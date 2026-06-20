@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS alertas_cracha (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    aluno_id INT NOT NULL,
+    token_qrcode VARCHAR(255) NOT NULL,
+    nome_informante VARCHAR(150),
+    telefone_informante VARCHAR(30),
+    mensagem TEXT,
+    latitude VARCHAR(50),
+    longitude VARCHAR(50),
+    ip_origem VARCHAR(45),
+    dispositivo VARCHAR(255),
+    status ENUM('novo', 'visualizado', 'resolvido') DEFAULT 'novo',
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    visualizado_em DATETIME,
+    resolvido_em DATETIME,
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
+    INDEX idx_aluno_id (aluno_id),
+    INDEX idx_token_qrcode (token_qrcode),
+    INDEX idx_status (status),
+    INDEX idx_criado_em (criado_em)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
