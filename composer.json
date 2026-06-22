@@ -1,0 +1,9 @@
+{
+    "name": "controle-portaria-escolar/sistema",
+    "description": "Sistema web de controle de portaria escolar",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=7.4"
+    }
+}
