@@ -32,12 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_header('Entrar');
 ?>
 <section class="login-shell">
-  <div class="login-message">
-    <span class="login-mark" aria-hidden="true">SCP</span>
-    <p class="login-kicker">SEGURANÇA ESCOLAR</p>
-    <h1>Entrada simples.<br>Cuidado todos os dias.</h1>
-    <p>Um único acesso para portaria, escola e responsáveis.</p>
-  </div>
   <div class="login-card card">
     <div class="card-body">
       <div class="login-mobile-brand"><span>SCP</span><strong>Controle Escolar</strong></div>
