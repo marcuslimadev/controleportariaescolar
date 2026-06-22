@@ -1,0 +1,9 @@
+/config/config.php
+/.env
+/storage/
+/deploy-*.tar.gz
+/deploy-stage-*/
+/.idea/
+/.vscode/
+/.repo/
+/controleportariaescolar/

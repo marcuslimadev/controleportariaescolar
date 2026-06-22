@@ -1,29 +1,28 @@
-# Controle de Portaria Escolar
+# SCP Escolar
 
-Sistema simples em PHP, HTML, Bootstrap e MySQL/MariaDB para controle de entrada e saída de alunos com crachá QR Code.
+MVP em PHP 8 + MySQL para controle seguro de entrada e saída de alunos.
 
-## Domínio provisório
+## Instalação
 
-`https://scp.lojadaesquina.store`
+1. Copie `config/config.example.php` para `config/config.php` e informe o banco.
+2. Importe `database/schema.sql` no MySQL/MariaDB.
+3. Crie o primeiro acesso: `php scripts/create_admin.php "Administrador" admin@escola.com "senha-segura"`.
+4. Aponte o document root para `public/` ou publique com `deploy.ps1`.
 
-## Recursos principais
+## Deploy
 
-- Cadastro rápido pela portaria
-- Foto da criança e do responsável pelo celular
-- Vínculo entre aluno e responsável
-- Turma ou professora responsável
-- Geração de crachá com QR Code
-- Leitura do QR Code pela portaria
-- Registro de entrada e saída
-- Portal do responsável
-- Modo emergência público em `/c/{token}`
+Copie `.env.example` para `.env`, preencha as credenciais SSH e execute:
 
-## Modo emergência
+```powershell
+.\deploy.ps1
+```
 
-O QR Code do crachá aponta para `https://scp.lojadaesquina.store/c/{token}`.
+O script cria commit, envia ao `origin` quando configurado e publica com Plink. Os arquivos `.env` e `config/config.php` são ignorados pelo Git.
 
-Quando aberto por agente de portaria logado, redireciona para o registro de entrada e saída.
+## Fluxo rápido da portaria
 
-Quando aberto por responsável logado e autorizado, redireciona para o histórico do aluno.
+O perfil de portaria pode abrir `portaria/cadastro.php`, fotografar o aluno pelo celular, preencher nome e turma e gerar imediatamente um crachá em PNG. Na tela do crachá, o botão de compartilhamento usa o menu nativo do celular para envio pelo WhatsApp; quando o navegador não oferece compartilhamento de arquivos, a imagem é baixada e o WhatsApp é aberto como alternativa.
 
-Quando aberto por qualquer pessoa sem login, exibe uma página pública de emergência que não revela dados pessoais da criança ou dos responsáveis.
+O fluxo recomendado fica em `portaria/convites.php`: o agente informa somente o WhatsApp do responsável e gera um convite em QR Code. O responsável abre o convite no próprio celular, fotografa a si e à criança, cria sua senha e envia os dados. A portaria recebe a pendência, confere as fotos, aprova e envia pelo WhatsApp o link do crachá digital, que também pode ser impresso.
+
+Em instalações existentes, execute uma vez `database/migrations/20260622_convites_cadastro.sql` antes de usar os convites.

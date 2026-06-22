@@ -1,0 +1,30 @@
+ALTER TABLE scp_responsaveis ADD COLUMN foto VARCHAR(255) NULL AFTER telefone;
+
+CREATE TABLE IF NOT EXISTS scp_convites_cadastro (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  telefone VARCHAR(30) NOT NULL,
+  token_hash CHAR(64) NOT NULL UNIQUE,
+  status ENUM('aguardando','preenchido','aprovado','cancelado','expirado') NOT NULL DEFAULT 'aguardando',
+  criado_por INT UNSIGNED NOT NULL,
+  expira_em DATETIME NOT NULL,
+  responsavel_nome VARCHAR(150) NULL,
+  responsavel_cpf CHAR(11) NULL,
+  responsavel_email VARCHAR(190) NULL,
+  responsavel_foto VARCHAR(255) NULL,
+  aluno_nome VARCHAR(150) NULL,
+  aluno_data_nascimento DATE NULL,
+  aluno_foto VARCHAR(255) NULL,
+  senha_hash VARCHAR(255) NULL,
+  preenchido_em DATETIME NULL,
+  aprovado_em DATETIME NULL,
+  aprovado_por INT UNSIGNED NULL,
+  responsavel_id INT UNSIGNED NULL,
+  aluno_id INT UNSIGNED NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(criado_por) REFERENCES scp_usuarios(id),
+  FOREIGN KEY(aprovado_por) REFERENCES scp_usuarios(id),
+  FOREIGN KEY(responsavel_id) REFERENCES scp_responsaveis(id),
+  FOREIGN KEY(aluno_id) REFERENCES scp_alunos(id),
+  INDEX(status,created_at),
+  INDEX(telefone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

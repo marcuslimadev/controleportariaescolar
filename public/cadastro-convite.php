@@ -1,0 +1,44 @@
+<?php
+require __DIR__.'/../includes/bootstrap.php';
+$token=(string)($_GET['token']??$_POST['token']??'');
+$q=db()->prepare('SELECT * FROM scp_convites_cadastro WHERE token_hash=? LIMIT 1');$q->execute([hash('sha256',$token)]);$invite=$q->fetch();
+if(!$invite){http_response_code(404);$invalid=true;}
+elseif(strtotime($invite['expira_em'])<time()&&$invite['status']==='aguardando'){$invalid=true;db()->prepare("UPDATE scp_convites_cadastro SET status='expirado' WHERE id=?")->execute([$invite['id']]);}
+
+if(empty($invalid)&&$_SERVER['REQUEST_METHOD']==='POST'&&$invite['status']==='aguardando'){
+    verify_csrf();
+    try{
+        $responsavelNome=trim((string)($_POST['responsavel_nome']??''));$cpf=preg_replace('/\D/','',(string)($_POST['cpf']??''));$email=strtolower(trim((string)($_POST['email']??'')));
+        $alunoNome=trim((string)($_POST['aluno_nome']??''));$nascimento=trim((string)($_POST['data_nascimento']??''));$password=(string)($_POST['senha']??'');
+        if(strlen($responsavelNome)<3||strlen($alunoNome)<3)throw new RuntimeException('Informe os nomes completos.');
+        if(strlen($cpf)!==11)throw new RuntimeException('Informe um CPF com 11 números.');
+        if($email!==''&&!filter_var($email,FILTER_VALIDATE_EMAIL))throw new RuntimeException('Informe um e-mail válido.');
+        if(strlen($password)<8)throw new RuntimeException('A senha precisa ter pelo menos 8 caracteres.');
+        if(!hash_equals($password,(string)($_POST['confirmar_senha']??'')))throw new RuntimeException('As senhas não coincidem.');
+        $responsavelFoto=save_uploaded_image($_FILES['responsavel_foto']??[],'convites');
+        $alunoFoto=save_uploaded_image($_FILES['aluno_foto']??[],'convites');
+        $q=db()->prepare("UPDATE scp_convites_cadastro SET status='preenchido',responsavel_nome=?,responsavel_cpf=?,responsavel_email=?,responsavel_foto=?,aluno_nome=?,aluno_data_nascimento=?,aluno_foto=?,senha_hash=?,preenchido_em=NOW() WHERE id=? AND status='aguardando'");
+        $q->execute([$responsavelNome,$cpf,$email?:null,$responsavelFoto,$alunoNome,$nascimento?:null,$alunoFoto,password_hash($password,PASSWORD_DEFAULT),$invite['id']]);
+        audit('preencher_convite_cadastro','scp_convites_cadastro',(int)$invite['id']);$invite['status']='preenchido';
+    }catch(Throwable $error){$message=$error->getMessage();}
+}
+layout_header('Cadastro da família');
+?>
+<section class="family-onboarding">
+  <?php if(!empty($invalid)):?><div class="family-finished"><span>!</span><h1>Convite indisponível</h1><p>Peça à portaria para gerar um novo QR Code.</p></div>
+  <?php elseif($invite['status']==='preenchido'):?><div class="family-finished success"><span>✓</span><h1>Cadastro enviado</h1><p>Avise ao agente da portaria. Ele fará a conferência e enviará o crachá pelo WhatsApp.</p></div>
+  <?php elseif($invite['status']==='aprovado'):?><div class="family-finished success"><span>✓</span><h1>Cadastro aprovado</h1><p>Seu crachá digital já foi liberado pela escola.</p><?php if($invite['aluno_id']):?><a class="btn-scan text-decoration-none" href="<?=e(url('cracha.php?aluno='.$invite['aluno_id'].'&convite='.$token))?>">Abrir crachá digital</a><?php endif?></div>
+  <?php else:?>
+  <div class="onboarding-heading text-center"><span class="gate-eyebrow">CADASTRO SEGURO</span><h1>Vamos criar o crachá</h1><p>Você tira as fotos e define sua senha. A portaria apenas confere e aprova.</p></div>
+  <?php if(isset($message)):?><div class="alert alert-danger"><?=e($message)?></div><?php endif?>
+  <form method="post" enctype="multipart/form-data" class="onboarding-form"><input type="hidden" name="csrf" value="<?=e(csrf())?>"><input type="hidden" name="token" value="<?=e($token)?>">
+    <fieldset><legend><span>1</span> Dados do responsável</legend><label class="form-label" for="responsavel_nome">Seu nome completo</label><input id="responsavel_nome" class="form-control form-control-lg" name="responsavel_nome" value="<?=e($_POST['responsavel_nome']??'')?>" required><div class="row g-3 mt-1"><div class="col-sm-6"><label class="form-label" for="cpf">CPF</label><input id="cpf" class="form-control form-control-lg" name="cpf" inputmode="numeric" value="<?=e($_POST['cpf']??'')?>" required></div><div class="col-sm-6"><label class="form-label" for="email">E-mail <small>(opcional)</small></label><input id="email" type="email" class="form-control form-control-lg" name="email" value="<?=e($_POST['email']??'')?>"></div></div><p class="phone-confirm">WhatsApp informado pela portaria: <strong>•••• <?=e(substr($invite['telefone'],-4))?></strong></p></fieldset>
+    <fieldset><legend><span>2</span> Fotos pelo celular</legend><div class="photo-grid"><label class="selfie-card" for="responsavel_foto"><strong>Sua foto</strong><small>Rosto bem iluminado</small><span>📷 Tirar selfie</span><img id="responsavel-preview" alt="Sua foto"></label><input id="responsavel_foto" class="visually-hidden" type="file" name="responsavel_foto" accept="image/jpeg,image/png,image/webp" capture="user" required><label class="selfie-card" for="aluno_foto"><strong>Foto da criança</strong><small>Rosto bem visível</small><span>📷 Tirar foto</span><img id="aluno-preview" alt="Foto da criança"></label><input id="aluno_foto" class="visually-hidden" type="file" name="aluno_foto" accept="image/jpeg,image/png,image/webp" capture="environment" required></div></fieldset>
+    <fieldset><legend><span>3</span> Dados da criança</legend><label class="form-label" for="aluno_nome">Nome completo</label><input id="aluno_nome" class="form-control form-control-lg" name="aluno_nome" value="<?=e($_POST['aluno_nome']??'')?>" required><label class="form-label mt-3" for="data_nascimento">Data de nascimento</label><input id="data_nascimento" type="date" class="form-control form-control-lg" name="data_nascimento" value="<?=e($_POST['data_nascimento']??'')?>"></fieldset>
+    <fieldset><legend><span>4</span> Crie sua senha</legend><div class="row g-3"><div class="col-sm-6"><label class="form-label" for="senha">Senha</label><input id="senha" type="password" class="form-control form-control-lg" name="senha" minlength="8" autocomplete="new-password" required></div><div class="col-sm-6"><label class="form-label" for="confirmar_senha">Repetir senha</label><input id="confirmar_senha" type="password" class="form-control form-control-lg" name="confirmar_senha" minlength="8" autocomplete="new-password" required></div></div><small class="text-muted">Use pelo menos 8 caracteres.</small></fieldset>
+    <button class="btn-scan" type="submit">Concluir e avisar a portaria</button><p class="privacy-note">🔒 Seus dados e fotos serão enviados somente para a escola.</p>
+  </form>
+  <?php endif?>
+</section>
+<script>for(const [inputId,previewId] of [['responsavel_foto','responsavel-preview'],['aluno_foto','aluno-preview']]){const input=document.getElementById(inputId);if(input)input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;const preview=document.getElementById(previewId);preview.src=URL.createObjectURL(file);preview.classList.add('show')})}</script>
+<?php layout_footer();
