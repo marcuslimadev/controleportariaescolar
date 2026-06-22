@@ -37,7 +37,6 @@ layout_header('Entrar');
       <div class="login-mobile-brand"><span>SCP</span><strong>Controle Escolar</strong></div>
       <span class="gate-eyebrow">BEM-VINDO</span>
       <h2>Acesse sua conta</h2>
-      <p class="login-hint">Informe seu usuário, CPF ou telefone. O sistema identifica automaticamente seu acesso.</p>
       <?php if(isset($error)):?><div class="alert alert-danger" role="alert"><?=e($error)?></div><?php endif?>
       <form method="post">
         <input type="hidden" name="csrf" value="<?=e(csrf())?>">
@@ -47,7 +46,6 @@ layout_header('Entrar');
         <div class="password-field"><input id="senha" class="form-control form-control-lg" type="password" name="senha" required autocomplete="current-password" placeholder="Digite sua senha"><button id="toggle-password" type="button" aria-label="Mostrar senha">Mostrar</button></div>
         <button class="btn-scan mt-4" type="submit">Entrar</button>
       </form>
-      <div class="login-trust"><span>✓</span> Acesso protegido e dados criptografados</div>
     </div>
   </div>
 </section>

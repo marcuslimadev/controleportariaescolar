@@ -39,6 +39,7 @@ const statusBox=document.querySelector('#status');
 const resultBox=document.querySelector('#result');
 let locked=false,scanning=false,current=null;
 let pendingCount=<?=$pending?>;
+const initialToken=<?=json_encode(extract_qr_token((string)($_GET['token']??'')))?>;
 
 startButton.addEventListener('click',startScanner);
 stopButton.addEventListener('click',()=>stopScanner(true));
@@ -133,4 +134,5 @@ function setStatus(message,type){statusBox.textContent=message;statusBox.classNa
 function labelType(type){return type==='saida'?'saída':'entrada'}
 function cameraMessage(error){const text=String(error&&error.message||error);return /permission|denied|notallowed/i.test(text)?'Permita o acesso à câmera para escanear o crachá.':'Não foi possível abrir a câmera. Verifique se ela está disponível.'}
 setInterval(async()=>{try{const response=await fetch('pendencias.php');const data=await response.json();if(data.count>pendingCount&&navigator.vibrate)navigator.vibrate([180,80,180]);pendingCount=data.count;const banner=document.querySelector('#pending-banner');banner.classList.toggle('d-none',!data.count);document.querySelector('#pending-count').textContent=data.count;document.querySelector('#pending-title').textContent=data.count===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'}catch(error){}},12000);
+if(initialToken)scan(initialToken);
 </script><?php layout_footer();

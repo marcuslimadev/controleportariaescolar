@@ -1,6 +1,6 @@
 Options -Indexes
 RewriteEngine On
+RewriteRule ^c/([A-Za-z0-9]+)$ c.php?token=$1 [L,QSA]
 RewriteRule ^config/ - [F,L]
 RewriteRule ^includes/ - [F,L]
 RewriteRule ^database/ - [F,L]
-

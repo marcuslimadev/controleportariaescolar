@@ -10,6 +10,7 @@ $telefone='';
 if(!empty($_GET['convite'])){$phoneQuery=db()->prepare('SELECT telefone FROM scp_convites_cadastro WHERE id=? AND aluno_id=?');$phoneQuery->execute([(int)$_GET['convite'],$id]);$telefone=normalize_phone((string)$phoneQuery->fetchColumn());}
 if(!$telefone){$phoneQuery=db()->prepare('SELECT r.telefone FROM scp_aluno_responsavel ar JOIN scp_responsaveis r ON r.id=ar.responsavel_id WHERE ar.aluno_id=? ORDER BY ar.autoriza_retirada DESC LIMIT 1');$phoneQuery->execute([$id]);$telefone=normalize_phone((string)$phoneQuery->fetchColumn());}
 $publicCard=url('cracha.php?token='.$a['qr_token']);
+$emergencyUrl=url('c/'.$a['qr_token']);
 if(($_GET['emit']??'')==='1'){
     db()->prepare('INSERT INTO scp_crachas_emitidos(aluno_id,emitido_por,token_no_momento) VALUES(?,?,?)')->execute([$id,$_SESSION['user_id'],$a['qr_token']]);
     audit('emitir_cracha','scp_alunos',$id);
@@ -41,7 +42,7 @@ const badgeData={
   name:<?=json_encode($a['nome'],JSON_UNESCAPED_UNICODE)?>,
   classroom:<?=json_encode($a['turma']??'Sem turma',JSON_UNESCAPED_UNICODE)?>,
   photo:<?=json_encode($a['foto']??'')?>,
-  token:<?=json_encode($a['qr_token'])?>,
+  token:<?=json_encode($emergencyUrl)?>,
   publicUrl:<?=json_encode($publicCard)?>,
   school:<?=json_encode(config()['app_name']??'SCP Escolar',JSON_UNESCAPED_UNICODE)?>
 };
