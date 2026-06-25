@@ -16,7 +16,8 @@ $alunos = db()->query('SELECT id,nome FROM scp_alunos WHERE ativo=1 ORDER BY nom
 layout_header($id ? 'Editar publicação' : 'Nova publicação');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">COMUNICAÇÃO</span><h1><?=$id?'Editar publicação':'Nova publicação'?></h1><p>Publique apenas informação oficial e útil para a rotina.</p></div></div>
-<form class="section-card portal-form" method="post" action="<?=e(url('admin/post-save.php'))?>" enctype="multipart/form-data">
+<section class="section-card portal-form">
+<form method="post" action="<?=e(url('admin/post-save.php'))?>" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="<?=e(csrf())?>">
   <input type="hidden" name="id" value="<?=(int)$post['id']?>">
   <div class="row g-3">
@@ -35,4 +36,12 @@ layout_header($id ? 'Editar publicação' : 'Nova publicação');
   </div>
   <button class="btn-scan mt-4" type="submit">Salvar publicação</button>
 </form>
+<?php if ($id): ?>
+<form method="post" action="<?=e(url('admin/post-delete.php'))?>" class="mt-3" onsubmit="return confirm('Excluir esta publicação? Esta ação não pode ser desfeita.');">
+  <input type="hidden" name="csrf" value="<?=e(csrf())?>">
+  <input type="hidden" name="id" value="<?=(int)$post['id']?>">
+  <button class="btn-scan btn-delete-post" type="submit">Excluir publicação</button>
+</form>
+<?php endif; ?>
+</section>
 <?php layout_footer();
