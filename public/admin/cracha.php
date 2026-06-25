@@ -49,7 +49,7 @@ const badgeData={
   children:<?=json_encode(array_map(fn($c)=>['nome'=>$c['nome'],'foto'=>$c['foto']??''],$children),JSON_UNESCAPED_UNICODE)?>,
   token:<?=json_encode($r['qr_token'])?>,
   phone:<?=json_encode($telefone?(str_starts_with($telefone,'55')?$telefone:'55'.$telefone):'')?>,
-  school:<?=json_encode(config()['app_name']??'SCP Escolar',JSON_UNESCAPED_UNICODE)?>
+  school:<?=json_encode(app_name(),JSON_UNESCAPED_UNICODE)?>
 };
 const canvas=document.querySelector('#badge-canvas');
 const ctx=canvas.getContext('2d');

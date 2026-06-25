@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+function app_name(): string {
+    return 'Porta Aberta Escolar';
+}
+
+function app_tagline(): string {
+    return 'O canal oficial entre escola, família e portaria.';
+}
+
 function current_role(): string {
     return !empty($_SESSION['responsavel_id']) ? 'responsavel' : (string)($_SESSION['role'] ?? '');
 }

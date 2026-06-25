@@ -5,7 +5,7 @@ $opts = getopt('', ['source-env:', 'admin-email:', 'admin-password:', 'admin-nam
 if (empty($opts['source-env']) || empty($opts['admin-email']) || empty($opts['admin-password'])) exit("Parâmetros obrigatórios ausentes.\n");
 $env = parse_ini_file($opts['source-env'], false, INI_SCANNER_RAW);
 foreach (['DB_HOST','DB_PORT','DB_DATABASE','DB_USERNAME','DB_PASSWORD'] as $key) if (!array_key_exists($key, $env)) exit("Variável $key ausente.\n");
-$config = ['app_name'=>'SCP Escolar','base_url'=>$opts['base-url'] ?? '','db'=>['host'=>$env['DB_HOST'],'port'=>$env['DB_PORT'],'name'=>$env['DB_DATABASE'],'user'=>$env['DB_USERNAME'],'pass'=>$env['DB_PASSWORD']]];
+$config = ['app_name'=>'Porta Aberta Escolar','base_url'=>$opts['base-url'] ?? '','db'=>['host'=>$env['DB_HOST'],'port'=>$env['DB_PORT'],'name'=>$env['DB_DATABASE'],'user'=>$env['DB_USERNAME'],'pass'=>$env['DB_PASSWORD']]];
 $content = "<?php\nreturn " . var_export($config, true) . ";\n";
 file_put_contents(__DIR__ . '/../config/config.php', $content, LOCK_EX);
 chmod(__DIR__ . '/../config/config.php', 0600);

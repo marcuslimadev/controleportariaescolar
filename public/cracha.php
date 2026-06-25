@@ -38,7 +38,7 @@ layout_header('Crachá digital');
     <h2><?=e($responsavel['nome'])?></h2>
     <span>Responsável autorizado</span>
     <div id="public-qrcode"></div>
-    <strong>SCP Escolar</strong>
+    <strong><?=e(app_name())?></strong>
   </article>
   <?php if($children):?>
   <div class="family-cards mt-3">
