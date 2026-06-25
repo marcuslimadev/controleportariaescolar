@@ -1,5 +1,16 @@
 <?php
 require __DIR__ . '/../includes/bootstrap.php';
+$publicPosts = [];
+try {
+    $q = db()->query("SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
+        FROM scp_posts p
+        JOIN scp_usuarios u ON u.id=p.autor_id
+        WHERE p.status='publicado' AND p.publico='toda_escola'
+        ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
+        LIMIT 6");
+    $publicPosts = $q->fetchAll();
+} catch (Throwable $ignored) {}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $login=trim((string)($_POST['login']??''));
@@ -32,7 +43,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_header('Entrar');
 ?>
 <section class="login-shell">
-  <div class="login-card card">
+  <div class="public-portal-card">
+    <img class="public-portal-logo" src="<?=e(asset_url('assets/porta-aberta-logo.jpg'))?>" alt="<?=e(app_name())?>">
+    <p class="public-portal-tagline"><?=e(app_tagline())?></p>
+    <div class="public-portal-actions">
+      <a href="#login-card" class="btn btn-primary">Entrar</a>
+      <a href="<?=e(url('eventos.php'))?>" class="btn btn-outline-primary">Eventos</a>
+    </div>
+    <div class="public-feed">
+      <h2>Portal público</h2>
+      <?php if($publicPosts): ?>
+        <?php foreach($publicPosts as $post): ?>
+          <article class="public-post <?=$post['importante']?'important':''?>">
+            <div class="feed-meta">
+              <span class="post-type"><?=e($post['tipo'])?></span>
+              <?php if($post['importante']): ?><span class="important-badge">Importante</span><?php endif ?>
+            </div>
+            <h3><?=e($post['titulo'])?></h3>
+            <p><?=nl2br(e(portal_excerpt($post['conteudo'], 190)))?></p>
+            <?php if($post['imagem_url']): ?><img src="<?=e($post['imagem_url'])?>" alt="Imagem da publicação"><?php endif ?>
+            <?php if($post['data_evento']): ?><div class="event-strip"><strong><?=e(date('d/m/Y', strtotime($post['data_evento'])))?></strong><?php if($post['hora_evento']): ?> às <?=e(substr($post['hora_evento'],0,5))?><?php endif ?><?php if($post['local']): ?> · <?=e($post['local'])?><?php endif ?></div><?php endif ?>
+            <small><?=e(format_br_datetime($post['publicado_em']))?></small>
+          </article>
+        <?php endforeach ?>
+      <?php else: ?>
+        <div class="empty-state">Nenhuma publicação pública no momento.</div>
+      <?php endif ?>
+    </div>
+  </div>
+  <div id="login-card" class="login-card card">
     <div class="card-body">
       <div class="login-mobile-brand official"><img src="<?=e(asset_url('assets/porta-aberta-logo.jpg'))?>" alt="<?=e(app_name())?>"></div>
       <span class="gate-eyebrow">BEM-VINDO</span>
