@@ -1,6 +1,6 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
-require_role(['admin','portaria']);
+require_role(['admin','secretaria','portaria']);
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();
@@ -32,9 +32,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $q=$pdo->prepare('INSERT INTO scp_alunos(nome,data_nascimento,foto,qr_token) VALUES(?,?,?,?)');$q->execute([$invite['aluno_nome'],$invite['aluno_data_nascimento']?:null,$invite['aluno_foto'],$qrToken]);$alunoId=(int)$pdo->lastInsertId();
             $q=$pdo->prepare("INSERT INTO scp_aluno_responsavel(aluno_id,responsavel_id,parentesco,autoriza_consulta,autoriza_retirada) VALUES(?,?,'Responsável',1,1)");$q->execute([$alunoId,$responsavelId]);
             $q=$pdo->prepare("UPDATE scp_convites_cadastro SET status='aprovado',aprovado_em=NOW(),aprovado_por=?,responsavel_id=?,aluno_id=? WHERE id=?");$q->execute([$_SESSION['user_id'],$responsavelId,$alunoId,$id]);
-            $q=$pdo->prepare('INSERT INTO scp_crachas_emitidos(aluno_id,emitido_por,token_no_momento) VALUES(?,?,?)');$q->execute([$alunoId,$_SESSION['user_id'],$qrToken]);
             $pdo->commit();audit('aprovar_cadastro_responsavel','scp_convites_cadastro',$id,['aluno_id'=>$alunoId]);
-            redirect('admin/cracha.php?id='.$alunoId.'&convite='.$id.'&ready=1');
+            redirect('admin/cracha.php?responsavel_id='.$responsavelId.'&convite='.$id.'&ready=1');
         }
     }catch(Throwable $error){if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();$message=$error->getMessage();}
 }
@@ -50,11 +49,13 @@ layout_header('Convites de cadastro');
   <?php if(isset($message)):?><div class="alert alert-danger"><?=e($message)?></div><?php endif?>
   <form method="post" class="invite-create-card"><input type="hidden" name="csrf" value="<?=e(csrf())?>"><input type="hidden" name="action" value="criar"><label class="form-label fw-bold" for="telefone">WhatsApp do pai ou responsável</label><div class="input-group input-group-lg"><span class="input-group-text">+55</span><input id="telefone" class="form-control" name="telefone" inputmode="tel" placeholder="DDD + número" required><button class="btn btn-success">Gerar convite</button></div><small class="text-muted">O convite expira em 24 horas.</small></form>
 
-  <?php if($recent):$inviteUrl=url('cadastro-convite.php?token='.$recent['token']);$phone=normalize_phone($recent['telefone']);if(!str_starts_with($phone,'55'))$phone='55'.$phone;?>
+  <?php if($recent):$inviteUrl=url('cadastro-convite.php?token='.$recent['token']);$phone=normalize_phone($recent['telefone']);if(!str_starts_with($phone,'55'))$phone='55'.$phone;$waUrl='https://wa.me/'.$phone.'?text='.rawurlencode('Olá! A portaria iniciou seu cadastro escolar. Abra este link para tirar as fotos, cadastrar a criança e criar sua senha: '.$inviteUrl);?>
   <article class="invite-qr-card">
     <div class="success-check">✓</div><h2>Convite pronto</h2><p>Mostre este QR Code para o responsável ler agora.</p><div id="invite-qrcode"></div>
-    <a class="btn-whatsapp d-flex align-items-center justify-content-center text-decoration-none mt-3" href="https://wa.me/<?=e($phone)?>?text=<?=rawurlencode('Olá! A portaria iniciou seu cadastro escolar. Abra este link para tirar as fotos, cadastrar a criança e criar sua senha: '.$inviteUrl)?>" target="_blank" rel="noopener">Enviar convite pelo WhatsApp</a>
-    <button class="btn btn-outline-secondary w-100 mt-2" type="button" onclick="navigator.clipboard.writeText(<?=e(json_encode($inviteUrl))?>)">Copiar link</button>
+    <a class="btn-whatsapp d-flex align-items-center justify-content-center text-decoration-none mt-3" href="<?=e($waUrl)?>" target="_blank" rel="noopener">Enviar convite pelo WhatsApp</a>
+    <label class="form-label small text-muted mt-3 mb-1 d-block text-start" for="wa-link-field">Link do WhatsApp</label>
+    <div class="input-group input-group-sm"><input type="text" class="form-control" readonly value="<?=e($waUrl)?>" id="wa-link-field" aria-label="Link do WhatsApp" onclick="this.select()"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('wa-link-field').value)">Copiar</button></div>
+    <button class="btn btn-outline-secondary w-100 mt-2" type="button" onclick="navigator.clipboard.writeText(<?=e(json_encode($inviteUrl))?>)">Copiar link do cadastro</button>
   </article>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script>new QRCode(document.querySelector('#invite-qrcode'),{text:<?=json_encode($inviteUrl)?>,width:230,height:230,correctLevel:QRCode.CorrectLevel.M});</script>
   <?php endif?>
@@ -65,5 +66,15 @@ layout_header('Convites de cadastro');
     <?php foreach($invites as $item):?><article class="invite-item <?=$item['status']==='preenchido'?'ready':''?>"><div><span class="invite-status"><?=$item['status']==='preenchido'?'Cadastro concluído':'Aguardando responsável'?></span><h3><?=$item['aluno_nome']?e($item['aluno_nome']):'WhatsApp •••• '.e(substr($item['telefone'],-4))?></h3><p><?=$item['responsavel_nome']?'Responsável: '.e($item['responsavel_nome']):'Convite criado '.e(date('d/m H:i',strtotime($item['created_at'])))?></p></div><?php if($item['status']==='preenchido'):?><a class="btn btn-success btn-lg" href="<?=e(url('portaria/aprovar.php?id='.$item['id']))?>">Revisar e aprovar</a><?php endif?></article><?php endforeach?>
   </div>
 </section>
-<script>setInterval(async()=>{try{const response=await fetch('pendencias.php');const data=await response.json();if(data.latest&&data.latest!==<?=json_encode($invites[0]['preenchido_em']??null)?>)location.reload()}catch(error){}},12000);</script>
+<script>
+const telefoneInput=document.getElementById('telefone');
+setInterval(async()=>{
+  try{
+    const response=await fetch('pendencias.php');
+    const data=await response.json();
+    const isTyping=document.activeElement===telefoneInput||(telefoneInput&&telefoneInput.value.trim()!=='');
+    if(data.latest&&data.latest!==<?=json_encode($invites[0]['preenchido_em']??null)?>&&!isTyping)location.reload();
+  }catch(error){}
+},12000);
+</script>
 <?php layout_footer();

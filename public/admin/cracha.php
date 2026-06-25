@@ -1,22 +1,27 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
-require_role(['admin','portaria']);
-$id=(int)($_GET['id']??0);
-$q=db()->prepare('SELECT a.*,t.nome turma FROM scp_alunos a LEFT JOIN scp_turmas t ON t.id=a.turma_id WHERE a.id=?');
-$q->execute([$id]);
-$a=$q->fetch();
-if(!$a){http_response_code(404);exit('Aluno não encontrado');}
-$telefone='';
-if(!empty($_GET['convite'])){$phoneQuery=db()->prepare('SELECT telefone FROM scp_convites_cadastro WHERE id=? AND aluno_id=?');$phoneQuery->execute([(int)$_GET['convite'],$id]);$telefone=normalize_phone((string)$phoneQuery->fetchColumn());}
-if(!$telefone){$phoneQuery=db()->prepare('SELECT r.telefone FROM scp_aluno_responsavel ar JOIN scp_responsaveis r ON r.id=ar.responsavel_id WHERE ar.aluno_id=? ORDER BY ar.autoriza_retirada DESC LIMIT 1');$phoneQuery->execute([$id]);$telefone=normalize_phone((string)$phoneQuery->fetchColumn());}
-$publicCard=url('cracha.php?token='.$a['qr_token']);
-$emergencyUrl=url('c/'.$a['qr_token']);
-if(($_GET['emit']??'')==='1'){
-    db()->prepare('INSERT INTO scp_crachas_emitidos(aluno_id,emitido_por,token_no_momento) VALUES(?,?,?)')->execute([$id,$_SESSION['user_id'],$a['qr_token']]);
-    audit('emitir_cracha','scp_alunos',$id);
-    redirect('admin/cracha.php?id='.$id.'&ready=1');
+require_role(['admin','secretaria','portaria']);
+$responsavelId=(int)($_GET['responsavel_id']??0);
+$q=db()->prepare('SELECT * FROM scp_responsaveis WHERE id=?');
+$q->execute([$responsavelId]);
+$r=$q->fetch();
+if(!$r){http_response_code(404);exit('Responsável não encontrado');}
+if(!$r['qr_token']){
+    $r['qr_token']=bin2hex(random_bytes(32));
+    db()->prepare('UPDATE scp_responsaveis SET qr_token=? WHERE id=?')->execute([$r['qr_token'],$responsavelId]);
 }
-layout_header('Crachá de '.$a['nome']);
+$q=db()->prepare('SELECT a.nome,a.foto,t.nome turma FROM scp_alunos a JOIN scp_aluno_responsavel ar ON ar.aluno_id=a.id LEFT JOIN scp_turmas t ON t.id=a.turma_id WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1 ORDER BY a.nome');
+$q->execute([$responsavelId]);
+$children=$q->fetchAll();
+$publicCard=url('cracha.php?token='.$r['qr_token']);
+$telefone=normalize_phone((string)$r['telefone']);
+
+if(($_GET['emit']??'')==='1'){
+    db()->prepare('INSERT INTO scp_crachas_responsavel_emitidos(responsavel_id,emitido_por,token_no_momento) VALUES(?,?,?)')->execute([$responsavelId,$_SESSION['user_id'],$r['qr_token']]);
+    audit('emitir_cracha_responsavel','scp_responsaveis',$responsavelId);
+    redirect('admin/cracha.php?responsavel_id='.$responsavelId.'&ready=1');
+}
+layout_header('Crachá de '.$r['nome']);
 ?>
 <section class="badge-page">
   <div class="text-center mb-3">
@@ -25,25 +30,25 @@ layout_header('Crachá de '.$a['nome']);
     <p class="text-muted">Baixe a imagem ou compartilhe direto pelo celular.</p>
   </div>
   <div class="badge-preview-wrap">
-    <canvas id="badge-canvas" width="1080" height="1350" aria-label="Crachá de <?=e($a['nome'])?>"></canvas>
+    <canvas id="badge-canvas" width="1080" height="1350" aria-label="Crachá de <?=e($r['nome'])?>"></canvas>
     <div id="qrcode-source" hidden></div>
   </div>
   <div class="badge-actions">
-    <?php if($telefone):?><a class="btn-whatsapp d-flex align-items-center justify-content-center text-decoration-none" href="https://wa.me/<?=e(str_starts_with($telefone,'55')?$telefone:'55'.$telefone)?>?text=<?=rawurlencode('Olá! O cadastro de '.$a['nome'].' foi aprovado. Este é o crachá digital para usar diariamente na entrada e saída: '.$publicCard)?>" target="_blank" rel="noopener">Enviar crachá ao responsável</a><?php endif?>
+    <?php if($telefone):?><a class="btn-whatsapp d-flex align-items-center justify-content-center text-decoration-none" href="https://wa.me/<?=e(str_starts_with($telefone,'55')?$telefone:'55'.$telefone)?>?text=<?=rawurlencode('Olá! Segue seu crachá digital para usar diariamente na entrada e saída: '.$publicCard)?>" target="_blank" rel="noopener">Enviar crachá ao responsável</a><?php endif?>
     <button id="share-badge" class="btn-whatsapp" type="button"><span aria-hidden="true">●</span> Compartilhar no WhatsApp</button>
     <button id="download-badge" class="btn btn-outline-primary btn-lg w-100" type="button">Baixar imagem do crachá</button>
-    <a class="btn btn-link" href="<?=e(url('portaria/cadastro.php'))?>">Cadastrar próximo aluno</a>
+    <a class="btn btn-link" href="<?=e(url('admin/index.php'))?>">Voltar ao painel</a>
   </div>
   <p id="share-status" class="scanner-status" role="status" aria-live="polite"></p>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const badgeData={
-  name:<?=json_encode($a['nome'],JSON_UNESCAPED_UNICODE)?>,
-  classroom:<?=json_encode($a['turma']??'Sem turma',JSON_UNESCAPED_UNICODE)?>,
-  photo:<?=json_encode($a['foto']??'')?>,
-  token:<?=json_encode($emergencyUrl)?>,
-  publicUrl:<?=json_encode($publicCard)?>,
+  name:<?=json_encode($r['nome'],JSON_UNESCAPED_UNICODE)?>,
+  photo:<?=json_encode($r['foto']??'')?>,
+  children:<?=json_encode(array_map(fn($c)=>['nome'=>$c['nome'],'foto'=>$c['foto']??''],$children),JSON_UNESCAPED_UNICODE)?>,
+  token:<?=json_encode($r['qr_token'])?>,
+  phone:<?=json_encode($telefone?(str_starts_with($telefone,'55')?$telefone:'55'.$telefone):'')?>,
   school:<?=json_encode(config()['app_name']??'SCP Escolar',JSON_UNESCAPED_UNICODE)?>
 };
 const canvas=document.querySelector('#badge-canvas');
@@ -53,28 +58,45 @@ new QRCode(document.querySelector('#qrcode-source'),{text:badgeData.token,width:
 
 function roundedRect(x,y,w,h,r,fill){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill()}
 function fitText(text,maxWidth,startSize,minSize){let size=startSize;do{ctx.font=`800 ${size}px system-ui,-apple-system,sans-serif`;if(ctx.measureText(text).width<=maxWidth)return size;size-=2}while(size>minSize);return minSize}
-function loadPhoto(){return new Promise(resolve=>{if(!badgeData.photo)return resolve(null);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=badgeData.photo})}
+function loadImage(src){return new Promise(resolve=>{if(!src)return resolve(null);const img=new Image();img.crossOrigin='anonymous';img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=src})}
 
 async function drawBadge(){
-  const photo=await loadPhoto();
+  const photo=await loadImage(badgeData.photo);
+  const list=badgeData.children.slice(0,4);
+  const overflow=badgeData.children.length-list.length;
+  const childImages=await Promise.all(list.map(c=>loadImage(c.foto)));
   const qr=document.querySelector('#qrcode-source canvas');
   ctx.clearRect(0,0,1080,1350);
-  ctx.fillStyle='#eef7fb';ctx.fillRect(0,0,1080,1350);
-  roundedRect(55,45,970,1260,54,'#ffffff');
-  ctx.fillStyle='#075985';ctx.fillRect(55,45,970,225);
-  ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.font='800 62px system-ui,-apple-system,sans-serif';ctx.fillText(badgeData.school,540,145);
-  ctx.font='700 27px system-ui,-apple-system,sans-serif';ctx.fillStyle='#bae6fd';ctx.fillText('IDENTIFICAÇÃO ESCOLAR',540,202);
-  ctx.save();ctx.beginPath();ctx.arc(540,405,132,0,Math.PI*2);ctx.clip();
-  if(photo){const scale=Math.max(264/photo.width,264/photo.height);const w=photo.width*scale,h=photo.height*scale;ctx.drawImage(photo,540-w/2,405-h/2,w,h)}else{ctx.fillStyle='#dbeafe';ctx.fillRect(408,273,264,264);ctx.fillStyle='#075985';ctx.font='900 105px system-ui';ctx.fillText(badgeData.name.trim().charAt(0).toUpperCase(),540,442)}
-  ctx.restore();ctx.strokeStyle='#ffffff';ctx.lineWidth=12;ctx.beginPath();ctx.arc(540,405,138,0,Math.PI*2);ctx.stroke();
-  ctx.fillStyle='#102235';ctx.font=`800 ${fitText(badgeData.name,860,58,36)}px system-ui,-apple-system,sans-serif`;ctx.fillText(badgeData.name,540,625);
-  roundedRect(335,665,410,72,36,'#e0f2fe');ctx.fillStyle='#075985';ctx.font='800 31px system-ui,-apple-system,sans-serif';ctx.fillText(badgeData.classroom,540,712);
-  roundedRect(330,780,420,420,32,'#f8fafc');ctx.drawImage(qr,360,810,360,360);
-  ctx.fillStyle='#64748b';ctx.font='600 23px system-ui,-apple-system,sans-serif';ctx.fillText('Apresente este QR Code na portaria',540,1250);
+  ctx.fillStyle='#F5F1E6';ctx.fillRect(0,0,1080,1350);
+  roundedRect(55,45,970,1260,18,'#ffffff');
+  ctx.fillStyle='#1356A2';ctx.fillRect(55,45,970,210);
+  ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.font='800 58px system-ui,-apple-system,sans-serif';ctx.fillText(badgeData.school,540,135);
+  ctx.font='700 25px system-ui,-apple-system,sans-serif';ctx.fillStyle='#F2B705';ctx.fillText('CRACHÁ DE RETIRADA',540,188);
+  ctx.save();ctx.beginPath();ctx.arc(540,390,120,0,Math.PI*2);ctx.clip();
+  if(photo){const scale=Math.max(240/photo.width,240/photo.height);const w=photo.width*scale,h=photo.height*scale;ctx.drawImage(photo,540-w/2,390-h/2,w,h)}else{ctx.fillStyle='#dbeafe';ctx.fillRect(420,270,240,240);ctx.fillStyle='#1356A2';ctx.font='900 96px system-ui';ctx.fillText(badgeData.name.trim().charAt(0).toUpperCase(),540,420)}
+  ctx.restore();ctx.strokeStyle='#15171A';ctx.lineWidth=8;ctx.beginPath();ctx.arc(540,390,124,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#15171A';ctx.font=`800 ${fitText(badgeData.name,860,52,32)}px system-ui,-apple-system,sans-serif`;ctx.fillText(badgeData.name,540,580);
+  roundedRect(330,605,420,62,31,'#F2B705');ctx.fillStyle='#15171A';ctx.font='800 27px system-ui,-apple-system,sans-serif';ctx.fillText('RESPONSÁVEL AUTORIZADO',540,645);
+
+  ctx.font='700 24px system-ui,-apple-system,sans-serif';ctx.fillStyle='#5B5F66';ctx.fillText('AUTORIZADO A RETIRAR',540,705);
+  const cell=180,startX=540-(list.length*cell)/2+cell/2,cy=755;
+  list.forEach((child,i)=>{
+    const cx=startX+i*cell;
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,42,0,Math.PI*2);ctx.clip();
+    const img=childImages[i];
+    if(img){const scale=Math.max(84/img.width,84/img.height);const w=img.width*scale,h=img.height*scale;ctx.drawImage(img,cx-w/2,cy-h/2,w,h)}else{ctx.fillStyle='#dbeafe';ctx.fillRect(cx-42,cy-42,84,84);ctx.fillStyle='#1356A2';ctx.font='900 36px system-ui';ctx.fillText(child.nome.trim().charAt(0).toUpperCase(),cx,cy+13)}
+    ctx.restore();ctx.strokeStyle='#15171A';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,44,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#15171A';ctx.font='700 22px system-ui,-apple-system,sans-serif';ctx.fillText(child.nome.trim().split(' ')[0],cx,cy+68);
+  });
+  if(overflow>0){ctx.fillStyle='#5B5F66';ctx.font='700 22px system-ui,-apple-system,sans-serif';ctx.fillText('+'+overflow+' criança(s)',540,cy+95)}
+  if(!list.length){ctx.fillStyle='#5B5F66';ctx.font='700 24px system-ui,-apple-system,sans-serif';ctx.fillText('Nenhuma criança vinculada ainda',540,cy)}
+
+  roundedRect(390,930,300,300,16,'#F5F1E6');ctx.drawImage(qr,405,945,270,270);
+  ctx.fillStyle='#5B5F66';ctx.font='600 22px system-ui,-apple-system,sans-serif';ctx.fillText('Apresente este QR Code na portaria',540,1260);
 }
 
 function badgeBlob(){return new Promise(resolve=>canvas.toBlob(resolve,'image/png',1))}
-function filename(){return 'cracha-'+badgeData.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()+'.png'}
+function filename(){return 'cracha-'+badgeData.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()+'.png'}
 async function downloadBadge(){await badgeReady;const blob=await badgeBlob();const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=filename();link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000)}
 
 document.querySelector('#download-badge').addEventListener('click',downloadBadge);
@@ -87,7 +109,8 @@ document.querySelector('#share-badge').addEventListener('click',async()=>{
       await navigator.share({files:[file],title:'Crachá de '+badgeData.name,text:'Crachá escolar de '+badgeData.name});shareStatus.textContent='Crachá compartilhado.';
     }else{
       await downloadBadge();shareStatus.textContent='Imagem baixada. Anexe-a na conversa do WhatsApp que será aberta.';
-      window.open('https://wa.me/?text='+encodeURIComponent('Olá! Segue o crachá escolar de '+badgeData.name+'.'),'_blank','noopener');
+      const target='https://wa.me/'+(badgeData.phone||'');
+      window.open(target+'?text='+encodeURIComponent('Olá! Segue o crachá escolar de '+badgeData.name+'.'),'_blank','noopener');
     }
   }catch(error){if(error.name!=='AbortError')shareStatus.textContent='Não foi possível compartilhar. Use o botão “Baixar imagem”.'}finally{button.disabled=false}
 });

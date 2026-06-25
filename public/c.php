@@ -4,7 +4,7 @@ $token=extract_qr_token((string)($_GET['token']??''));
 $q=db()->prepare('SELECT id,qr_token FROM scp_alunos WHERE qr_token=? AND ativo=1 LIMIT 1');$q->execute([$token]);$student=$q->fetch();
 if(!$student){http_response_code(404);layout_header('Crachá não encontrado');echo '<section class="emergency-page"><div class="emergency-card"><span class="emergency-icon">!</span><h1>Crachá inválido</h1><p>Este crachá não foi encontrado ou não está mais ativo.</p></div></section>';layout_footer();exit;}
 
-if(!empty($_SESSION['user_id'])&&in_array($_SESSION['role']??'', ['admin','portaria'],true))redirect('portaria/index.php?token='.rawurlencode($token));
+if(!empty($_SESSION['user_id'])&&in_array($_SESSION['role']??'', ['admin','secretaria','portaria'],true))redirect('portaria/index.php?token='.rawurlencode($token));
 if(!empty($_SESSION['responsavel_id'])){
     $q=db()->prepare('SELECT COUNT(*) FROM scp_aluno_responsavel WHERE aluno_id=? AND responsavel_id=? AND autoriza_consulta=1');$q->execute([$student['id'],$_SESSION['responsavel_id']]);
     if($q->fetchColumn())redirect('cracha.php?token='.rawurlencode($token));

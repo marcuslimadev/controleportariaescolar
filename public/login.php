@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_regenerate_id(true);
         $_SESSION=['user_id'=>(int)$user['id'],'role'=>$user['perfil'],'name'=>$user['nome'],'csrf'=>bin2hex(random_bytes(32))];
         audit('login_usuario');
-        redirect($user['perfil']==='admin'?'admin/index.php':'portaria/index.php');
+        redirect($user['perfil']==='portaria'?'portaria/index.php':'feed.php');
     }
 
     if($digits!==''){
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
             $_SESSION=['responsavel_id'=>(int)$parent['id'],'name'=>$parent['nome'],'csrf'=>bin2hex(random_bytes(32))];
             audit('login_responsavel');
-            redirect('responsavel/index.php');
+            redirect('feed.php');
         }
     }
     $error='Usuário ou senha inválidos.';

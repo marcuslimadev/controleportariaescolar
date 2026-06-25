@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/portal.php';
 
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
@@ -49,8 +50,8 @@ function save_uploaded_image(array $file, string $folder): string {
 function layout_header(string $title): void {
     $flash = $_SESSION['flash'] ?? null; unset($_SESSION['flash']);
     $bodyClass=$title==='Entrar'?' class="login-page"':'';
-    echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#075985"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SCP Portaria"><title>'.e($title).'</title><link rel="manifest" href="'.e(url('manifest.webmanifest')).'"><link rel="icon" href="'.e(url('assets/icon.svg')).'" type="image/svg+xml"><link rel="apple-touch-icon" href="'.e(url('assets/icon.svg')).'"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="'.e(asset_url('assets/app.css')).'"></head><body'.$bodyClass.'>';
-    if (!empty($_SESSION['user_id']) || !empty($_SESSION['responsavel_id'])) echo '<nav class="navbar navbar-dark bg-primary mb-4"><div class="container"><a class="navbar-brand fw-bold" href="'.e(url('index.php')).'">SCP Escolar</a><a class="btn btn-outline-light btn-sm" href="'.e(url('logout.php')).'">Sair</a></div></nav>';
+    echo '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light"><meta name="theme-color" content="#1356A2"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SCP Portaria"><title>'.e($title).'</title><link rel="manifest" href="'.e(url('manifest.webmanifest')).'"><link rel="icon" href="'.e(url('assets/icon.svg')).'" type="image/svg+xml"><link rel="apple-touch-icon" href="'.e(url('assets/icon.svg')).'"><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="'.e(asset_url('assets/app.css')).'"></head><body'.$bodyClass.'>';
+    if (!empty($_SESSION['user_id']) || !empty($_SESSION['responsavel_id'])) echo '<nav class="navbar navbar-dark bg-primary"><div class="container"><a class="navbar-brand fw-bold" href="'.e(url(portal_home())).'">SCP Escolar</a><a class="btn btn-outline-light btn-sm" href="'.e(url('logout.php')).'">Sair</a></div></nav>'.portal_nav_html();
     echo '<main class="container pb-5">'; if ($flash) echo '<div class="alert alert-'.e($flash[1]).'">'.e($flash[0]).'</div>';
 }
 function layout_footer(): void { echo '</main><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("'.e(url('sw.js')).'"));}</script></body></html>'; }

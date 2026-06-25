@@ -16,4 +16,19 @@ foreach (array_filter(array_map('trim', explode(';', $sql))) as $statement) {
 }
 $q=db()->prepare("INSERT INTO scp_usuarios(nome,email,senha_hash,perfil) VALUES(?,?,?,'admin') ON DUPLICATE KEY UPDATE nome=VALUES(nome),senha_hash=VALUES(senha_hash),ativo=1");
 $q->execute([$opts['admin-name'] ?? 'Administrador', strtolower($opts['admin-email']), password_hash($opts['admin-password'], PASSWORD_DEFAULT)]);
+$pdo = db();
+$pdo->exec('CREATE TABLE IF NOT EXISTS scp_migrations (nome VARCHAR(190) PRIMARY KEY, executada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+$files = glob(__DIR__ . '/../database/migrations/*.sql') ?: [];
+sort($files);
+foreach ($files as $file) {
+    $name = basename($file);
+    $check = $pdo->prepare('SELECT COUNT(*) FROM scp_migrations WHERE nome=?');
+    $check->execute([$name]);
+    if ($check->fetchColumn()) continue;
+    foreach (array_filter(array_map('trim', explode(';', (string)file_get_contents($file)))) as $statement) {
+        try { $pdo->exec($statement); } catch (PDOException $e) { if (!in_array($e->getCode(), ['42S01','42S21'], true)) throw $e; }
+    }
+    $done = $pdo->prepare('INSERT INTO scp_migrations(nome) VALUES(?)');
+    $done->execute([$name]);
+}
 echo "Instalação concluída.\n";

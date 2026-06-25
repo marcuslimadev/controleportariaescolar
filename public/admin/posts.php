@@ -1,0 +1,16 @@
+<?php
+require __DIR__ . '/../../includes/bootstrap.php';
+require_role(['admin','secretaria']);
+$q = db()->query("SELECT p.*, u.nome autor, t.nome turma, a.nome aluno FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id LEFT JOIN scp_alunos a ON a.id=p.aluno_id ORDER BY p.created_at DESC LIMIT 100");
+$posts = $q->fetchAll();
+layout_header('Publicações');
+?>
+<div class="page-heading"><div><span class="gate-eyebrow">COMUNICAÇÃO</span><h1>Publicações</h1><p>Comunicados, eventos, alertas e lembretes oficiais.</p></div><div class="page-actions"><a class="btn btn-primary" href="<?=e(url('admin/post-form.php'))?>">Nova publicação</a></div></div>
+<?php if ($posts): ?>
+<div class="data-table-card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Título</th><th>Tipo</th><th>Público</th><th>Status</th><th>Autor</th><th></th></tr></thead><tbody>
+<?php foreach ($posts as $post): ?>
+<tr><td><strong><?=e($post['titulo'])?></strong><br><small><?=e($post['turma'] ?: $post['aluno'] ?: 'Toda escola/equipe')?></small></td><td><?=e($post['tipo'])?></td><td><?=e($post['publico'])?></td><td><span class="status-pill <?=$post['status']==='publicado'?'active':'inactive'?>"><?=e($post['status'])?></span></td><td><?=e($post['autor'])?></td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="<?=e(url('admin/post-form.php?id='.(int)$post['id']))?>">Editar</a></td></tr>
+<?php endforeach ?>
+</tbody></table></div></div>
+<?php else: ?><div class="empty-state">Nenhuma publicação cadastrada.</div><?php endif ?>
+<?php layout_footer();
