@@ -10,7 +10,7 @@ $sql = "SELECT p.*, u.nome autor,
         (SELECT confirmado_em FROM scp_post_ciencias ci WHERE ci.post_id=p.id AND " . (!empty($_SESSION['responsavel_id']) ? 'ci.responsavel_id=?' : 'ci.usuario_id=?') . " LIMIT 1) ciencia_em
         FROM scp_posts p
         JOIN scp_usuarios u ON u.id=p.autor_id
-        WHERE p.status='publicado' AND $visibilitySql
+        WHERE p.status='publicado' AND p.deleted_at IS NULL AND $visibilitySql
         ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
         LIMIT 80";
 $actorId = $_SESSION['responsavel_id'] ?? $_SESSION['user_id'];

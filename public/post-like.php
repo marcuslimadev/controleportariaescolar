@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('feed.php');
 verify_csrf();
 $postId = (int)($_POST['post_id'] ?? 0);
 [$visibilitySql, $visibilityParams] = post_visible_sql('p');
-$q = db()->prepare("SELECT p.id FROM scp_posts p WHERE p.id=? AND p.status='publicado' AND $visibilitySql");
+$q = db()->prepare("SELECT p.id FROM scp_posts p WHERE p.id=? AND p.status='publicado' AND p.deleted_at IS NULL AND $visibilitySql");
 $q->execute(array_merge([$postId], $visibilityParams));
 if (!$q->fetchColumn()) { flash('Publicação não encontrada.', 'warning'); redirect('feed.php'); }
 

@@ -3,6 +3,12 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/portal.php';
 
+spl_autoload_register(static function (string $class): void {
+    if (!str_starts_with($class, 'App\\')) return;
+    $path = __DIR__ . '/../app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+    if (is_file($path)) require_once $path;
+});
+
 function send_security_headers(): void {
     if (headers_sent()) return;
     header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self' data: https://cdn.jsdelivr.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");

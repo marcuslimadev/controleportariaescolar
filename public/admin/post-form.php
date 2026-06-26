@@ -4,7 +4,7 @@ require_role(['admin','secretaria']);
 $id = (int)($_GET['id'] ?? 0);
 $post = ['id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'toda_escola','turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'','importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho'];
 if ($id) {
-    $q = db()->prepare('SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=?');
+    $q = db()->prepare('SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=? AND p.deleted_at IS NULL');
     $q->execute([$id]);
     $loaded = $q->fetch();
     if (!$loaded) { flash('Publicação não encontrada.', 'warning'); redirect('admin/posts.php'); }

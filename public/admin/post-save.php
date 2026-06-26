@@ -23,7 +23,7 @@ try {
     if (!empty($_FILES['imagem'])) $imagemUrl = save_portal_upload($_FILES['imagem'], 'posts', 'image');
 
     if ($id) {
-        $q = db()->prepare('SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=?');
+        $q = db()->prepare('SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=? AND p.deleted_at IS NULL');
         $q->execute([$id]);
         $current = $q->fetch();
         if (!$current) throw new RuntimeException('Publicação não encontrada.');

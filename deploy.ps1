@@ -34,7 +34,7 @@ $stage = Join-Path $PSScriptRoot ('deploy-stage-' + [guid]::NewGuid())
 $archive = "$stage.tar.gz"
 New-Item -ItemType Directory -Path $stage | Out-Null
 try {
-  Copy-Item public,config,includes,database,scripts -Destination $stage -Recurse
+  Copy-Item public,config,includes,database,scripts,app -Destination $stage -Recurse
   if (Test-Path config/config.php) { Copy-Item config/config.php "$stage/config/config.php" -Force }
   tar -czf $archive -C $stage .
   $pi = [Diagnostics.ProcessStartInfo]::new()

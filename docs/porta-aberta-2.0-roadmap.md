@@ -15,6 +15,14 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Headers de segurança globais.
 - Limite de tentativas de login por IP + identificador informado.
 - Auditoria para ações críticas.
+- Primeiro soft delete em publicações.
+- Primeiro service com contrato/repository para exclusão de posts.
+- CI básico para lint PHP/JSON e teste unitário leve.
+
+## Progresso estimado
+
+- Base aproveitável do 2.0 no MVP atual: 18%.
+- Restante estimado: 82%.
 
 ## Próximas fases
 
@@ -54,4 +62,3 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Relatórios exportáveis.
 - Dashboard de acessos e comunicados.
 - Melhorias offline do PWA.
-

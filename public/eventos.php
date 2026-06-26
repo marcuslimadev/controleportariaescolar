@@ -15,7 +15,7 @@ if ($isPublic) {
 $params = array_merge([$start, $end], $visibilityParams);
 $extra = '';
 if ($turmaId) { $extra = ' AND (p.turma_id=? OR p.turma_id IS NULL)'; $params[] = $turmaId; }
-$q = db()->prepare("SELECT p.*, u.nome autor, t.nome turma FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id WHERE p.status='publicado' AND p.tipo IN ('evento','programação') AND p.data_evento BETWEEN ? AND ? AND $visibilitySql $extra ORDER BY p.data_evento ASC, p.hora_evento ASC");
+$q = db()->prepare("SELECT p.*, u.nome autor, t.nome turma FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id WHERE p.status='publicado' AND p.deleted_at IS NULL AND p.tipo IN ('evento','programação') AND p.data_evento BETWEEN ? AND ? AND $visibilitySql $extra ORDER BY p.data_evento ASC, p.hora_evento ASC");
 $q->execute($params);
 $events = $q->fetchAll();
 $turmas = $isPublic ? [] : db()->query('SELECT id,nome FROM scp_turmas WHERE ativo=1 ORDER BY nome')->fetchAll();

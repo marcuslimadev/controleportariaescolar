@@ -21,3 +21,6 @@ jobs:
 
       - name: Validate PHP and JSON
         run: php scripts/ci_check.php
+
+      - name: Run unit checks
+        run: php scripts/unit_check.php
