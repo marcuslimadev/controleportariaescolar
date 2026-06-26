@@ -34,6 +34,18 @@ final class InMemoryGuardianRepository implements GuardianRepository
     {
         return $guardianId === $this->guardianId && !empty($this->authorized[$studentId]);
     }
+
+    public function findIdByCpf(string $cpf): ?int
+    {
+        return $cpf === '11144477735' ? $this->guardianId : null;
+    }
+
+    public function createFromInvite(array $invite): int
+    {
+        return $this->guardianId ?? 7;
+    }
+
+    public function updateFromInvite(int $guardianId, array $invite): void {}
 }
 
 final class InMemoryAccessLogRepository implements AccessLogRepository
@@ -72,6 +84,13 @@ final class InMemoryStudentRepository implements \App\Contracts\Repositories\Stu
     {
         return $this->securityBadgeExists && $token === 'STUDENT_TOKEN';
     }
+
+    public function createFromInvite(array $invite, string $qrToken): int
+    {
+        return 10;
+    }
+
+    public function linkGuardian(int $studentId, int $guardianId): void {}
 }
 
 return static function (): void {

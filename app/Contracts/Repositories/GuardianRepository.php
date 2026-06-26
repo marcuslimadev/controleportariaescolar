@@ -12,4 +12,10 @@ interface GuardianRepository
     public function authorizedChildrenForWithdrawal(int $guardianId): array;
 
     public function canWithdrawStudent(int $guardianId, int $studentId): bool;
+
+    public function findIdByCpf(string $cpf): ?int;
+
+    public function createFromInvite(array $invite): int;
+
+    public function updateFromInvite(int $guardianId, array $invite): void;
 }

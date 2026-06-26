@@ -1,47 +1,34 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('invite.manage');
+$inviteService = new \App\Services\InviteService(
+    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
+    new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
+    new \App\Infrastructure\Persistence\PdoStudentRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+    db(),
+);
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();
     $action=$_POST['action']??'';
     try{
         if($action==='criar'){
-            $telefone=normalize_phone((string)($_POST['telefone']??''));
-            if(strlen($telefone)<10||strlen($telefone)>13)throw new RuntimeException('Informe um telefone com DDD.');
-            $token=bin2hex(random_bytes(32));
-            $q=db()->prepare("INSERT INTO scp_convites_cadastro(telefone,token_hash,criado_por,expira_em) VALUES(?,?,?,DATE_ADD(NOW(),INTERVAL 24 HOUR))");
-            $q->execute([$telefone,hash('sha256',$token),$_SESSION['user_id']]);
-            $id=(int)db()->lastInsertId();audit('criar_convite_cadastro','scp_convites_cadastro',$id,['telefone_final'=>substr($telefone,-4)]);
-            $_SESSION['convite_recente']=['id'=>$id,'token'=>$token,'telefone'=>$telefone];
-            redirect('portaria/convites.php?convite='.$id);
+            $recentInvite = $inviteService->createInvite((string)($_POST['telefone']??''), (int)$_SESSION['user_id']);
+            $_SESSION['convite_recente']=$recentInvite;
+            redirect('portaria/convites.php?convite='.$recentInvite['id']);
         }
         if($action==='aprovar'){
-            $id=(int)($_POST['id']??0);$pdo=db();$pdo->beginTransaction();
-            $q=$pdo->prepare("SELECT * FROM scp_convites_cadastro WHERE id=? AND status='preenchido' AND expira_em>NOW() FOR UPDATE");$q->execute([$id]);$invite=$q->fetch();
-            if(!$invite)throw new RuntimeException('Este cadastro não está pronto para aprovação.');
-            $q=$pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? LIMIT 1');$q->execute([$invite['responsavel_cpf']]);$responsavelId=(int)$q->fetchColumn();
-            if($responsavelId){
-                $q=$pdo->prepare('UPDATE scp_responsaveis SET nome=?,email=?,telefone=?,foto=?,senha_hash=?,ativo=1 WHERE id=?');
-                $q->execute([$invite['responsavel_nome'],$invite['responsavel_email']?:null,$invite['telefone'],$invite['responsavel_foto'],$invite['senha_hash'],$responsavelId]);
-            }else{
-                $q=$pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,email,telefone,foto,senha_hash) VALUES(?,?,?,?,?,?)');
-                $q->execute([$invite['responsavel_nome'],$invite['responsavel_cpf'],$invite['responsavel_email']?:null,$invite['telefone'],$invite['responsavel_foto'],$invite['senha_hash']]);$responsavelId=(int)$pdo->lastInsertId();
-            }
-            $qrToken=bin2hex(random_bytes(32));
-            $q=$pdo->prepare('INSERT INTO scp_alunos(nome,data_nascimento,foto,qr_token) VALUES(?,?,?,?)');$q->execute([$invite['aluno_nome'],$invite['aluno_data_nascimento']?:null,$invite['aluno_foto'],$qrToken]);$alunoId=(int)$pdo->lastInsertId();
-            $q=$pdo->prepare("INSERT INTO scp_aluno_responsavel(aluno_id,responsavel_id,parentesco,autoriza_consulta,autoriza_retirada) VALUES(?,?,'Responsável',1,1)");$q->execute([$alunoId,$responsavelId]);
-            $q=$pdo->prepare("UPDATE scp_convites_cadastro SET status='aprovado',aprovado_em=NOW(),aprovado_por=?,responsavel_id=?,aluno_id=? WHERE id=?");$q->execute([$_SESSION['user_id'],$responsavelId,$alunoId,$id]);
-            $pdo->commit();audit('aprovar_cadastro_responsavel','scp_convites_cadastro',$id,['aluno_id'=>$alunoId]);
-            redirect('admin/cracha.php?responsavel_id='.$responsavelId.'&convite='.$id.'&ready=1');
+            $id=(int)($_POST['id']??0);
+            $result=$inviteService->approveInvite($id, (int)$_SESSION['user_id']);
+            redirect('admin/cracha.php?responsavel_id='.$result['responsavel_id'].'&convite='.$id.'&ready=1');
         }
-    }catch(Throwable $error){if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();$message=$error->getMessage();}
+    }catch(Throwable $error){$message=$error->getMessage();}
 }
 
-db()->exec("UPDATE scp_convites_cadastro SET status='expirado' WHERE status='aguardando' AND expira_em<NOW()");
 $recent=$_SESSION['convite_recente']??null;
 if(!$recent||$recent['id']!==(int)($_GET['convite']??0))$recent=null;else unset($_SESSION['convite_recente']);
-$q=db()->query("SELECT c.*,u.nome criado_por_nome FROM scp_convites_cadastro c JOIN scp_usuarios u ON u.id=c.criado_por WHERE c.status IN ('aguardando','preenchido') ORDER BY FIELD(c.status,'preenchido','aguardando'),c.created_at DESC LIMIT 30");$invites=$q->fetchAll();
+$invites=$inviteService->refreshPendingList(30);
 layout_header('Convites de cadastro');
 ?>
 <section class="invite-page">

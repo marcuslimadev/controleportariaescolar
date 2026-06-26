@@ -51,4 +51,41 @@ final class PdoGuardianRepository implements GuardianRepository
 
         return (int)$query->fetchColumn() > 0;
     }
+
+    public function findIdByCpf(string $cpf): ?int
+    {
+        $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? LIMIT 1');
+        $query->execute([$cpf]);
+        $id = (int)$query->fetchColumn();
+
+        return $id > 0 ? $id : null;
+    }
+
+    public function createFromInvite(array $invite): int
+    {
+        $query = $this->pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,email,telefone,foto,senha_hash) VALUES(?,?,?,?,?,?)');
+        $query->execute([
+            $invite['responsavel_nome'],
+            $invite['responsavel_cpf'],
+            $invite['responsavel_email'] ?: null,
+            $invite['telefone'],
+            $invite['responsavel_foto'],
+            $invite['senha_hash'],
+        ]);
+
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    public function updateFromInvite(int $guardianId, array $invite): void
+    {
+        $query = $this->pdo->prepare('UPDATE scp_responsaveis SET nome=?,email=?,telefone=?,foto=?,senha_hash=?,ativo=1 WHERE id=?');
+        $query->execute([
+            $invite['responsavel_nome'],
+            $invite['responsavel_email'] ?: null,
+            $invite['telefone'],
+            $invite['responsavel_foto'],
+            $invite['senha_hash'],
+            $guardianId,
+        ]);
+    }
 }
