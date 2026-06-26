@@ -1,25 +1,22 @@
 <?php
 require __DIR__.'/../includes/bootstrap.php';
 $token=(string)($_GET['token']??$_POST['token']??'');
-$q=db()->prepare('SELECT * FROM scp_convites_cadastro WHERE token_hash=? LIMIT 1');$q->execute([hash('sha256',$token)]);$invite=$q->fetch();
-if(!$invite){http_response_code(404);$invalid=true;}
-elseif(strtotime($invite['expira_em'])<time()&&$invite['status']==='aguardando'){$invalid=true;db()->prepare("UPDATE scp_convites_cadastro SET status='expirado' WHERE id=?")->execute([$invite['id']]);}
+$onboardingService = new \App\Services\FamilyOnboardingService(
+    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+$state=$onboardingService->getInvite($token);
+$invite=$state['invite'];
+$invalid=$state['invalid'];
+if(!$invite){http_response_code(404);}
 
 if(empty($invalid)&&$_SERVER['REQUEST_METHOD']==='POST'&&$invite['status']==='aguardando'){
     verify_csrf();
     try{
-        $responsavelNome=trim((string)($_POST['responsavel_nome']??''));$cpf=preg_replace('/\D/','',(string)($_POST['cpf']??''));$email=strtolower(trim((string)($_POST['email']??'')));
-        $alunoNome=trim((string)($_POST['aluno_nome']??''));$nascimento=trim((string)($_POST['data_nascimento']??''));$password=(string)($_POST['senha']??'');
-        if(strlen($responsavelNome)<3||strlen($alunoNome)<3)throw new RuntimeException('Informe os nomes completos.');
-        if(strlen($cpf)!==11)throw new RuntimeException('Informe um CPF com 11 números.');
-        if($email!==''&&!filter_var($email,FILTER_VALIDATE_EMAIL))throw new RuntimeException('Informe um e-mail válido.');
-        if(strlen($password)<8)throw new RuntimeException('A senha precisa ter pelo menos 8 caracteres.');
-        if(!hash_equals($password,(string)($_POST['confirmar_senha']??'')))throw new RuntimeException('As senhas não coincidem.');
         $responsavelFoto=save_uploaded_image($_FILES['responsavel_foto']??[],'convites');
         $alunoFoto=save_uploaded_image($_FILES['aluno_foto']??[],'convites');
-        $q=db()->prepare("UPDATE scp_convites_cadastro SET status='preenchido',responsavel_nome=?,responsavel_cpf=?,responsavel_email=?,responsavel_foto=?,aluno_nome=?,aluno_data_nascimento=?,aluno_foto=?,senha_hash=?,preenchido_em=NOW() WHERE id=? AND status='aguardando'");
-        $q->execute([$responsavelNome,$cpf,$email?:null,$responsavelFoto,$alunoNome,$nascimento?:null,$alunoFoto,password_hash_secure($password),$invite['id']]);
-        audit('preencher_convite_cadastro','scp_convites_cadastro',(int)$invite['id']);$invite['status']='preenchido';
+        $onboardingService->fillInvite((int)$invite['id'], $_POST, $responsavelFoto, $alunoFoto);
+        $invite['status']='preenchido';
     }catch(Throwable $error){$message=$error->getMessage();}
 }
 layout_header('Cadastro da família');

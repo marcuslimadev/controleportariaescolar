@@ -26,12 +26,13 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Auditoria passou a registrar user-agent.
 - `composer.json` criado com PSR-4 para `App\\`.
 - Fluxo de convites da portaria iniciou migração para service/repository.
+- Cadastro público da família via convite migrado para service/repository.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 39%.
-- Restante estimado: 61%.
+- Base aproveitável do 2.0 no MVP atual: 43%.
+- Restante estimado: 57%.
 
 ## Próximas fases
 

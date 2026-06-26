@@ -40,6 +40,41 @@ final class PdoInviteRepository implements InviteRepository
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function findByPublicToken(string $token): ?array
+    {
+        $query = $this->pdo->prepare('SELECT * FROM scp_convites_cadastro WHERE token_hash=? LIMIT 1');
+        $query->execute([hash('sha256', $token)]);
+        $invite = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $invite ?: null;
+    }
+
+    public function expire(int $id): void
+    {
+        $query = $this->pdo->prepare("UPDATE scp_convites_cadastro SET status='expirado' WHERE id=?");
+        $query->execute([$id]);
+    }
+
+    public function fillByFamily(int $id, array $data): void
+    {
+        $query = $this->pdo->prepare(
+            "UPDATE scp_convites_cadastro
+             SET status='preenchido',responsavel_nome=?,responsavel_cpf=?,responsavel_email=?,responsavel_foto=?,aluno_nome=?,aluno_data_nascimento=?,aluno_foto=?,senha_hash=?,preenchido_em=NOW()
+             WHERE id=? AND status='aguardando'"
+        );
+        $query->execute([
+            $data['responsavel_nome'],
+            $data['responsavel_cpf'],
+            $data['responsavel_email'] ?: null,
+            $data['responsavel_foto'],
+            $data['aluno_nome'],
+            $data['aluno_data_nascimento'] ?: null,
+            $data['aluno_foto'],
+            $data['senha_hash'],
+            $id,
+        ]);
+    }
+
     public function findReadyForApproval(int $id): ?array
     {
         $query = $this->pdo->prepare("SELECT * FROM scp_convites_cadastro WHERE id=? AND status='preenchido' AND expira_em>NOW() FOR UPDATE");
