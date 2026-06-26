@@ -3,6 +3,19 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/portal.php';
 
+function send_security_headers(): void {
+    if (headers_sent()) return;
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self' data: https://cdn.jsdelivr.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(self), geolocation=(self), microphone=()');
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+}
+send_security_headers();
+
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_samesite', 'Lax');
@@ -16,6 +29,38 @@ function csrf(): string { return $_SESSION['csrf'] ??= bin2hex(random_bytes(32))
 function verify_csrf(): void { if (!hash_equals($_SESSION['csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) { http_response_code(419); exit('Sessão expirada. Atualize a página.'); } }
 function redirect(string $path): never { header('Location: ' . url($path)); exit; }
 function flash(string $message, string $type='success'): void { $_SESSION['flash'] = [$message, $type]; }
+function client_ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'), 0, 45); }
+function login_rate_normalize(string $login): string { return strtolower(trim($login)); }
+function login_rate_key(string $login): string { return hash('sha256', client_ip() . '|' . login_rate_normalize($login)); }
+function login_rate_blocked(string $login): bool {
+    try {
+        $q = db()->prepare('SELECT bloqueado_ate FROM scp_login_tentativas WHERE chave=? AND bloqueado_ate > NOW() LIMIT 1');
+        $q->execute([login_rate_key($login)]);
+        return (bool)$q->fetchColumn();
+    } catch (Throwable $ignored) {
+        return false;
+    }
+}
+function login_rate_hit(string $login): void {
+    try {
+        $key = login_rate_key($login);
+        $hash = hash('sha256', login_rate_normalize($login));
+        $sql = "INSERT INTO scp_login_tentativas (chave, ip, login_hash, tentativas, ultima_tentativa)
+                VALUES (?, ?, ?, 1, NOW())
+                ON DUPLICATE KEY UPDATE
+                  ip=VALUES(ip),
+                  login_hash=VALUES(login_hash),
+                  tentativas=CASE WHEN ultima_tentativa < DATE_SUB(NOW(), INTERVAL 15 MINUTE) THEN 1 ELSE tentativas + 1 END,
+                  bloqueado_ate=CASE WHEN (CASE WHEN ultima_tentativa < DATE_SUB(NOW(), INTERVAL 15 MINUTE) THEN 1 ELSE tentativas + 1 END) >= 5 THEN DATE_ADD(NOW(), INTERVAL 15 MINUTE) ELSE bloqueado_ate END,
+                  ultima_tentativa=NOW()";
+        db()->prepare($sql)->execute([$key, client_ip(), $hash]);
+    } catch (Throwable $ignored) {}
+}
+function login_rate_clear(string $login): void {
+    try {
+        db()->prepare('DELETE FROM scp_login_tentativas WHERE chave=?')->execute([login_rate_key($login)]);
+    } catch (Throwable $ignored) {}
+}
 function audit(string $action, ?string $entity=null, ?int $entityId=null, array $details=[]): void {
     $s = db()->prepare('INSERT INTO scp_logs_auditoria (usuario_id, responsavel_id, acao, entidade, entidade_id, detalhes, ip) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $s->execute([$_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $action, $entity, $entityId, json_encode($details, JSON_UNESCAPED_UNICODE), $_SERVER['REMOTE_ADDR'] ?? null]);
