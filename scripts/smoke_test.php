@@ -19,16 +19,18 @@ function login(string $tipo,string $usuario,string $senha,string $expected): arr
     return [$jar,$body];
 }
 
-[$adminJar] = login('equipe','admin@scp.local','SCP@2026!Acesso#7kP','Painel da escola');
+[$adminJar] = login('equipe','admin@scp.local','SCP@2026!Acesso#7kP','Timeline oficial');
 [$portariaJar,$portaria] = login('equipe','portaria@scp.local','Portaria@2026!Teste','Controle de acesso');
 if(!preg_match('/const csrf="([a-f0-9]+)"/',$portaria,$m)) throw new RuntimeException('CSRF da portaria não encontrado');
-$token=(string)db()->query("SELECT qr_token FROM scp_alunos WHERE cpf='52998224725'")->fetchColumn();
+$token=(string)db()->query("SELECT qr_token FROM scp_responsaveis WHERE cpf='11144477735'")->fetchColumn();
 $lookup=json_decode(sessionRequest($portariaJar,'portaria/lookup.php',['csrf'=>$m[1],'token'=>$token]),true,512,JSON_THROW_ON_ERROR);
-if(empty($lookup['ok']) || $lookup['nome']!=='Aluno Demonstração') throw new RuntimeException('Consulta do QR falhou');
-$tipo=$lookup['sugerida'];
-$registro=json_decode(sessionRequest($portariaJar,'portaria/registrar.php',['csrf'=>$m[1],'token'=>$token,'tipo'=>$tipo,'manual'=>'0','observacao'=>'Teste automatizado']),true,512,JSON_THROW_ON_ERROR);
+if(empty($lookup['ok']) || empty($lookup['responsavel']) || empty($lookup['children'][0])) throw new RuntimeException('Consulta do QR falhou');
+$child=$lookup['children'][0];
+$tipo=$child['sugerida'];
+$items=json_encode([['aluno_id'=>$child['id'],'tipo'=>$tipo,'manual'=>false,'observacao'=>'']], JSON_THROW_ON_ERROR);
+$registro=json_decode(sessionRequest($portariaJar,'portaria/registrar.php',['csrf'=>$m[1],'token'=>$token,'items'=>$items]),true,512,JSON_THROW_ON_ERROR);
 if(!str_contains($registro['message']??'','sucesso')) throw new RuntimeException('Registro de acesso falhou');
-[$parentJar,$portal] = login('responsavel','11144477735','Responsavel@2026!Teste','Histórico dos alunos vinculados');
+[$parentJar,$portal] = login('responsavel','11144477735','Responsavel@2026!Teste','Timeline oficial');
 if(!str_contains($portal,'Aluno Demonstração')) throw new RuntimeException('Aluno não apareceu no portal');
 @unlink($adminJar);@unlink($portariaJar);@unlink($parentJar);
 echo "ADMIN_OK PORTARIA_OK QR_OK REGISTRO_".strtoupper($tipo)." PARENT_OK\n";

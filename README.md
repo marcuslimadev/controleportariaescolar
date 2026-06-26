@@ -1,4 +1,4 @@
-# SCP Escolar
+# Porta Aberta Escolar
 
 MVP em PHP 8 + MySQL para controle seguro de entrada e saída de alunos.
 
@@ -26,3 +26,13 @@ O perfil de portaria pode abrir `portaria/cadastro.php`, fotografar o aluno pelo
 O fluxo recomendado fica em `portaria/convites.php`: o agente informa somente o WhatsApp do responsável e gera um convite em QR Code. O responsável abre o convite no próprio celular, fotografa a si e à criança, cria sua senha e envia os dados. A portaria recebe a pendência, confere as fotos, aprova e envia pelo WhatsApp o link do crachá digital, que também pode ser impresso.
 
 Em instalações existentes, execute uma vez `database/migrations/20260622_convites_cadastro.sql` antes de usar os convites.
+
+## Validação rápida
+
+Antes de publicar, rode:
+
+```powershell
+php scripts/ci_check.php
+```
+
+O GitHub Actions executa a mesma validação em pushes e pull requests para a `main`.

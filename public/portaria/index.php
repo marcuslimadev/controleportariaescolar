@@ -92,27 +92,50 @@ async function scan(token){
 }
 
 function show(data){
-  if(!data.ok){locked=false;showError('Crachá inválido ou aluno inativo.');return}
+  if(!data.ok){locked=false;showError(data.message||'Crachá inválido ou aluno inativo.');return}
   current=data;
   setStatus('','');
   const card=document.createElement('article');card.className='access-card';
-  const photo=document.createElement('img');photo.className='student-photo';photo.alt='Foto de '+data.nome;photo.src=data.foto||'';photo.onerror=()=>photo.remove();
-  const tag=document.createElement('span');tag.className='access-state '+(data.dentro?'inside':'outside');tag.textContent=data.dentro?'Está dentro':'Está fora';
-  const name=document.createElement('h2');name.textContent=data.nome;
-  const classroom=document.createElement('p');classroom.className='student-class';classroom.textContent=data.turma||'Sem turma informada';
-  const confirm=document.createElement('button');confirm.type='button';confirm.className='btn-confirm '+(data.sugerida==='entrada'?'entry':'exit');confirm.textContent='Confirmar '+labelType(data.sugerida);confirm.addEventListener('click',()=>record(data.token,data.sugerida,false));
-  const correction=document.createElement('button');correction.type='button';correction.className='btn-correction';correction.textContent='Corrigir para '+(data.sugerida==='entrada'?'saída':'entrada');correction.addEventListener('click',()=>manual(data.token,data.sugerida==='entrada'?'saida':'entrada'));
+  const photo=document.createElement('img');photo.className='student-photo';photo.alt='Foto de '+data.responsavel.nome;photo.src=data.responsavel.foto||'';photo.onerror=()=>photo.remove();
+  const tag=document.createElement('span');tag.className='access-state inside';tag.textContent='Responsável autorizado';
+  const name=document.createElement('h2');name.textContent=data.responsavel.nome;
+  const classroom=document.createElement('p');classroom.className='student-class';classroom.textContent='Selecione as crianças que estão entrando ou saindo.';
+  const list=document.createElement('div');list.className='children-list';
+  data.children.forEach(child=>list.appendChild(childRow(child)));
+  const confirm=document.createElement('button');confirm.type='button';confirm.className='btn-confirm entry';confirm.textContent='Registrar selecionados';confirm.addEventListener('click',()=>record(data.responsavel.token));
   const another=document.createElement('button');another.type='button';another.className='btn-another';another.textContent='Escanear outro crachá';another.addEventListener('click',resetAndScan);
-  card.append(photo,tag,name,classroom,confirm,correction,another);resultBox.replaceChildren(card);
+  card.append(photo,tag,name,classroom,list,confirm,another);resultBox.replaceChildren(card);
 }
 
-function manual(token,type){const note=prompt('Informe o motivo da correção (mínimo de 5 caracteres):');if(note&&note.trim().length>=5)record(token,type,true,note)}
+function childRow(child){
+  const row=document.createElement('label');row.className='child-row';row.dataset.id=child.id;row.dataset.tipo=child.sugerida;row.dataset.sugerida=child.sugerida;row.dataset.selected='1';
+  const check=document.createElement('input');check.type='checkbox';check.checked=true;check.className='visually-hidden';
+  const photo=document.createElement('img');photo.alt='Foto de '+child.nome;photo.src=child.foto||'';photo.onerror=()=>photo.remove();
+  const info=document.createElement('div');info.className='child-info';
+  const name=document.createElement('strong');name.textContent=child.nome;
+  const details=document.createElement('span');details.textContent=(child.turma||'Sem turma')+' · '+(child.dentro?'está dentro':'está fora');
+  info.append(name,details);
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='child-toggle '+child.sugerida;toggle.textContent=labelType(child.sugerida);
+  toggle.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const next=row.dataset.tipo==='entrada'?'saida':'entrada';row.dataset.tipo=next;toggle.textContent=labelType(next);toggle.className='child-toggle '+next});
+  row.addEventListener('change',()=>{row.dataset.selected=check.checked?'1':'0';row.classList.toggle('unchecked',!check.checked)});
+  row.append(check,photo,info,toggle);
+  return row;
+}
 
-async function record(token,type,manual,note=''){
+async function record(token){
+  const rows=[...resultBox.querySelectorAll('.child-row')].filter(row=>row.dataset.selected==='1');
+  if(!rows.length){setStatus('Selecione pelo menos uma criança.','error');return}
+  const needsNote=rows.some(row=>row.dataset.tipo!==row.dataset.sugerida);
+  let note='';
+  if(needsNote){
+    note=(prompt('Informe o motivo da correção (mínimo de 5 caracteres):')||'').trim();
+    if(note.length<5){setStatus('Correção precisa de motivo.','error');return}
+  }
+  const items=rows.map(row=>({aluno_id:row.dataset.id,tipo:row.dataset.tipo,manual:row.dataset.tipo!==row.dataset.sugerida,observacao:row.dataset.tipo!==row.dataset.sugerida?note:''}));
   const button=resultBox.querySelector('.btn-confirm');if(button)button.disabled=true;
-  setStatus('Registrando '+labelType(type)+'…','busy');
+  setStatus('Registrando acesso…','busy');
   try{
-    const response=await fetch('registrar.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token,tipo:type,manual:manual?'1':'0',observacao:note})});
+    const response=await fetch('registrar.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token,items:JSON.stringify(items)})});
     const data=await response.json();
     if(!response.ok)throw new Error(data.message||'Falha no registro');
     if(navigator.vibrate)navigator.vibrate([100,60,100]);
