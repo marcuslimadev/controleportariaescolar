@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
-require_role(['admin','secretaria','professor']);
+require_permission('frequency.manage');
 $date = $_GET['data'] ?? date('Y-m-d');
 $turmaId = (int)($_GET['turma_id'] ?? 0);
 $situacaoFiltro = (string)($_GET['situacao'] ?? '');

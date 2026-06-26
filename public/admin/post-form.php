@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
-require_role(['admin','secretaria']);
+require_permission('post.manage');
 $id = (int)($_GET['id'] ?? 0);
 $post = ['id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'toda_escola','turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'','importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho'];
 if ($id) {

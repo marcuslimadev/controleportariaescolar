@@ -1,6 +1,6 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
-require_role(['admin','secretaria','portaria']);
+require_permission('badge.issue');
 $responsavelId=(int)($_GET['responsavel_id']??0);
 $q=db()->prepare('SELECT * FROM scp_responsaveis WHERE id=?');
 $q->execute([$responsavelId]);

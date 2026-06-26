@@ -35,6 +35,29 @@ function csrf(): string { return $_SESSION['csrf'] ??= bin2hex(random_bytes(32))
 function verify_csrf(): void { if (!hash_equals($_SESSION['csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) { http_response_code(419); exit('Sessão expirada. Atualize a página.'); } }
 function redirect(string $path): never { header('Location: ' . url($path)); exit; }
 function flash(string $message, string $type='success'): void { $_SESSION['flash'] = [$message, $type]; }
+function wants_json(): bool {
+    $script = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+    return in_array($script, ['lookup.php','registrar.php','pendencias.php'], true)
+        || str_contains((string)($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json')
+        || str_contains((string)($_SERVER['CONTENT_TYPE'] ?? ''), 'application/json')
+        || str_contains((string)($_SERVER['HTTP_X_REQUESTED_WITH'] ?? ''), 'XMLHttpRequest');
+}
+function forbidden(string $message='Sem permissão.'): never {
+    http_response_code(403);
+    if (wants_json()) {
+        header('Content-Type: application/json');
+        echo json_encode(['message'=>$message], JSON_UNESCAPED_UNICODE);
+    } else {
+        exit($message);
+    }
+    exit;
+}
+function current_actor_role(): string { return !empty($_SESSION['responsavel_id']) ? 'responsavel' : (string)($_SESSION['role'] ?? ''); }
+function has_permission(string $permission): bool { return \App\Support\Permission::roleHas(current_actor_role(), $permission); }
+function require_permission(string $permission): void {
+    if (empty($_SESSION['user_id']) && empty($_SESSION['responsavel_id'])) redirect('login.php');
+    if (!has_permission($permission)) forbidden();
+}
 function client_ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'), 0, 45); }
 function login_rate_normalize(string $login): string { return strtolower(trim($login)); }
 function login_rate_key(string $login): string { return hash('sha256', client_ip() . '|' . login_rate_normalize($login)); }
@@ -71,7 +94,7 @@ function audit(string $action, ?string $entity=null, ?int $entityId=null, array 
     $s = db()->prepare('INSERT INTO scp_logs_auditoria (usuario_id, responsavel_id, acao, entidade, entidade_id, detalhes, ip) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $s->execute([$_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $action, $entity, $entityId, json_encode($details, JSON_UNESCAPED_UNICODE), $_SERVER['REMOTE_ADDR'] ?? null]);
 }
-function require_role(array $roles): void { if (empty($_SESSION['user_id']) || !in_array($_SESSION['role'] ?? '', $roles, true)) redirect('login.php'); }
+function require_role(array $roles): void { if (empty($_SESSION['user_id'])) redirect('login.php'); if (!in_array($_SESSION['role'] ?? '', $roles, true)) forbidden(); }
 function require_parent(): void { if (empty($_SESSION['responsavel_id'])) redirect('login.php'); }
 function normalize_phone(string $phone): string { return preg_replace('/\D+/', '', $phone) ?: ''; }
 function extract_qr_token(string $value): string {

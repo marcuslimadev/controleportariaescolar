@@ -1,6 +1,6 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
-require_role(['admin','secretaria','portaria']);
+require_permission('badge.issue');
 $id=(int)($_GET['id']??0);
 $q=db()->prepare('SELECT id,nome,qr_token FROM scp_alunos WHERE id=? AND ativo=1');
 $q->execute([$id]);

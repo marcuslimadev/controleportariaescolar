@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../includes/bootstrap.php'; require_role(['admin','secretaria']);
+require __DIR__ . '/../../includes/bootstrap.php'; require_permission('student.manage');
 if ($_SERVER['REQUEST_METHOD']==='POST') {
  verify_csrf(); $a=$_POST['action']??'';
  try {

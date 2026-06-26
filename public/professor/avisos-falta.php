@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
-require_role(['admin','secretaria','professor']);
+require_permission('absence.read');
 $params = [];
 $where = '1=1';
 if (($_SESSION['role'] ?? '') === 'professor') {

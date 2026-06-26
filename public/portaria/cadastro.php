@@ -1,6 +1,6 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
-require_role(['admin','secretaria','portaria']);
+require_permission('student.quick_create');
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();

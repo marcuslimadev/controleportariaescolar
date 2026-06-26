@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
-require_role(['admin','secretaria']);
+require_permission('post.manage');
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') redirect('admin/posts.php');
 verify_csrf();
 

@@ -19,12 +19,14 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Primeiro service com contrato/repository para exclusão de posts.
 - Primeiro service com contrato/repository para registro de acesso da portaria.
 - Lookup do QR da portaria migrado para service/repository.
+- Permissões granulares iniciadas com mapa central por perfil.
+- Endpoints JSON críticos retornam 403 em JSON quando sem permissão.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 25%.
-- Restante estimado: 75%.
+- Base aproveitável do 2.0 no MVP atual: 28%.
+- Restante estimado: 72%.
 
 ## Próximas fases
 

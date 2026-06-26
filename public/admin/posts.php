@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
-require_role(['admin','secretaria']);
+require_permission('post.manage');
 $q = db()->query("SELECT p.*, u.nome autor, t.nome turma, a.nome aluno FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id LEFT JOIN scp_alunos a ON a.id=p.aluno_id WHERE p.deleted_at IS NULL ORDER BY p.created_at DESC LIMIT 100");
 $posts = $q->fetchAll();
 layout_header('Publicações');

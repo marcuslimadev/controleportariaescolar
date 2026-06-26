@@ -1,5 +1,5 @@
 <?php
-require __DIR__.'/../../includes/bootstrap.php';require_role(['admin','secretaria','portaria']);$id=(int)($_GET['id']??0);
+require __DIR__.'/../../includes/bootstrap.php';require_permission('invite.manage');$id=(int)($_GET['id']??0);
 $q=db()->prepare("SELECT c.*,u.nome criado_por_nome FROM scp_convites_cadastro c JOIN scp_usuarios u ON u.id=c.criado_por WHERE c.id=? AND c.status='preenchido'");$q->execute([$id]);$invite=$q->fetch();if(!$invite){http_response_code(404);exit('Cadastro não encontrado ou já processado.');}
 layout_header('Aprovar cadastro');
 ?>

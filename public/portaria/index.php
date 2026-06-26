@@ -1,4 +1,4 @@
-<?php require __DIR__.'/../../includes/bootstrap.php';require_role(['admin','secretaria','portaria']);$pending=0;try{$pending=(int)db()->query("SELECT COUNT(*) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();}catch(Throwable $ignored){}layout_header('Portaria');?>
+<?php require __DIR__.'/../../includes/bootstrap.php';require_permission('access.read');$pending=0;try{$pending=(int)db()->query("SELECT COUNT(*) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();}catch(Throwable $ignored){}layout_header('Portaria');?>
 <section class="gate-app" aria-labelledby="gate-title">
   <header class="gate-heading text-center">
     <span class="gate-eyebrow">PORTARIA</span>
