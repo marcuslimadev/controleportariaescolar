@@ -28,12 +28,13 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Fluxo de convites da portaria iniciou migração para service/repository.
 - Cadastro público da família via convite migrado para service/repository.
 - Login único migrado para `AuthService` com repositories.
+- Criação e edição de publicações migradas para `PostService`.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 47%.
-- Restante estimado: 53%.
+- Base aproveitável do 2.0 no MVP atual: 50%.
+- Restante estimado: 50%.
 
 ## Próximas fases
 
