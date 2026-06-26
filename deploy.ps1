@@ -35,6 +35,7 @@ $archive = "$stage.tar.gz"
 New-Item -ItemType Directory -Path $stage | Out-Null
 try {
   Copy-Item public,config,includes,database,scripts,app -Destination $stage -Recurse
+  if (Test-Path composer.json) { Copy-Item composer.json "$stage/composer.json" -Force }
   if (Test-Path config/config.php) { Copy-Item config/config.php "$stage/config/config.php" -Force }
   tar -czf $archive -C $stage .
   $pi = [Diagnostics.ProcessStartInfo]::new()
