@@ -1,0 +1,21 @@
+{
+  "name": "porta-aberta/escolar",
+  "description": "Porta Aberta Escolar - canal entre escola, família e portaria.",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "ext-pdo": "*",
+    "ext-fileinfo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "scripts": {
+    "check": [
+      "php scripts/ci_check.php",
+      "php scripts/unit_check.php"
+    ]
+  }
+}

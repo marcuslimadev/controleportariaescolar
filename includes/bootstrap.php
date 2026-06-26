@@ -58,6 +58,9 @@ function require_permission(string $permission): void {
     if (empty($_SESSION['user_id']) && empty($_SESSION['responsavel_id'])) redirect('login.php');
     if (!has_permission($permission)) forbidden();
 }
+function password_hash_secure(string $plain): string { return \App\Support\PasswordService::hash($plain); }
+function password_verify_secure(string $plain, string $hash): bool { return \App\Support\PasswordService::verify($plain, $hash); }
+function password_needs_rehash_secure(string $hash): bool { return \App\Support\PasswordService::needsRehash($hash); }
 function client_ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'), 0, 45); }
 function login_rate_normalize(string $login): string { return strtolower(trim($login)); }
 function login_rate_key(string $login): string { return hash('sha256', client_ip() . '|' . login_rate_normalize($login)); }
@@ -91,8 +94,8 @@ function login_rate_clear(string $login): void {
     } catch (Throwable $ignored) {}
 }
 function audit(string $action, ?string $entity=null, ?int $entityId=null, array $details=[]): void {
-    $s = db()->prepare('INSERT INTO scp_logs_auditoria (usuario_id, responsavel_id, acao, entidade, entidade_id, detalhes, ip) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    $s->execute([$_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $action, $entity, $entityId, json_encode($details, JSON_UNESCAPED_UNICODE), $_SERVER['REMOTE_ADDR'] ?? null]);
+    $s = db()->prepare('INSERT INTO scp_logs_auditoria (usuario_id, responsavel_id, acao, entidade, entidade_id, detalhes, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $s->execute([$_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $action, $entity, $entityId, json_encode($details, JSON_UNESCAPED_UNICODE), $_SERVER['REMOTE_ADDR'] ?? null, substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500)]);
 }
 function require_role(array $roles): void { if (empty($_SESSION['user_id'])) redirect('login.php'); if (!in_array($_SESSION['role'] ?? '', $roles, true)) forbidden(); }
 function require_parent(): void { if (empty($_SESSION['responsavel_id'])) redirect('login.php'); }

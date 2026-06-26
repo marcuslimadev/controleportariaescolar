@@ -23,9 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $q=db()->prepare('SELECT * FROM scp_usuarios WHERE email=? AND ativo=1 LIMIT 1');
         $q->execute([strtolower($login)]);
         $user=$q->fetch();
-        if($user&&password_verify($senha,$user['senha_hash'])){
+        if($user&&password_verify_secure($senha,$user['senha_hash'])){
             session_regenerate_id(true);
             $_SESSION=['user_id'=>(int)$user['id'],'role'=>$user['perfil'],'name'=>$user['nome'],'csrf'=>bin2hex(random_bytes(32))];
+            if(password_needs_rehash_secure($user['senha_hash'])) db()->prepare('UPDATE scp_usuarios SET senha_hash=? WHERE id=?')->execute([password_hash_secure($senha),(int)$user['id']]);
             login_rate_clear($login);
             audit('login_usuario');
             redirect($user['perfil']==='portaria'?'portaria/index.php':'feed.php');
@@ -35,9 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $q=db()->prepare("SELECT * FROM scp_responsaveis WHERE ativo=1 AND (cpf=? OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,' ',''),'-',''),'(',''),')','')=?) LIMIT 1");
             $q->execute([$digits,$digits]);
             $parent=$q->fetch();
-            if($parent&&password_verify($senha,$parent['senha_hash'])){
+            if($parent&&password_verify_secure($senha,$parent['senha_hash'])){
                 session_regenerate_id(true);
                 $_SESSION=['responsavel_id'=>(int)$parent['id'],'name'=>$parent['nome'],'csrf'=>bin2hex(random_bytes(32))];
+                if(password_needs_rehash_secure($parent['senha_hash'])) db()->prepare('UPDATE scp_responsaveis SET senha_hash=? WHERE id=?')->execute([password_hash_secure($senha),(int)$parent['id']]);
                 login_rate_clear($login);
                 audit('login_responsavel');
                 redirect('feed.php');

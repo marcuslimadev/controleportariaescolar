@@ -18,7 +18,7 @@ if(empty($invalid)&&$_SERVER['REQUEST_METHOD']==='POST'&&$invite['status']==='ag
         $responsavelFoto=save_uploaded_image($_FILES['responsavel_foto']??[],'convites');
         $alunoFoto=save_uploaded_image($_FILES['aluno_foto']??[],'convites');
         $q=db()->prepare("UPDATE scp_convites_cadastro SET status='preenchido',responsavel_nome=?,responsavel_cpf=?,responsavel_email=?,responsavel_foto=?,aluno_nome=?,aluno_data_nascimento=?,aluno_foto=?,senha_hash=?,preenchido_em=NOW() WHERE id=? AND status='aguardando'");
-        $q->execute([$responsavelNome,$cpf,$email?:null,$responsavelFoto,$alunoNome,$nascimento?:null,$alunoFoto,password_hash($password,PASSWORD_DEFAULT),$invite['id']]);
+        $q->execute([$responsavelNome,$cpf,$email?:null,$responsavelFoto,$alunoNome,$nascimento?:null,$alunoFoto,password_hash_secure($password),$invite['id']]);
         audit('preencher_convite_cadastro','scp_convites_cadastro',(int)$invite['id']);$invite['status']='preenchido';
     }catch(Throwable $error){$message=$error->getMessage();}
 }

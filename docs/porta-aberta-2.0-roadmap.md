@@ -21,12 +21,16 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Lookup do QR da portaria migrado para service/repository.
 - Permissões granulares iniciadas com mapa central por perfil.
 - Endpoints JSON críticos retornam 403 em JSON quando sem permissão.
+- Serviço central de senha com Argon2id quando disponível.
+- Login faz rehash transparente de senhas antigas.
+- Auditoria passou a registrar user-agent.
+- `composer.json` criado com PSR-4 para `App\\`.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 28%.
-- Restante estimado: 72%.
+- Base aproveitável do 2.0 no MVP atual: 34%.
+- Restante estimado: 66%.
 
 ## Próximas fases
 

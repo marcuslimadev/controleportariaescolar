@@ -10,12 +10,13 @@ $content = "<?php\nreturn " . var_export($config, true) . ";\n";
 file_put_contents(__DIR__ . '/../config/config.php', $content, LOCK_EX);
 chmod(__DIR__ . '/../config/config.php', 0600);
 require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../app/Support/PasswordService.php';
 $sql = file_get_contents(__DIR__ . '/../database/schema.sql');
 foreach (array_filter(array_map('trim', explode(';', $sql))) as $statement) {
     try { db()->exec($statement); } catch (PDOException $e) { if ($e->getCode() !== '42S01') throw $e; }
 }
 $q=db()->prepare("INSERT INTO scp_usuarios(nome,email,senha_hash,perfil) VALUES(?,?,?,'admin') ON DUPLICATE KEY UPDATE nome=VALUES(nome),senha_hash=VALUES(senha_hash),ativo=1");
-$q->execute([$opts['admin-name'] ?? 'Administrador', strtolower($opts['admin-email']), password_hash($opts['admin-password'], PASSWORD_DEFAULT)]);
+$q->execute([$opts['admin-name'] ?? 'Administrador', strtolower($opts['admin-email']), \App\Support\PasswordService::hash($opts['admin-password'])]);
 $pdo = db();
 $pdo->exec('CREATE TABLE IF NOT EXISTS scp_migrations (nome VARCHAR(190) PRIMARY KEY, executada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $files = glob(__DIR__ . '/../database/migrations/*.sql') ?: [];

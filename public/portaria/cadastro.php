@@ -44,7 +44,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $q->execute([$respTelefone,$respFoto,$responsavelId]);
         }else{
             $q=$pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,telefone,foto,senha_hash) VALUES(?,?,?,?,?)');
-            $q->execute([$respNome,$respCpf,$respTelefone,$respFoto,password_hash(bin2hex(random_bytes(8)),PASSWORD_DEFAULT)]);
+            $q->execute([$respNome,$respCpf,$respTelefone,$respFoto,password_hash_secure(bin2hex(random_bytes(8)))]);
             $responsavelId=(int)$pdo->lastInsertId();
         }
         $q=$pdo->prepare('INSERT INTO scp_alunos(nome,cpf,data_nascimento,turma_id,foto,qr_token) VALUES(?,?,?,?,?,?)');
