@@ -15,35 +15,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $login=trim((string)($_POST['login']??''));
     $senha=(string)($_POST['senha']??'');
-    $digits=preg_replace('/\D/','',$login);
     if (login_rate_blocked($login)) {
         $error='Muitas tentativas. Aguarde alguns minutos e tente novamente.';
     } else {
-
-        $q=db()->prepare('SELECT * FROM scp_usuarios WHERE email=? AND ativo=1 LIMIT 1');
-        $q->execute([strtolower($login)]);
-        $user=$q->fetch();
-        if($user&&password_verify_secure($senha,$user['senha_hash'])){
+        $authService = new \App\Services\AuthService(
+            new \App\Infrastructure\Persistence\PdoUserRepository(db()),
+            new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
+        );
+        $actor = $authService->authenticate($login, $senha);
+        if($actor){
             session_regenerate_id(true);
-            $_SESSION=['user_id'=>(int)$user['id'],'role'=>$user['perfil'],'name'=>$user['nome'],'csrf'=>bin2hex(random_bytes(32))];
-            if(password_needs_rehash_secure($user['senha_hash'])) db()->prepare('UPDATE scp_usuarios SET senha_hash=? WHERE id=?')->execute([password_hash_secure($senha),(int)$user['id']]);
+            if($actor['type']==='user') $_SESSION=['user_id'=>$actor['id'],'role'=>$actor['role'],'name'=>$actor['name'],'csrf'=>bin2hex(random_bytes(32))];
+            else $_SESSION=['responsavel_id'=>$actor['id'],'name'=>$actor['name'],'csrf'=>bin2hex(random_bytes(32))];
             login_rate_clear($login);
-            audit('login_usuario');
-            redirect($user['perfil']==='portaria'?'portaria/index.php':'feed.php');
-        }
-
-        if($digits!==''){
-            $q=db()->prepare("SELECT * FROM scp_responsaveis WHERE ativo=1 AND (cpf=? OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,' ',''),'-',''),'(',''),')','')=?) LIMIT 1");
-            $q->execute([$digits,$digits]);
-            $parent=$q->fetch();
-            if($parent&&password_verify_secure($senha,$parent['senha_hash'])){
-                session_regenerate_id(true);
-                $_SESSION=['responsavel_id'=>(int)$parent['id'],'name'=>$parent['nome'],'csrf'=>bin2hex(random_bytes(32))];
-                if(password_needs_rehash_secure($parent['senha_hash'])) db()->prepare('UPDATE scp_responsaveis SET senha_hash=? WHERE id=?')->execute([password_hash_secure($senha),(int)$parent['id']]);
-                login_rate_clear($login);
-                audit('login_responsavel');
-                redirect('feed.php');
-            }
+            audit($actor['audit']);
+            redirect($actor['home']);
         }
         login_rate_hit($login);
         $error='Usuário ou senha inválidos.';

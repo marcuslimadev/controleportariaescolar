@@ -61,6 +61,21 @@ final class PdoGuardianRepository implements GuardianRepository
         return $id > 0 ? $id : null;
     }
 
+    public function findActiveByCpfOrPhone(string $digits): ?array
+    {
+        $query = $this->pdo->prepare("SELECT * FROM scp_responsaveis WHERE ativo=1 AND (cpf=? OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,' ',''),'-',''),'(',''),')','')=?) LIMIT 1");
+        $query->execute([$digits, $digits]);
+        $guardian = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $guardian ?: null;
+    }
+
+    public function updatePasswordHash(int $id, string $hash): void
+    {
+        $query = $this->pdo->prepare('UPDATE scp_responsaveis SET senha_hash=? WHERE id=?');
+        $query->execute([$hash, $id]);
+    }
+
     public function createFromInvite(array $invite): int
     {
         $query = $this->pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,email,telefone,foto,senha_hash) VALUES(?,?,?,?,?,?)');

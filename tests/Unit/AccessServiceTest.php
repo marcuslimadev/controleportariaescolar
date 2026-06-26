@@ -40,6 +40,13 @@ final class InMemoryGuardianRepository implements GuardianRepository
         return $cpf === '11144477735' ? $this->guardianId : null;
     }
 
+    public function findActiveByCpfOrPhone(string $digits): ?array
+    {
+        return $digits === '11144477735' ? ['id' => $this->guardianId, 'nome' => 'Responsável Teste', 'senha_hash' => \App\Support\PasswordService::hash('Senha@12345')] : null;
+    }
+
+    public function updatePasswordHash(int $id, string $hash): void {}
+
     public function createFromInvite(array $invite): int
     {
         return $this->guardianId ?? 7;
