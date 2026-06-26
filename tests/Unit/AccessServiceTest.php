@@ -9,10 +9,25 @@ final class InMemoryGuardianRepository implements GuardianRepository
 {
     public ?int $guardianId = 7;
     public array $authorized = [10 => true, 11 => true];
+    public ?array $guardian = ['id' => 7, 'nome' => 'Responsável Teste', 'foto' => null, 'qr_token' => 'TOKEN_OK'];
+    public array $children = [
+        ['id' => 10, 'nome' => 'Aluno Entrada', 'foto' => null, 'turma' => '1A', 'ultimo' => null],
+        ['id' => 11, 'nome' => 'Aluno Saída', 'foto' => null, 'turma' => '1A', 'ultimo' => 'entrada'],
+    ];
 
     public function findActiveIdByQrToken(string $token): ?int
     {
         return $token === 'TOKEN_OK' ? $this->guardianId : null;
+    }
+
+    public function findActiveByQrToken(string $token): ?array
+    {
+        return $token === 'TOKEN_OK' ? $this->guardian : null;
+    }
+
+    public function authorizedChildrenForWithdrawal(int $guardianId): array
+    {
+        return $guardianId === $this->guardianId ? $this->children : [];
     }
 
     public function canWithdrawStudent(int $guardianId, int $studentId): bool
@@ -49,6 +64,16 @@ final class AccessSpyAuditLogger implements \App\Contracts\Services\AuditLogger
     }
 }
 
+final class InMemoryStudentRepository implements \App\Contracts\Repositories\StudentRepository
+{
+    public bool $securityBadgeExists = false;
+
+    public function activeExistsByQrToken(string $token): bool
+    {
+        return $this->securityBadgeExists && $token === 'STUDENT_TOKEN';
+    }
+}
+
 return static function (): void {
     $guardians = new InMemoryGuardianRepository();
     $logs = new InMemoryAccessLogRepository();
@@ -71,4 +96,16 @@ return static function (): void {
         $blocked = true;
     }
     if (!$blocked) throw new RuntimeException('Token inválido não foi bloqueado.');
+
+    $lookup = new \App\Services\AccessLookupService($guardians, new InMemoryStudentRepository());
+    $found = $lookup->lookupGuardianBadge('TOKEN_OK');
+    if (empty($found['ok']) || count($found['children']) !== 2) throw new RuntimeException('Lookup do responsável falhou.');
+    if (($found['children'][0]['sugerida'] ?? null) !== 'entrada') throw new RuntimeException('Sugestão de entrada incorreta.');
+    if (($found['children'][1]['sugerida'] ?? null) !== 'saida') throw new RuntimeException('Sugestão de saída incorreta.');
+
+    $students = new InMemoryStudentRepository();
+    $students->securityBadgeExists = true;
+    $lookup = new \App\Services\AccessLookupService($guardians, $students);
+    $security = $lookup->lookupGuardianBadge('STUDENT_TOKEN');
+    if (($security['message'] ?? '') === '') throw new RuntimeException('Crachá de segurança não foi identificado.');
 };

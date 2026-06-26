@@ -18,12 +18,13 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Primeiro soft delete em publicações.
 - Primeiro service com contrato/repository para exclusão de posts.
 - Primeiro service com contrato/repository para registro de acesso da portaria.
+- Lookup do QR da portaria migrado para service/repository.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 22%.
-- Restante estimado: 78%.
+- Base aproveitável do 2.0 no MVP atual: 25%.
+- Restante estimado: 75%.
 
 ## Próximas fases
 
