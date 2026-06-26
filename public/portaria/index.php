@@ -10,6 +10,7 @@
   <a id="pending-banner" class="pending-banner <?=$pending?'':'d-none'?>" href="<?=e(url('portaria/convites.php'))?>"><span id="pending-count"><?=$pending?></span><strong id="pending-title"><?=$pending===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'?></strong><small>Toque para revisar</small></a>
 
   <div id="scanner-panel" class="scanner-panel">
+    <div id="scanner-state" class="scanner-state" aria-hidden="true">Pronto</div>
     <div id="reader" class="qr-reader" aria-label="Visualização da câmera"></div>
     <div id="scanner-placeholder" class="scanner-placeholder">
       <div class="scan-symbol" aria-hidden="true"><span></span></div>
@@ -24,7 +25,7 @@
     <span>Escanear crachá</span>
   </button>
   <button id="stop-scan" class="btn btn-outline-secondary w-100 d-none" type="button">Cancelar leitura</button>
-  <div id="status" class="scanner-status" role="status" aria-live="polite"></div>
+  <div id="status" class="scanner-status" role="status" aria-live="polite">Pronto para começar.</div>
   <div id="result" class="result-area" aria-live="polite"></div>
 </section>
 
@@ -35,6 +36,7 @@ const startButton=document.querySelector('#start-scan');
 const stopButton=document.querySelector('#stop-scan');
 const placeholder=document.querySelector('#scanner-placeholder');
 const panel=document.querySelector('#scanner-panel');
+const scannerState=document.querySelector('#scanner-state');
 const statusBox=document.querySelector('#status');
 const resultBox=document.querySelector('#result');
 let locked=false,scanning=false,current=null;
@@ -46,7 +48,7 @@ stopButton.addEventListener('click',()=>stopScanner(true));
 
 async function startScanner(){
   if(scanning)return;
-  setStatus('Abrindo câmera traseira…','busy');
+  setScanState('procurando','Abrindo câmera traseira…');
   startButton.disabled=true;
   resultBox.replaceChildren();
   try{
@@ -63,7 +65,7 @@ async function startScanner(){
   panel.classList.add('is-scanning');
   startButton.classList.add('d-none');
   stopButton.classList.remove('d-none');
-  setStatus('Câmera ativa — aproxime o crachá','active');
+  setScanState('procurando','Procurando QR Code — aproxime o crachá');
 }
 
 async function stopScanner(showStart=false){
@@ -73,14 +75,14 @@ async function stopScanner(showStart=false){
   stopButton.classList.add('d-none');
   startButton.classList.toggle('d-none',!showStart);
   startButton.disabled=false;
-  if(showStart)setStatus('','');
+  if(showStart)setScanState('pronto','Pronto para começar.');
 }
 
 async function scan(token){
   if(locked)return;
   locked=true;
   if(navigator.vibrate)navigator.vibrate(120);
-  setStatus('Crachá encontrado. Consultando…','busy');
+  setScanState('encontrado','Crachá encontrado. Consultando autorização…');
   await stopScanner(false);
   try{
     const response=await fetch('lookup.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token})});
@@ -94,7 +96,8 @@ async function scan(token){
 function show(data){
   if(!data.ok){locked=false;showError(data.message||'Crachá inválido ou aluno inativo.');return}
   current=data;
-  setStatus('','');
+  const hasExit=data.children.some(child=>child.sugerida==='saida');
+  setScanState(hasExit?'saida':'entrada',hasExit?'Responsável encontrado — revise entrada ou saída.':'Responsável encontrado — entrada sugerida.');
   const card=document.createElement('article');card.className='access-card';
   const photo=document.createElement('img');photo.className='student-photo';photo.alt='Foto de '+data.responsavel.nome;photo.src=data.responsavel.foto||'';photo.onerror=()=>photo.remove();
   const tag=document.createElement('span');tag.className='access-state inside';tag.textContent='Responsável autorizado';
@@ -124,23 +127,24 @@ function childRow(child){
 
 async function record(token){
   const rows=[...resultBox.querySelectorAll('.child-row')].filter(row=>row.dataset.selected==='1');
-  if(!rows.length){setStatus('Selecione pelo menos uma criança.','error');return}
+  if(!rows.length){setScanState('erro','Selecione pelo menos uma criança.');return}
   const needsNote=rows.some(row=>row.dataset.tipo!==row.dataset.sugerida);
   let note='';
   if(needsNote){
     note=(prompt('Informe o motivo da correção (mínimo de 5 caracteres):')||'').trim();
-    if(note.length<5){setStatus('Correção precisa de motivo.','error');return}
+    if(note.length<5){setScanState('erro','Correção precisa de motivo.');return}
   }
   const items=rows.map(row=>({aluno_id:row.dataset.id,tipo:row.dataset.tipo,manual:row.dataset.tipo!==row.dataset.sugerida,observacao:row.dataset.tipo!==row.dataset.sugerida?note:''}));
   const button=resultBox.querySelector('.btn-confirm');if(button)button.disabled=true;
-  setStatus('Registrando acesso…','busy');
+  const hasExit=items.some(item=>item.tipo==='saida');
+  setScanState(hasExit?'saida':'entrada',hasExit?'Registrando saída…':'Registrando entrada…');
   try{
     const response=await fetch('registrar.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token,items:JSON.stringify(items)})});
     const data=await response.json();
     if(!response.ok)throw new Error(data.message||'Falha no registro');
     if(navigator.vibrate)navigator.vibrate([100,60,100]);
     showSuccess(data.message);
-  }catch(error){if(button)button.disabled=false;setStatus(error.message||'Não foi possível registrar.','error')}
+  }catch(error){if(button)button.disabled=false;setScanState('erro',error.message||'Não foi possível registrar.')}
 }
 
 function showSuccess(message){
@@ -148,12 +152,19 @@ function showSuccess(message){
   const icon=document.createElement('span');icon.className='success-check';icon.textContent='✓';
   const title=document.createElement('h2');title.textContent=message;
   const next=document.createElement('button');next.className='btn-scan';next.type='button';next.textContent='Escanear próximo crachá';next.addEventListener('click',resetAndScan);
-  box.append(icon,title,next);resultBox.replaceChildren(box);setStatus('','');
+  box.append(icon,title,next);resultBox.replaceChildren(box);setScanState('sucesso','Registro concluído.');
 }
 
 function resetAndScan(){locked=false;current=null;resultBox.replaceChildren();startButton.classList.remove('d-none');startScanner()}
-function showError(message){setStatus(message,'error');startButton.classList.remove('d-none');startButton.disabled=false;startButton.querySelector('span:last-child').textContent='Tentar novamente'}
-function setStatus(message,type){statusBox.textContent=message;statusBox.className='scanner-status '+(type||'')}
+function showError(message){setScanState('erro',message);startButton.classList.remove('d-none');startButton.disabled=false;startButton.querySelector('span:last-child').textContent='Tentar novamente'}
+function setScanState(state,message){
+  panel.dataset.state=state||'pronto';
+  statusBox.textContent=message||'';
+  const typeMap={pronto:'',procurando:'busy',encontrado:'active',entrada:'entry',saida:'exit',erro:'error',sucesso:'success'};
+  const labelMap={pronto:'Pronto',procurando:'Procurando',encontrado:'Encontrado',entrada:'Entrada',saida:'Saída',erro:'Erro',sucesso:'Concluído'};
+  statusBox.className='scanner-status '+(typeMap[state]||'');
+  scannerState.textContent=labelMap[state]||'Pronto';
+}
 function labelType(type){return type==='saida'?'saída':'entrada'}
 function cameraMessage(error){const text=String(error&&error.message||error);return /permission|denied|notallowed/i.test(text)?'Permita o acesso à câmera para escanear o crachá.':'Não foi possível abrir a câmera. Verifique se ela está disponível.'}
 setInterval(async()=>{try{const response=await fetch('pendencias.php');const data=await response.json();if(data.count>pendingCount&&navigator.vibrate)navigator.vibrate([180,80,180]);pendingCount=data.count;const banner=document.querySelector('#pending-banner');banner.classList.toggle('d-none',!data.count);document.querySelector('#pending-count').textContent=data.count;document.querySelector('#pending-title').textContent=data.count===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'}catch(error){}},12000);
