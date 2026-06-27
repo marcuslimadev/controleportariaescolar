@@ -1,6 +1,7 @@
 <?php
 return [
     'app_name' => 'Porta Aberta Escolar',
+    'locale' => 'pt',
     'base_url' => '',
     'db' => ['host' => 'localhost', 'port' => '3306', 'name' => 'porta_aberta', 'user' => 'porta_aberta_user', 'pass' => 'ALTERE_AQUI'],
 ];

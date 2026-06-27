@@ -6,7 +6,116 @@ function app_name(): string {
 }
 
 function app_tagline(): string {
-    return 'O canal oficial entre escola, família e portaria.';
+    return t('app_tagline');
+}
+
+function current_locale(): string {
+    $lang = (string)($_SESSION['lang'] ?? config()['locale'] ?? 'pt');
+    return $lang === 'en' ? 'en' : 'pt';
+}
+
+function t(string $key): string {
+    static $messages = [
+        'pt' => [
+            'app_tagline' => 'O canal oficial entre escola, família e portaria.',
+            'logout' => 'Sair',
+            'language' => 'Idioma',
+            'portuguese' => 'Português',
+            'english' => 'English',
+            'login' => 'Entrar',
+            'events' => 'Eventos',
+            'public_portal' => 'Portal público',
+            'important' => 'Importante',
+            'no_public_posts' => 'Nenhuma publicação pública no momento.',
+            'welcome' => 'BEM-VINDO',
+            'access_account' => 'Acesse sua conta',
+            'login_identifier' => 'Usuário, CPF ou telefone',
+            'login_placeholder' => 'Digite seu acesso',
+            'password' => 'Senha',
+            'password_placeholder' => 'Digite sua senha',
+            'show_password' => 'Mostrar',
+            'hide_password' => 'Ocultar',
+            'invalid_login' => 'Usuário ou senha inválidos.',
+            'too_many_attempts' => 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+            'official_portal' => 'PORTAL OFICIAL',
+            'timeline' => 'Timeline',
+            'new_post' => 'Nova publicação',
+            'manage' => 'Gerenciar',
+            'quick_actions' => 'Ações rápidas',
+            'no_posts' => 'Nenhuma publicação disponível no momento.',
+            'pinned' => 'Fixado',
+            'liked' => 'Curtido',
+            'like' => 'Curtir',
+            'science_confirmed' => 'Ciência confirmada em',
+            'acknowledge' => 'Li e estou ciente',
+            'agenda' => 'AGENDA',
+            'events_program' => 'Eventos e programação',
+            'events_hint' => 'Próximos eventos e programação oficial da escola.',
+            'month' => 'Mês',
+            'class' => 'Turma',
+            'all' => 'Todas',
+            'filter' => 'Filtrar',
+            'upcoming' => 'Próximo',
+            'past' => 'Passado',
+            'no_events' => 'Nenhum evento neste mês.',
+        ],
+        'en' => [
+            'app_tagline' => 'The official channel between school, family, and gatehouse.',
+            'logout' => 'Sign out',
+            'language' => 'Language',
+            'portuguese' => 'Português',
+            'english' => 'English',
+            'login' => 'Sign in',
+            'events' => 'Events',
+            'public_portal' => 'Public portal',
+            'important' => 'Important',
+            'no_public_posts' => 'No public posts right now.',
+            'welcome' => 'WELCOME',
+            'access_account' => 'Access your account',
+            'login_identifier' => 'User, CPF, or phone',
+            'login_placeholder' => 'Enter your access',
+            'password' => 'Password',
+            'password_placeholder' => 'Enter your password',
+            'show_password' => 'Show',
+            'hide_password' => 'Hide',
+            'invalid_login' => 'Invalid user or password.',
+            'too_many_attempts' => 'Too many attempts. Wait a few minutes and try again.',
+            'official_portal' => 'OFFICIAL PORTAL',
+            'timeline' => 'Timeline',
+            'new_post' => 'New post',
+            'manage' => 'Manage',
+            'quick_actions' => 'Quick actions',
+            'no_posts' => 'No posts available right now.',
+            'pinned' => 'Pinned',
+            'liked' => 'Liked',
+            'like' => 'Like',
+            'science_confirmed' => 'Acknowledged on',
+            'acknowledge' => 'I have read and acknowledge',
+            'agenda' => 'AGENDA',
+            'events_program' => 'Events and schedule',
+            'events_hint' => 'Upcoming events and the official school schedule.',
+            'month' => 'Month',
+            'class' => 'Class',
+            'all' => 'All',
+            'filter' => 'Filter',
+            'upcoming' => 'Upcoming',
+            'past' => 'Past',
+            'no_events' => 'No events this month.',
+        ],
+    ];
+    $locale = current_locale();
+    return $messages[$locale][$key] ?? $messages['pt'][$key] ?? $key;
+}
+
+function lang_url(string $lang): string {
+    $query = $_GET;
+    $query['lang'] = $lang === 'en' ? 'en' : 'pt';
+    $path = ltrim((string)($_SERVER['SCRIPT_NAME'] ?? 'login.php'), '/');
+    $prefix = trim(parse_url((string)(config()['base_url'] ?? ''), PHP_URL_PATH) ?: '', '/');
+    if ($prefix !== '' && str_starts_with($path, $prefix . '/')) {
+        $path = substr($path, strlen($prefix) + 1);
+    }
+    return url($path . '?' . http_build_query($query));
 }
 
 function current_role(): string {
@@ -32,42 +141,42 @@ function portal_nav_items(): array {
     $role = current_role();
     if ($role === 'responsavel') {
         return [
-            ['Timeline', 'feed.php'],
-            ['Meus filhos', 'responsavel/index.php'],
-            ['Crachá digital', 'cracha.php'],
-            ['Avisar falta', 'responsavel/avisar-falta.php'],
-            ['Eventos', 'eventos.php'],
-            ['Histórico', 'responsavel/index.php'],
+            [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'My children' : 'Meus filhos', 'responsavel/index.php'],
+            [current_locale()==='en' ? 'Digital badge' : 'Crachá digital', 'cracha.php'],
+            [current_locale()==='en' ? 'Report absence' : 'Avisar falta', 'responsavel/avisar-falta.php'],
+            [t('events'), 'eventos.php'],
+            [current_locale()==='en' ? 'History' : 'Histórico', 'responsavel/index.php'],
         ];
     }
     if ($role === 'professor') {
         return [
-            ['Timeline', 'feed.php'],
-            ['Frequência', 'professor/frequencia.php'],
-            ['Avisos de falta', 'professor/avisos-falta.php'],
-            ['Eventos', 'eventos.php'],
+            [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
+            [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'professor/avisos-falta.php'],
+            [t('events'), 'eventos.php'],
         ];
     }
     if ($role === 'portaria') {
         return [
-            ['Leitor QR Code', 'portaria/index.php'],
-            ['Convites', 'portaria/convites.php'],
-            ['Timeline', 'feed.php'],
+            [current_locale()==='en' ? 'QR Reader' : 'Leitor QR Code', 'portaria/index.php'],
+            [current_locale()==='en' ? 'Invites' : 'Convites', 'portaria/convites.php'],
+            [t('timeline'), 'feed.php'],
         ];
     }
     if (in_array($role, ['admin', 'secretaria'], true)) {
         $items = [
-            ['Timeline', 'feed.php'],
-            ['Nova publicação', 'admin/post-form.php'],
-            ['Eventos', 'eventos.php'],
-            ['Avisos de falta', 'admin/avisos-falta.php'],
-            ['Frequência', 'professor/frequencia.php'],
-            ['Alunos', 'admin/index.php'],
-            ['Responsáveis', 'admin/index.php'],
-            ['Turmas', 'admin/index.php'],
+            [t('timeline'), 'feed.php'],
+            [t('new_post'), 'admin/post-form.php'],
+            [t('events'), 'eventos.php'],
+            [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'admin/avisos-falta.php'],
+            [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
+            [current_locale()==='en' ? 'Students' : 'Alunos', 'admin/index.php'],
+            [current_locale()==='en' ? 'Guardians' : 'Responsáveis', 'admin/index.php'],
+            [current_locale()==='en' ? 'Classes' : 'Turmas', 'admin/index.php'],
         ];
-        if ($role === 'admin') $items[] = ['Professores', 'admin/index.php'];
-        $items[] = ['Portaria', 'portaria/index.php'];
+        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Teachers' : 'Professores', 'admin/index.php'];
+        $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
         return $items;
     }
     return [];

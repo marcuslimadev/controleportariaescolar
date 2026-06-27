@@ -36,11 +36,12 @@ layout_header($id ? 'Editar publicação' : 'Nova publicação');
   <button class="btn-scan mt-4" type="submit">Salvar publicação</button>
 </form>
 <?php if ($id): ?>
-<form method="post" action="<?=e(url('admin/post-delete.php'))?>" class="mt-3" onsubmit="return confirm('Excluir esta publicação? Esta ação não pode ser desfeita.');">
+<form method="post" action="<?=e(url('admin/post-delete.php'))?>" class="mt-3 js-confirm-delete">
   <input type="hidden" name="csrf" value="<?=e(csrf())?>">
   <input type="hidden" name="id" value="<?=(int)$post['id']?>">
   <button class="btn-scan btn-delete-post" type="submit">Excluir publicação</button>
 </form>
 <?php endif; ?>
 </section>
+<script nonce="<?=e(csp_nonce())?>">document.querySelectorAll('.js-confirm-delete').forEach(form=>form.addEventListener('submit',event=>{if(!confirm('Excluir esta publicação? Esta ação não pode ser desfeita.'))event.preventDefault()}));</script>
 <?php layout_footer();
