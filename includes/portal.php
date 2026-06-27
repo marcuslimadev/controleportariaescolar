@@ -208,11 +208,45 @@ function portal_nav_items(): array {
 function portal_nav_html(): string {
     $items = portal_nav_items();
     if (!$items) return '';
-    $html = '<div class="app-nav-scroll"><div class="container"><div class="app-nav">';
-    foreach ($items as [$label, $path]) {
-        $html .= '<a href="' . e(url($path)) . '">' . e($label) . '</a>';
+    $current = trim((string)($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+    $prefix = trim(parse_url((string)(config()['base_url'] ?? ''), PHP_URL_PATH) ?: '', '/');
+    if ($prefix !== '' && str_starts_with($current, $prefix . '/')) {
+        $current = substr($current, strlen($prefix) + 1);
     }
-    return $html . '</div></div></div>';
+    $html = '<div class="app-nav-scroll" aria-label="Menu principal"><div class="container"><nav class="app-nav">';
+    foreach ($items as $index => [$label, $path]) {
+        $path = ltrim($path, '/');
+        $active = $current === $path || ($path === 'admin/index.php' && str_starts_with($current, 'admin/'));
+        $html .= '<a class="' . ($active ? 'is-active' : '') . '" href="' . e(url($path)) . '"><span class="app-nav-icon">' . e(portal_nav_icon($path, $index)) . '</span><span class="app-nav-label">' . e(portal_nav_short_label($label)) . '</span></a>';
+    }
+    return $html . '</nav></div></div>';
+}
+
+function portal_nav_icon(string $path, int $index): string {
+    if (str_contains($path, 'portaria')) return '▣';
+    if (str_contains($path, 'convites')) return '✚';
+    if (str_contains($path, 'cracha')) return '▤';
+    if (str_contains($path, 'avisar-falta') || str_contains($path, 'avisos-falta')) return '!';
+    if (str_contains($path, 'frequencia')) return '✓';
+    if (str_contains($path, 'eventos')) return '◷';
+    if (str_contains($path, 'post-form')) return '+';
+    if (str_contains($path, 'admin/index')) return '☰';
+    if (str_contains($path, 'responsavel/index')) return '👥';
+    if (str_contains($path, 'feed')) return '⌂';
+    return ['⌂','▣','+','✓','☰'][$index % 5];
+}
+
+function portal_nav_short_label(string $label): string {
+    return match ($label) {
+        'Leitor QR Code' => 'QR',
+        'Crachá digital' => 'Crachá',
+        'Avisar falta' => 'Falta',
+        'Avisos de falta' => 'Faltas',
+        'Nova publicação' => 'Novo',
+        'Responsáveis' => 'Resp.',
+        'Meus filhos' => 'Filhos',
+        default => $label,
+    };
 }
 
 function portal_quick_actions(): array {
