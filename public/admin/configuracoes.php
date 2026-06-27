@@ -31,7 +31,7 @@ layout_header('Configurações');
   <form method="post" class="theme-picker-grid">
     <input type="hidden" name="csrf" value="<?=e(csrf())?>">
     <input type="hidden" name="action" value="tema">
-    <?php foreach(['classico'=>'Colorido atual','azul_branco'=>'Azul e branco moderno','preto_branco'=>'Preto e branco moderno'] as $value=>$label): ?>
+    <?php foreach(['classico'=>'Colorido escolar','azul_branco'=>'Azul corporativo','preto_branco'=>'Preto e branco editorial'] as $value=>$label): ?>
       <label class="theme-choice theme-choice-<?=e($value)?> <?=$currentTheme===$value?'selected':''?>">
         <input type="radio" name="tema" value="<?=e($value)?>" <?=$currentTheme===$value?'checked':''?>>
         <span class="theme-swatch"><i></i><i></i><i></i></span>

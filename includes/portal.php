@@ -217,7 +217,7 @@ function portal_nav_html(): string {
     $html = '<div class="app-menu-overlay" aria-hidden="true"></div><div id="app-menu" class="app-nav-scroll" aria-label="Menu principal" aria-hidden="true"><div class="app-menu-head"><div><strong>Menu</strong><span>' . e(app_name()) . '</span></div><button class="app-menu-close" type="button" aria-label="Fechar menu">×</button></div><div class="container"><nav class="app-nav">';
     foreach ($items as $index => [$label, $path]) {
         $path = ltrim($path, '/');
-        $active = $current === $path || ($path === 'admin/index.php' && str_starts_with($current, 'admin/'));
+        $active = $current === $path;
         $html .= '<a class="' . ($active ? 'is-active' : '') . '" href="' . e(url($path)) . '"><span class="app-nav-icon">' . e(portal_nav_icon($path, $index)) . '</span><span class="app-nav-label">' . e(portal_nav_short_label($label)) . '</span></a>';
     }
     return $html . '</nav></div></div>';

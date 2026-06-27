@@ -294,3 +294,132 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .emergency-card form{margin-top:1.5rem}
 .emergency-card .form-label{font-weight:700}
 .emergency-success{margin:0;box-shadow:none;padding:1rem;border:0}
+
+/* Temas completos */
+.theme-blue-white{background:
+  radial-gradient(circle at 10% 0%,#DDEEFF 0 180px,transparent 181px),
+  linear-gradient(180deg,#F7FBFF 0%,#EDF5FF 100%);
+}
+.theme-blue-white .navbar{border-bottom:1px solid #BBD7F5;box-shadow:0 8px 24px #0B63CE18}
+.theme-blue-white .brand-lockup img{border:1px solid #D7E8FA;border-radius:14px;box-shadow:0 6px 18px #0B63CE25}
+.theme-blue-white .section-card,
+.theme-blue-white .data-table-card,
+.theme-blue-white .feed-card,
+.theme-blue-white .quick-action-card,
+.theme-blue-white .access-card,
+.theme-blue-white .success-card,
+.theme-blue-white .quick-register-card,
+.theme-blue-white .invite-create-card,
+.theme-blue-white .invite-qr-card,
+.theme-blue-white .onboarding-form,
+.theme-blue-white .approval-page,
+.theme-blue-white .mobile-credential,
+.theme-blue-white .emergency-card,
+.theme-blue-white .public-portal-card{border:1px solid #CFE2F6;border-radius:22px;box-shadow:0 16px 36px #0B63CE16;background:#FFFFFF}
+.theme-blue-white .page-heading h1,
+.theme-blue-white .feed-card h2,
+.theme-blue-white .access-card h2,
+.theme-blue-white .success-card h2{letter-spacing:-.045em;color:#0A376D}
+.theme-blue-white .gate-eyebrow{color:#0B63CE}
+.theme-blue-white .gate-eyebrow:before{border-bottom-color:#0B63CE}
+.theme-blue-white .btn-scan,
+.theme-blue-white .btn-confirm,
+.theme-blue-white .btn-primary,
+.theme-blue-white .pwa-banner-action{border:0;border-radius:16px;background:linear-gradient(135deg,#0B63CE,#39A0FF);box-shadow:0 12px 24px #0B63CE35}
+.theme-blue-white .btn-outline-primary{border-color:#0B63CE;color:#0B63CE;border-radius:14px}
+.theme-blue-white .app-nav a,
+.theme-blue-white .scp-tabs .nav-link,
+.theme-blue-white .theme-choice,
+.theme-blue-white .child-row,
+.theme-blue-white .invite-item{border:1px solid #CFE2F6;border-radius:18px;box-shadow:0 8px 20px #0B63CE10;background:#fff}
+.theme-blue-white .app-nav a:hover,
+.theme-blue-white .app-nav a.is-active,
+.theme-blue-white .scp-tabs .nav-link.active,
+.theme-blue-white .theme-choice.selected{background:#EAF3FF;color:#084B99;box-shadow:0 10px 24px #0B63CE20;outline:0}
+.theme-blue-white .app-nav-icon{border:0;background:#EAF3FF;color:#0B63CE}
+.theme-blue-white .app-nav a.is-active .app-nav-icon{background:#0B63CE;color:#fff}
+.theme-blue-white .app-menu-head{border-bottom:0;background:linear-gradient(135deg,#0B63CE,#39A0FF)}
+.theme-blue-white .app-nav-scroll{border-left:1px solid #BBD7F5;box-shadow:-24px 0 48px #0B63CE24}
+.theme-blue-white .form-control,
+.theme-blue-white .form-select,
+.theme-blue-white .login-card .form-control{border:1px solid #CFE2F6;border-radius:14px;box-shadow:0 4px 12px #0B63CE0d}
+.theme-blue-white .feed-card.important{border-left:5px solid #0B63CE}
+.theme-blue-white .pin-badge,
+.theme-blue-white .post-type{border:0;background:#EAF3FF;color:#084B99}
+.theme-blue-white .scanner-panel,
+.theme-blue-white .badge-preview-wrap{border:1px solid #BBD7F5;border-radius:22px;box-shadow:0 18px 36px #0B63CE18}
+.theme-blue-white .pending-banner,
+.theme-blue-white .pwa-banner{border:1px solid #BBD7F5;border-radius:20px;box-shadow:0 18px 36px #0B63CE20;background:#fff}
+
+.theme-black-white{background:
+  linear-gradient(90deg,#F8F8F8 21px,transparent 1%) center/22px 22px,
+  linear-gradient(#F8F8F8 21px,transparent 1%) center/22px 22px,
+  #fff;
+}
+.theme-black-white .navbar{border-bottom:4px solid #000;background:#000!important}
+.theme-black-white .brand-lockup img{border:2px solid #000;border-radius:0;filter:grayscale(1)}
+.theme-black-white .section-card,
+.theme-black-white .data-table-card,
+.theme-black-white .feed-card,
+.theme-black-white .quick-action-card,
+.theme-black-white .access-card,
+.theme-black-white .success-card,
+.theme-black-white .quick-register-card,
+.theme-black-white .invite-create-card,
+.theme-black-white .invite-qr-card,
+.theme-black-white .onboarding-form,
+.theme-black-white .approval-page,
+.theme-black-white .mobile-credential,
+.theme-black-white .emergency-card,
+.theme-black-white .public-portal-card{border:2px solid #000;border-radius:0;box-shadow:8px 8px 0 #000;background:#fff;color:#000}
+.theme-black-white .page-heading h1,
+.theme-black-white .feed-card h2,
+.theme-black-white .access-card h2,
+.theme-black-white .success-card h2{text-transform:uppercase;letter-spacing:-.02em;color:#000}
+.theme-black-white .gate-eyebrow{color:#000}
+.theme-black-white .gate-eyebrow:before{border-bottom-color:#000}
+.theme-black-white .text-muted,
+.theme-black-white .page-heading p,
+.theme-black-white .feed-content,
+.theme-black-white .student-class{color:#333!important}
+.theme-black-white .btn-scan,
+.theme-black-white .btn-confirm,
+.theme-black-white .btn-primary,
+.theme-black-white .pwa-banner-action{border:2px solid #000;border-radius:0;background:#000;color:#fff;box-shadow:5px 5px 0 #777}
+.theme-black-white .btn-outline-primary,
+.theme-black-white .btn-outline-secondary,
+.theme-black-white .btn-outline-light{border:2px solid currentColor;border-radius:0;background:#fff;color:#000}
+.theme-black-white .app-nav a,
+.theme-black-white .scp-tabs .nav-link,
+.theme-black-white .theme-choice,
+.theme-black-white .child-row,
+.theme-black-white .invite-item{border:2px solid #000;border-radius:0;box-shadow:5px 5px 0 #000;background:#fff;color:#000}
+.theme-black-white .app-nav a:hover,
+.theme-black-white .app-nav a.is-active,
+.theme-black-white .scp-tabs .nav-link.active,
+.theme-black-white .theme-choice.selected{background:#000;color:#fff;outline:0}
+.theme-black-white .app-nav-icon{border:2px solid #000;background:#fff;color:#000;border-radius:0}
+.theme-black-white .app-nav a.is-active .app-nav-icon{background:#fff;color:#000;border-color:#fff}
+.theme-black-white .app-menu-head{border-bottom:4px solid #000;background:#000}
+.theme-black-white .app-nav-scroll{border-left:4px solid #000;box-shadow:-12px 0 0 #000;background:#fff}
+.theme-black-white .form-control,
+.theme-black-white .form-select,
+.theme-black-white .login-card .form-control{border:2px solid #000;border-radius:0;background:#fff;color:#000;box-shadow:none}
+.theme-black-white .feed-card.important{border-left:14px solid #000}
+.theme-black-white .post-type,
+.theme-black-white .important-badge,
+.theme-black-white .pin-badge,
+.theme-black-white .status-pill,
+.theme-black-white .movement-pill{border:2px solid #000;border-radius:0;background:#fff;color:#000}
+.theme-black-white .scanner-panel,
+.theme-black-white .badge-preview-wrap,
+.theme-black-white .pending-banner,
+.theme-black-white .pwa-banner{border:2px solid #000;border-radius:0;box-shadow:8px 8px 0 #000;background:#fff;color:#000}
+.theme-black-white img:not(.brand-lockup img){filter:grayscale(.9)}
+
+@media(max-width:576px){
+  .theme-blue-white .app-nav a{border:1px solid #CFE2F6;border-radius:18px;box-shadow:0 10px 24px #0B63CE12}
+  .theme-black-white .app-nav a{border:2px solid #000;border-radius:0;box-shadow:4px 4px 0 #000}
+  .theme-blue-white .mobile-menu-button{border:1px solid #D7E8FA;border-radius:14px;background:#ffffff22}
+  .theme-black-white .mobile-menu-button{border:2px solid #fff;border-radius:0}
+}
