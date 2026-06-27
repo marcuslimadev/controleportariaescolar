@@ -43,6 +43,10 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Cadastro rápido da portaria migrado para `QuickRegistrationService`.
 - Conferência de cadastro por convite passou a usar `InviteService`.
 - Páginas públicas, de portaria e administrativas principais ficaram sem SQL direto.
+- Instanciação de services centralizada em `ServiceFactory`.
+- `DatabaseAuditLogger` passou a gravar direto no banco, sem depender da função global `audit()`.
+- `InviteService` passou a exigir `PDO` tipado na transação de aprovação.
+- Exemplos e defaults de deploy foram higienizados para não expor IP, usuário e caminho real de produção.
 - Smoke HTTP não destrutivo criado e acoplado ao deploy.
 - CI bloqueia regressão de SQL direto em `public/`.
 - Deploy roda lint, testes unitários e smoke HTTP.
@@ -50,14 +54,14 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 100%.
-- Restante estimado: 0%.
+- Base aproveitável do 2.0 no MVP atual: 96%.
+- Restante estimado: 4%.
 
 ## Próximas fases
 
 ### Fase 0 — Base técnica
 
-- Concluída para o escopo viável do MVP atual.
+- Restam hardening final de CSP sem `unsafe-inline`, soft delete nas tabelas principais e smoke HTTP pós-deploy.
 
 ### Fase 1 — Portaria 2.0
 

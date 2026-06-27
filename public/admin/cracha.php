@@ -2,10 +2,7 @@
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('badge.issue');
 $responsavelId=(int)($_GET['responsavel_id']??0);
-$badgeService = new \App\Services\BadgeService(
-    new \App\Infrastructure\Persistence\PdoBadgeRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$badgeService = \App\Support\ServiceFactory::badges();
 try {
     $badge = $badgeService->adminGuardianBadge($responsavelId, ($_GET['emit']??'')==='1', (int)$_SESSION['user_id']);
 } catch (Throwable $error) {

@@ -51,12 +51,7 @@ return static function (): void {
         new InMemoryGuardianRepository(),
         new InMemoryStudentRepository(),
         new AccessSpyAuditLogger(),
-        new class {
-            public function beginTransaction(): void {}
-            public function commit(): void {}
-            public function rollBack(): void {}
-            public function inTransaction(): bool { return false; }
-        }
+        new PDO('sqlite::memory:')
     );
 
     $invite = $service->createInvite('(91) 96321-42134', 77);

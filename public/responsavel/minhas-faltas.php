@@ -1,9 +1,7 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_parent();
-$portalService = new \App\Services\GuardianPortalService(
-    new \App\Infrastructure\Persistence\PdoGuardianPortalRepository(db())
-);
+$portalService = \App\Support\ServiceFactory::guardianPortal();
 $rows = $portalService->absences((int)$_SESSION['responsavel_id']);
 layout_header('Minhas faltas');
 ?>

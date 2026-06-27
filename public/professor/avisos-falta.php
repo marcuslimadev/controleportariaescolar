@@ -1,10 +1,7 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('absence.read');
-$absenceService = new \App\Services\AbsenceService(
-    new \App\Infrastructure\Persistence\PdoAbsenceRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger()
-);
+$absenceService = \App\Support\ServiceFactory::absences();
 $rows = (($_SESSION['role'] ?? '') === 'professor')
     ? $absenceService->listForTeacher(get_professor_id_for_user())
     : $absenceService->listForAdmin(null);

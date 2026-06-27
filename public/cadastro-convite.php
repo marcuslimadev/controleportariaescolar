@@ -1,10 +1,7 @@
 <?php
 require __DIR__.'/../includes/bootstrap.php';
 $token=(string)($_GET['token']??$_POST['token']??'');
-$onboardingService = new \App\Services\FamilyOnboardingService(
-    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$onboardingService = \App\Support\ServiceFactory::familyOnboarding();
 $state=$onboardingService->getInvite($token);
 $invite=$state['invite'];
 $invalid=$state['invalid'];

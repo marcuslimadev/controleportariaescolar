@@ -3,10 +3,7 @@ require __DIR__.'/../includes/bootstrap.php';
 $qrToken=(string)($_GET['token']??'');
 $inviteToken=(string)($_GET['convite']??'');
 $responsavelIdParam=(int)($_GET['responsavel']??0);
-$badgeService = new \App\Services\BadgeService(
-    new \App\Infrastructure\Persistence\PdoBadgeRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$badgeService = \App\Support\ServiceFactory::badges();
 $badge = $badgeService->publicGuardianBadge($qrToken ?: null, $inviteToken ?: null, $responsavelIdParam, !empty($_SESSION['responsavel_id']) ? (int)$_SESSION['responsavel_id'] : null);
 if(!$badge){http_response_code(404);layout_header('Crachá não encontrado');echo '<div class="alert alert-warning mx-auto" style="max-width:520px">Crachá inválido ou ainda não aprovado.</div>';layout_footer();exit;}
 $responsavel=$badge['guardian'];

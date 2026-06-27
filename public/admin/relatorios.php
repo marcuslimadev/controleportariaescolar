@@ -1,9 +1,7 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_role(['admin']);
-$reportService = new \App\Services\ReportService(
-    new \App\Infrastructure\Persistence\PdoReportRepository(db())
-);
+$reportService = \App\Support\ServiceFactory::reports();
 $report = $reportService->accessMovements((string)($_GET['de'] ?? date('Y-m-d')), (string)($_GET['ate'] ?? date('Y-m-d')));
 $de = $report['from']; $ate = $report['to']; $rows = $report['rows'];
 layout_header('Relatórios');?>

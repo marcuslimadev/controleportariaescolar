@@ -7,10 +7,7 @@ verify_csrf();
 try {
     $imagemUrl = null;
     if (!empty($_FILES['imagem'])) $imagemUrl = save_portal_upload($_FILES['imagem'], 'posts', 'image');
-    $service = new \App\Services\PostService(
-        new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-        new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    );
+    $service = \App\Support\ServiceFactory::posts();
     $service->savePost($_POST, $imagemUrl, (int)$_SESSION['user_id'], (string)($_SESSION['role'] ?? ''));
     flash('Publicação salva.');
 } catch (Throwable $e) {

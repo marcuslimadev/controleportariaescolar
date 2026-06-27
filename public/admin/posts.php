@@ -1,10 +1,7 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('post.manage');
-$postService = new \App\Services\PostService(
-    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$postService = \App\Support\ServiceFactory::posts();
 $posts = $postService->listAdminPosts();
 layout_header('Publicações');
 ?>

@@ -9,11 +9,7 @@ $items=json_decode((string)($_POST['items']??'[]'),true);
 if(!is_array($items))$items=[];
 
 try {
-    $service = new \App\Services\AccessService(
-        new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
-        new \App\Infrastructure\Persistence\PdoAccessLogRepository(db()),
-        new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    );
+    $service = \App\Support\ServiceFactory::access();
     $result = $service->registerGuardianAccess(
         $token,
         $items,

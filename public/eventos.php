@@ -10,10 +10,7 @@ if ($isPublic) {
 } else {
     [$visibilitySql, $visibilityParams] = post_visible_sql('p');
 }
-$postService = new \App\Services\PostService(
-    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$postService = \App\Support\ServiceFactory::posts();
 $eventData = $postService->eventsForMonth($month, $visibilitySql, $visibilityParams, $turmaId ?: null);
 $month = $eventData['month'];
 $events = $eventData['events'];

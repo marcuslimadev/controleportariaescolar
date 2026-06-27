@@ -4,10 +4,7 @@ require_portal_access();
 
 [$visibilitySql, $visibilityParams] = post_visible_sql('p');
 $actorId = $_SESSION['responsavel_id'] ?? $_SESSION['user_id'];
-$postService = new \App\Services\PostService(
-    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$postService = \App\Support\ServiceFactory::posts();
 $posts = $postService->feedPosts($visibilitySql, $visibilityParams, (int)$actorId, !empty($_SESSION['responsavel_id']));
 
 layout_header('Timeline oficial');

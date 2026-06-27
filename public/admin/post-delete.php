@@ -6,10 +6,7 @@ verify_csrf();
 
 try {
     $id = (int)($_POST['id'] ?? 0);
-    $service = new \App\Services\PostService(
-        new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-        new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    );
+    $service = \App\Support\ServiceFactory::posts();
     $service->deletePost($id, (int)$_SESSION['user_id'], (string)($_SESSION['role'] ?? ''));
     flash('Publicação excluída.');
 } catch (Throwable $e) {

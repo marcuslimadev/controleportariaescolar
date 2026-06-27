@@ -1,9 +1,6 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php'; require_permission('student.manage');
-$schoolService = new \App\Services\SchoolAdminService(
-    new \App\Infrastructure\Persistence\PdoSchoolAdminRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$schoolService = \App\Support\ServiceFactory::schoolAdmin();
 if ($_SERVER['REQUEST_METHOD']==='POST') {
  verify_csrf();
  try {

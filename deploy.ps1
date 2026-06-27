@@ -1,8 +1,8 @@
 param(
-  [string]$HostName = '145.223.105.168',
-  [int]$Port = 65002,
-  [string]$User = 'u815655858',
-  [string]$RemotePath = '/home/u815655858/domains/scp.lojadaesquina.store',
+  [string]$HostName = '',
+  [int]$Port = 22,
+  [string]$User = '',
+  [string]$RemotePath = '',
   [string]$Message = 'deploy: atualizar SCP Escolar',
   [switch]$SkipGit
 )
@@ -22,6 +22,11 @@ if ($env:SCP_SSH_HOST) { $HostName = $env:SCP_SSH_HOST }
 if ($env:SCP_SSH_PORT) { $Port = [int]$env:SCP_SSH_PORT }
 if ($env:SCP_SSH_USER) { $User = $env:SCP_SSH_USER }
 if ($env:SCP_REMOTE_PATH) { $RemotePath = $env:SCP_REMOTE_PATH }
+$BaseUrl = $env:SCP_BASE_URL
+if (-not $HostName) { throw 'Defina SCP_SSH_HOST no arquivo .env local ou passe -HostName.' }
+if (-not $User) { throw 'Defina SCP_SSH_USER no arquivo .env local ou passe -User.' }
+if (-not $RemotePath) { throw 'Defina SCP_REMOTE_PATH no arquivo .env local ou passe -RemotePath.' }
+if (-not $BaseUrl) { throw 'Defina SCP_BASE_URL no arquivo .env local.' }
 if (-not $SkipGit) {
   if (-not (Test-Path .repo)) { git --git-dir=.repo --work-tree=. init }
   git --git-dir=.repo --work-tree=. add -A
@@ -56,8 +61,8 @@ try {
   $cmd = "if [ -f '$RemotePath/config/config.php' ]; then cp '$RemotePath/config/config.php' /tmp/scp-config.php; fi && mkdir -p '$RemotePath/public_html' && find '$RemotePath/public_html' -mindepth 1 -maxdepth 1 -exec rm -rf {} + && rm -rf '$RemotePath/includes' '$RemotePath/database' '$RemotePath/scripts' '$RemotePath/config' && tar -xzf /tmp/scp-deploy.tar.gz -C '$RemotePath' && if [ -f /tmp/scp-config.php ]; then mv /tmp/scp-config.php '$RemotePath/config/config.php'; fi && cd '$RemotePath' && php scripts/migrate.php && cp -a '$RemotePath/public/.' '$RemotePath/public_html/' && rm -rf '$RemotePath/public' /tmp/scp-deploy.tar.gz && chmod -R u=rwX,go=rX '$RemotePath'"
   & plink -batch -P $Port -l $User -pw $password $HostName $cmd
   if ($LASTEXITCODE) { throw 'Falha na publicação remota.' }
-  php scripts/http_smoke.php 'https://scp.lojadaesquina.store'
-  Write-Host 'Deploy concluído: https://scp.lojadaesquina.store'
+  php scripts/http_smoke.php $BaseUrl
+  Write-Host "Deploy concluído: $BaseUrl"
 } finally {
   Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
   Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue

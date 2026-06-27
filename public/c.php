@@ -1,9 +1,6 @@
 <?php
 require __DIR__.'/../includes/bootstrap.php';
-$emergencyService = new \App\Services\EmergencyBadgeService(
-    new \App\Infrastructure\Persistence\PdoEmergencyBadgeRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$emergencyService = \App\Support\ServiceFactory::emergencyBadges();
 $token=extract_qr_token((string)($_GET['token']??''));
 $student=$emergencyService->findPublicBadge($token);
 if(!$student){http_response_code(404);layout_header('Crachá não encontrado');echo '<section class="emergency-page"><div class="emergency-card"><span class="emergency-icon">!</span><h1>Crachá inválido</h1><p>Este crachá não foi encontrado ou não está mais ativo.</p></div></section>';layout_footer();exit;}

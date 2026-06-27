@@ -1,10 +1,7 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('student.quick_create');
-$quickRegistrationService = new \App\Services\QuickRegistrationService(
-    new \App\Infrastructure\Persistence\PdoQuickRegistrationRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$quickRegistrationService = \App\Support\ServiceFactory::quickRegistrations();
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();

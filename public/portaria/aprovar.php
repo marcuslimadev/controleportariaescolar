@@ -1,12 +1,6 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';require_permission('invite.manage');$id=(int)($_GET['id']??0);
-$inviteService = new \App\Services\InviteService(
-    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
-    new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
-    new \App\Infrastructure\Persistence\PdoStudentRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    db(),
-);
+$inviteService = \App\Support\ServiceFactory::invites();
 try { $invite=$inviteService->approvalPreview($id); } catch(Throwable $error) { http_response_code(404); exit($error->getMessage()); }
 layout_header('Aprovar cadastro');
 ?>

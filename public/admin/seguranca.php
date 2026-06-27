@@ -2,10 +2,7 @@
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('badge.issue');
 $id=(int)($_GET['id']??0);
-$badgeService = new \App\Services\BadgeService(
-    new \App\Infrastructure\Persistence\PdoBadgeRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$badgeService = \App\Support\ServiceFactory::badges();
 try {
     $a=$badgeService->securityBadge($id);
 } catch (Throwable $error) {

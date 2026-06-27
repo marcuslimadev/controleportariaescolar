@@ -1,9 +1,7 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_parent();
-$portalService = new \App\Services\GuardianPortalService(
-    new \App\Infrastructure\Persistence\PdoGuardianPortalRepository(db())
-);
+$portalService = \App\Support\ServiceFactory::guardianPortal();
 $dashboard = $portalService->dashboard((int)$_SESSION['responsavel_id'], (string)($_GET['de'] ?? date('Y-m-01')), (string)($_GET['ate'] ?? date('Y-m-d')));
 $from = $dashboard['from']; $to = $dashboard['to']; $rows = $dashboard['movements']; $children = $dashboard['children'];
 layout_header('Portal do responsável');?>

@@ -6,8 +6,5 @@ if($_SERVER['REQUEST_METHOD']!=='POST')exit('{}');
 verify_csrf();
 $token=extract_qr_token((string)($_POST['token']??''));
 
-$service = new \App\Services\AccessLookupService(
-    new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
-    new \App\Infrastructure\Persistence\PdoStudentRepository(db()),
-);
+$service = \App\Support\ServiceFactory::accessLookup();
 echo json_encode($service->lookupGuardianBadge($token));

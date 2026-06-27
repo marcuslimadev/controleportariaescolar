@@ -2,10 +2,7 @@
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('post.manage');
 $id = (int)($_GET['id'] ?? 0);
-$postService = new \App\Services\PostService(
-    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$postService = \App\Support\ServiceFactory::posts();
 try {
     $formData = $postService->formData($id, (int)$_SESSION['user_id'], (string)($_SESSION['role'] ?? ''));
 } catch (Throwable $error) {

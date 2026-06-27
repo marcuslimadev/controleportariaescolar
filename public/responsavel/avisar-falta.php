@@ -1,10 +1,7 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_parent();
-$absenceService = new \App\Services\AbsenceService(
-    new \App\Infrastructure\Persistence\PdoAbsenceRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-);
+$absenceService = \App\Support\ServiceFactory::absences();
 $children = $absenceService->childrenForGuardian((int)$_SESSION['responsavel_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

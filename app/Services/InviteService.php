@@ -7,6 +7,7 @@ use App\Contracts\Repositories\GuardianRepository;
 use App\Contracts\Repositories\InviteRepository;
 use App\Contracts\Repositories\StudentRepository;
 use App\Contracts\Services\AuditLogger;
+use PDO;
 use RuntimeException;
 
 final class InviteService
@@ -16,7 +17,7 @@ final class InviteService
         private GuardianRepository $guardians,
         private StudentRepository $students,
         private AuditLogger $audit,
-        private object $pdo,
+        private PDO $pdo,
     ) {}
 
     public function createInvite(string $phone, int $createdBy): array

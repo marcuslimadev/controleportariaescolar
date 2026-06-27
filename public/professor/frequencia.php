@@ -1,9 +1,7 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('frequency.manage');
-$frequencyService = new \App\Services\FrequencyService(
-    new \App\Infrastructure\Persistence\PdoFrequencyRepository(db())
-);
+$frequencyService = \App\Support\ServiceFactory::frequency();
 $role = (string)($_SESSION['role'] ?? '');
 $professorId = $role === 'professor' ? get_professor_id_for_user() : 0;
 $date = (string)($_GET['data'] ?? date('Y-m-d'));

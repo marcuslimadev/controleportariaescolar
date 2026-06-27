@@ -1,13 +1,7 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('invite.manage');
-$inviteService = new \App\Services\InviteService(
-    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
-    new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
-    new \App\Infrastructure\Persistence\PdoStudentRepository(db()),
-    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    db(),
-);
+$inviteService = \App\Support\ServiceFactory::invites();
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();

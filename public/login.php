@@ -2,10 +2,7 @@
 require __DIR__ . '/../includes/bootstrap.php';
 $publicPosts = [];
 try {
-    $postService = new \App\Services\PostService(
-        new \App\Infrastructure\Persistence\PdoPostRepository(db()),
-        new \App\Infrastructure\Logging\DatabaseAuditLogger(),
-    );
+    $postService = \App\Support\ServiceFactory::posts();
     $publicPosts = $postService->publicPosts(6);
 } catch (Throwable $ignored) {}
 
@@ -16,10 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (login_rate_blocked($login)) {
         $error='Muitas tentativas. Aguarde alguns minutos e tente novamente.';
     } else {
-        $authService = new \App\Services\AuthService(
-            new \App\Infrastructure\Persistence\PdoUserRepository(db()),
-            new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
-        );
+        $authService = \App\Support\ServiceFactory::auth();
         $actor = $authService->authenticate($login, $senha);
         if($actor){
             session_regenerate_id(true);
