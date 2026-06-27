@@ -12,4 +12,6 @@ interface AbsenceRepository
     public function updateStatus(int $id, string $status, int $reviewedBy): void;
 
     public function listForAdmin(?string $status = null): array;
+
+    public function listForTeacher(int $professorId): array;
 }

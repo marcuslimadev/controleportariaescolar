@@ -69,4 +69,9 @@ final class AbsenceService
 
         return $this->absences->listForAdmin($status);
     }
+
+    public function listForTeacher(int $professorId): array
+    {
+        return $this->absences->listForTeacher($professorId);
+    }
 }

@@ -72,4 +72,20 @@ final class PdoAbsenceRepository implements AbsenceRepository
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function listForTeacher(int $professorId): array
+    {
+        $query = $this->pdo->prepare(
+            "SELECT af.*, a.nome aluno, t.nome turma, r.nome responsavel
+             FROM scp_avisos_falta af
+             JOIN scp_alunos a ON a.id=af.aluno_id
+             LEFT JOIN scp_turmas t ON t.id=af.turma_id
+             JOIN scp_responsaveis r ON r.id=af.responsavel_id
+             WHERE af.turma_id IN (SELECT turma_id FROM scp_professor_turma WHERE professor_id=?)
+             ORDER BY af.data_falta DESC, af.id DESC"
+        );
+        $query->execute([$professorId]);
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

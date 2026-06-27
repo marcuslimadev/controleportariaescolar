@@ -1,16 +1,13 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('absence.read');
-$params = [];
-$where = '1=1';
-if (($_SESSION['role'] ?? '') === 'professor') {
-    $professorId = get_professor_id_for_user();
-    $where = 'af.turma_id IN (SELECT turma_id FROM scp_professor_turma WHERE professor_id=?)';
-    $params[] = $professorId;
-}
-$q = db()->prepare("SELECT af.*, a.nome aluno, t.nome turma, r.nome responsavel FROM scp_avisos_falta af JOIN scp_alunos a ON a.id=af.aluno_id LEFT JOIN scp_turmas t ON t.id=af.turma_id JOIN scp_responsaveis r ON r.id=af.responsavel_id WHERE $where ORDER BY af.data_falta DESC, af.id DESC");
-$q->execute($params);
-$rows = $q->fetchAll();
+$absenceService = new \App\Services\AbsenceService(
+    new \App\Infrastructure\Persistence\PdoAbsenceRepository(db()),
+    new \App\Infrastructure\Services\AuditLoggerAdapter()
+);
+$rows = (($_SESSION['role'] ?? '') === 'professor')
+    ? $absenceService->listForTeacher(get_professor_id_for_user())
+    : $absenceService->listForAdmin(null);
 layout_header('Avisos da turma');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">PROFESSOR</span><h1>Avisos de falta</h1><p>Avisos enviados para alunos das suas turmas.</p></div></div>
