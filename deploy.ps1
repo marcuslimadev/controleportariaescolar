@@ -28,6 +28,10 @@ if (-not $SkipGit) {
   if (git --git-dir=.repo --work-tree=. diff --cached --quiet) { Write-Host 'Sem alterações para commit.' } else { git --git-dir=.repo --work-tree=. commit -m $Message }
   if (git --git-dir=.repo --work-tree=. remote get-url origin 2>$null) { git --git-dir=.repo --work-tree=. push origin HEAD }
 }
+php scripts/ci_check.php
+if ($LASTEXITCODE) { throw 'Falha no CI local.' }
+php scripts/unit_check.php
+if ($LASTEXITCODE) { throw 'Falha nos testes unitários locais.' }
 $password = $env:SCP_SSH_PASSWORD
 if (-not $password) { throw 'Defina SCP_SSH_PASSWORD no arquivo .env local.' }
 $stage = Join-Path $PSScriptRoot ('deploy-stage-' + [guid]::NewGuid())

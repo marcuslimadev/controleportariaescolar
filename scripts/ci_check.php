@@ -7,6 +7,7 @@ if (PHP_SAPI !== 'cli') {
 
 $root = dirname(__DIR__);
 $errors = 0;
+$forbiddenPublicDb = '/\bdb\s*\(\s*\)\s*->|\$pdo\s*->/';
 
 $iterator = new RecursiveIteratorIterator(
     new RecursiveCallbackFilterIterator(
@@ -26,6 +27,10 @@ foreach ($iterator as $file) {
             $errors++;
             echo "PHP inválido: {$relative}\n";
             echo implode("\n", $output) . "\n";
+        }
+        if (str_starts_with(str_replace('\\', '/', $relative), 'public/') && preg_match($forbiddenPublicDb, (string)file_get_contents($path))) {
+            $errors++;
+            echo "SQL direto não permitido em public/: {$relative}\n";
         }
     }
     if ($file->getExtension() === 'json' || $file->getFilename() === 'manifest.webmanifest') {

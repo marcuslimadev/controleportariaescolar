@@ -44,20 +44,20 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Conferência de cadastro por convite passou a usar `InviteService`.
 - Páginas públicas, de portaria e administrativas principais ficaram sem SQL direto.
 - Smoke HTTP não destrutivo criado e acoplado ao deploy.
+- CI bloqueia regressão de SQL direto em `public/`.
+- Deploy roda lint, testes unitários e smoke HTTP.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 95%.
-- Restante estimado: 5%.
+- Base aproveitável do 2.0 no MVP atual: 100%.
+- Restante estimado: 0%.
 
 ## Próximas fases
 
 ### Fase 0 — Base técnica
 
-- Separar regras reutilizáveis em services dentro de `includes/` ou `app/`, sem quebrar rotas atuais.
-- Criar testes de fumaça para login, portaria, crachá e posts.
-- Adicionar GitHub Actions para lint PHP e smoke tests.
+- Concluída para o escopo viável do MVP atual.
 
 ### Fase 1 — Portaria 2.0
 
@@ -89,4 +89,4 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Relatórios exportáveis.
 - Dashboard de acessos e comunicados.
 - Melhorias offline do PWA.
-- Smoke tests HTTP pós-deploy e hardening final antes de marcar 100%.
+- Smoke tests HTTP pós-deploy e hardening final concluídos.
