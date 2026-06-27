@@ -45,6 +45,7 @@ $coverUrl = app_cover_url();
     <nav class="public-top-actions" aria-label="Ações iniciais">
       <a href="<?=e(url('login.php?login=1#login-card'))?>" class="btn btn-primary"><?=e(t('login'))?></a>
       <a href="<?=e(url('eventos.php'))?>" class="btn btn-outline-primary"><?=e(t('events'))?></a>
+      <a href="<?=e(url('galeria.php'))?>" class="btn btn-outline-primary public-gallery-link"><?=e(current_locale()==='en' ? 'Gallery' : 'Galeria')?></a>
       <a href="<?=e(lang_url($nextLang))?>" class="btn btn-outline-secondary lang-button login-lang-button" aria-label="<?=e($nextLang === 'pt' ? 'Trocar idioma para Português' : 'Change language to English')?>">
         <span class="lang-flag" aria-hidden="true"><?=$nextLang === 'pt' ? '🇧🇷' : '🇺🇸'?></span>
         <span class="lang-code"><?=e(strtoupper($nextLang))?></span>

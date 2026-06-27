@@ -15,6 +15,8 @@ interface PostRepository
 
     public function publicFeed(int $limit = 6): array;
 
+    public function publicGallery(int $limit = 60): array;
+
     public function events(string $start, string $end, string $visibilitySql, array $visibilityParams, ?int $classId): array;
 
     public function activeClasses(): array;

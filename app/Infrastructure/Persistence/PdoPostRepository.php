@@ -93,6 +93,21 @@ final class PdoPostRepository implements PostRepository
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function publicGallery(int $limit = 60): array
+    {
+        $limit = max(1, min(100, $limit));
+        $query = $this->pdo->query(
+            "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.publicado_em,u.nome autor
+             FROM scp_posts p
+             JOIN scp_usuarios u ON u.id=p.autor_id
+             WHERE p.status='publicado' AND p.publico='publico' AND p.imagem_url IS NOT NULL AND p.imagem_url<>'' AND p.deleted_at IS NULL
+             ORDER BY p.publicado_em DESC, p.id DESC
+             LIMIT {$limit}"
+        );
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function events(string $start, string $end, string $visibilitySql, array $visibilityParams, ?int $classId): array
     {
         $params = array_merge([$start, $end], $visibilityParams);

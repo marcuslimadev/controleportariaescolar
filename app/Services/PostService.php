@@ -47,6 +47,11 @@ final class PostService
         return $this->posts->publicFeed($limit);
     }
 
+    public function publicGallery(int $limit = 60): array
+    {
+        return $this->posts->publicGallery($limit);
+    }
+
     public function feedPosts(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian): array
     {
         return $this->posts->feed($visibilitySql, $visibilityParams, $actorId, $isGuardian, 80);

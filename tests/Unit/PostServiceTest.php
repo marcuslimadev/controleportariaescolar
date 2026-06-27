@@ -51,6 +51,8 @@ final class InMemoryPostRepository implements PostRepository
 
     public function publicFeed(int $limit = 6): array { return $this->publicList; }
 
+    public function publicGallery(int $limit = 60): array { return $this->publicList; }
+
     public function events(string $start, string $end, string $visibilitySql, array $visibilityParams, ?int $classId): array
     {
         return $this->eventList ?: [['start' => $start, 'end' => $end, 'class_id' => $classId]];
