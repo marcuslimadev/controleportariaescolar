@@ -14,6 +14,23 @@
   document.addEventListener('keydown', event => { if (event.key === 'Escape') setMenu(false); });
   document.querySelectorAll('#app-menu a').forEach(link => link.addEventListener('click', () => setMenu(false)));
 
+  const themeChoices = [...document.querySelectorAll('.theme-choice')];
+  if (themeChoices.length) {
+    const syncThemeChoice = input => {
+      themeChoices.forEach(choice => choice.classList.toggle('selected', choice.contains(input)));
+    };
+    themeChoices.forEach(choice => {
+      const input = choice.querySelector('input[type="radio"]');
+      if (!input) return;
+      choice.addEventListener('click', () => {
+        input.checked = true;
+        syncThemeChoice(input);
+      });
+      input.addEventListener('change', () => syncThemeChoice(input));
+      if (input.checked) syncThemeChoice(input);
+    });
+  }
+
   const banner = document.querySelector('.pwa-banner');
   const title = document.querySelector('.pwa-banner-title');
   const text = document.querySelector('.pwa-banner-text');

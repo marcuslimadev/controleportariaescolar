@@ -175,6 +175,8 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .theme-choice-azul_branco .theme-swatch i:nth-child(1){background:#0B63CE}.theme-choice-azul_branco .theme-swatch i:nth-child(2){background:#fff}.theme-choice-azul_branco .theme-swatch i:nth-child(3){background:#EAF3FF}
 .theme-choice-preto_branco .theme-swatch i:nth-child(1){background:#050505}.theme-choice-preto_branco .theme-swatch i:nth-child(2){background:#fff}.theme-choice-preto_branco .theme-swatch i:nth-child(3){background:#F4F4F4}
 .theme-choice strong{font-size:.95rem;line-height:1.15}
+.theme-selected-label{display:none;color:var(--gate);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.theme-choice.selected .theme-selected-label{display:block}
 .data-table-card{background:#fff;border:3px solid var(--bh-black);border-radius:10px;overflow:hidden;margin-bottom:1.25rem}
 .data-table-card table{margin:0}
 .data-table-card thead th{background:var(--bh-black);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:.85rem 1rem;white-space:nowrap}

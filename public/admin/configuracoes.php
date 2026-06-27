@@ -36,6 +36,7 @@ layout_header('Configurações');
         <input type="radio" name="tema" value="<?=e($value)?>" <?=$currentTheme===$value?'checked':''?>>
         <span class="theme-swatch"><i></i><i></i><i></i></span>
         <strong><?=e($label)?></strong>
+        <small class="theme-selected-label">Selecionado</small>
       </label>
     <?php endforeach ?>
     <button class="btn btn-primary btn-lg" type="submit">Salvar tema</button>
