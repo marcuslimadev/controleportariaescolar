@@ -32,12 +32,17 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Avisos de falta migrados para `AbsenceService` com repository.
 - Frequência do professor migrada para `FrequencyService` com repository.
 - Listagem de avisos do professor passou a reutilizar `AbsenceService`.
+- Painel de cadastros da escola migrado para `SchoolAdminService`.
+- Portal do responsável e histórico de movimentações migrados para `GuardianPortalService`.
+- Relatório administrativo de acessos migrado para `ReportService`.
+- Pendências da portaria passaram a usar `InviteService`.
+- Portal público de emergência do QR migrado para `EmergencyBadgeService`.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 58%.
-- Restante estimado: 42%.
+- Base aproveitável do 2.0 no MVP atual: 76%.
+- Restante estimado: 24%.
 
 ## Próximas fases
 

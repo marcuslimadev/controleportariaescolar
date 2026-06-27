@@ -11,6 +11,8 @@ interface InviteRepository
 
     public function pendingList(int $limit = 30): array;
 
+    public function pendingSummary(): array;
+
     public function findByPublicToken(string $token): ?array;
 
     public function expire(int $id): void;

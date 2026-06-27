@@ -1,9 +1,10 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_parent();
-$q = db()->prepare('SELECT af.*, a.nome aluno, t.nome turma FROM scp_avisos_falta af JOIN scp_alunos a ON a.id=af.aluno_id LEFT JOIN scp_turmas t ON t.id=af.turma_id WHERE af.responsavel_id=? ORDER BY af.data_falta DESC, af.id DESC');
-$q->execute([$_SESSION['responsavel_id']]);
-$rows = $q->fetchAll();
+$portalService = new \App\Services\GuardianPortalService(
+    new \App\Infrastructure\Persistence\PdoGuardianPortalRepository(db())
+);
+$rows = $portalService->absences((int)$_SESSION['responsavel_id']);
 layout_header('Minhas faltas');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">FREQUÊNCIA</span><h1>Meus avisos de falta</h1><p>Acompanhe o status dos avisos enviados.</p></div><div class="page-actions"><a class="btn btn-primary" href="<?=e(url('responsavel/avisar-falta.php'))?>">Novo aviso</a></div></div>

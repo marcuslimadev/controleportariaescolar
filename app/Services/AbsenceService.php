@@ -74,4 +74,9 @@ final class AbsenceService
     {
         return $this->absences->listForTeacher($professorId);
     }
+
+    public function listForGuardian(int $guardianId): array
+    {
+        return $this->absences->listForGuardian($guardianId);
+    }
 }

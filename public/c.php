@@ -1,22 +1,19 @@
 <?php
 require __DIR__.'/../includes/bootstrap.php';
+$emergencyService = new \App\Services\EmergencyBadgeService(
+    new \App\Infrastructure\Persistence\PdoEmergencyBadgeRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
 $token=extract_qr_token((string)($_GET['token']??''));
-$q=db()->prepare('SELECT id,qr_token FROM scp_alunos WHERE qr_token=? AND ativo=1 LIMIT 1');$q->execute([$token]);$student=$q->fetch();
+$student=$emergencyService->findPublicBadge($token);
 if(!$student){http_response_code(404);layout_header('Crachá não encontrado');echo '<section class="emergency-page"><div class="emergency-card"><span class="emergency-icon">!</span><h1>Crachá inválido</h1><p>Este crachá não foi encontrado ou não está mais ativo.</p></div></section>';layout_footer();exit;}
 
-if(!empty($_SESSION['user_id'])&&in_array($_SESSION['role']??'', ['admin','secretaria','portaria'],true))redirect('portaria/index.php?token='.rawurlencode($token));
-if(!empty($_SESSION['responsavel_id'])){
-    $q=db()->prepare('SELECT COUNT(*) FROM scp_aluno_responsavel WHERE aluno_id=? AND responsavel_id=? AND autoriza_consulta=1');$q->execute([$student['id'],$_SESSION['responsavel_id']]);
-    if($q->fetchColumn())redirect('cracha.php?token='.rawurlencode($token));
-}
+$redirectTo = $emergencyService->redirectForLoggedActor($student, $_SESSION, $token);
+if ($redirectTo) redirect($redirectTo);
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();
-    $nome=trim((string)($_POST['nome']??''));$telefone=trim((string)($_POST['telefone']??''));$mensagem=trim((string)($_POST['mensagem']??''));
-    $latitude=trim((string)($_POST['latitude']??''));$longitude=trim((string)($_POST['longitude']??''));
-    $q=db()->prepare('INSERT INTO scp_alertas_cracha(aluno_id,qr_token,nome_informante,telefone_informante,mensagem,latitude,longitude,ip,user_agent) VALUES(?,?,?,?,?,?,?,?,?)');
-    $q->execute([$student['id'],$token,$nome?:null,$telefone?:null,$mensagem?:null,$latitude?:null,$longitude?:null,$_SERVER['REMOTE_ADDR']??null,substr($_SERVER['HTTP_USER_AGENT']??'',0,500)]);
-    audit('alerta_cracha_publico','scp_alertas_cracha',(int)db()->lastInsertId(),['aluno_id'=>(int)$student['id']]);
+    $emergencyService->createPublicAlert($student, $token, $_POST, (string)($_SERVER['REMOTE_ADDR'] ?? ''), (string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
     $sent=true;
 }
 layout_header('Emergência');

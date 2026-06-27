@@ -1,20 +1,17 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php'; require_permission('student.manage');
+$schoolService = new \App\Services\SchoolAdminService(
+    new \App\Infrastructure\Persistence\PdoSchoolAdminRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
 if ($_SERVER['REQUEST_METHOD']==='POST') {
- verify_csrf(); $a=$_POST['action']??'';
+ verify_csrf();
  try {
-  if($a==='turma'){ $q=db()->prepare('INSERT INTO scp_turmas(nome,turno) VALUES(?,?)');$q->execute([trim($_POST['nome']),$_POST['turno']]);audit('criar_turma','scp_turmas',(int)db()->lastInsertId()); }
-  elseif($a==='aluno'){ $cpf=preg_replace('/\D/','',$_POST['cpf']);$q=db()->prepare('INSERT INTO scp_alunos(nome,cpf,data_nascimento,turma_id,foto,qr_token) VALUES(?,?,?,?,?,?)');$q->execute([trim($_POST['nome']),$cpf?:null,$_POST['data_nascimento']?:null,$_POST['turma_id']?:null,filter_var($_POST['foto'],FILTER_VALIDATE_URL)?$_POST['foto']:null,bin2hex(random_bytes(32))]);$novoId=(int)db()->lastInsertId();audit('criar_aluno','scp_alunos',$novoId); }
-  elseif($a==='responsavel'){ $q=db()->prepare('INSERT INTO scp_responsaveis(nome,cpf,email,telefone,senha_hash) VALUES(?,?,?,?,?)');$q->execute([trim($_POST['nome']),preg_replace('/\D/','',$_POST['cpf']),strtolower(trim($_POST['email'])),trim($_POST['telefone']),password_hash_secure($_POST['senha'])]);audit('criar_responsavel','scp_responsaveis',(int)db()->lastInsertId()); }
-  elseif($a==='vinculo'){ $q=db()->prepare('INSERT INTO scp_aluno_responsavel(aluno_id,responsavel_id,parentesco,autoriza_consulta,autoriza_retirada) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE parentesco=VALUES(parentesco),autoriza_consulta=VALUES(autoriza_consulta),autoriza_retirada=VALUES(autoriza_retirada)');$q->execute([(int)$_POST['aluno_id'],(int)$_POST['responsavel_id'],trim($_POST['parentesco']),isset($_POST['consulta']),isset($_POST['retirada'])]);audit('vincular_responsavel','scp_alunos',(int)$_POST['aluno_id']); }
-  elseif($a==='usuario' && ($_SESSION['role']??'')==='admin'){ $perfil=in_array($_POST['perfil']??'', ['admin','secretaria','portaria','professor'], true)?$_POST['perfil']:'portaria';$q=db()->prepare('INSERT INTO scp_usuarios(nome,email,senha_hash,perfil) VALUES(?,?,?,?)');$q->execute([trim($_POST['nome']),strtolower(trim($_POST['email'])),password_hash_secure($_POST['senha']),$perfil]);audit('criar_usuario','scp_usuarios',(int)db()->lastInsertId()); }
-  elseif($a==='professor' && ($_SESSION['role']??'')==='admin'){ $q=db()->prepare('INSERT INTO scp_professores(usuario_id,nome,email,telefone,ativo) VALUES(?,?,?,?,1)');$q->execute([$_POST['usuario_id']?:null,trim($_POST['nome']),strtolower(trim($_POST['email'])),trim($_POST['telefone'])]);audit('criar_professor','scp_professores',(int)db()->lastInsertId()); }
-  elseif($a==='professor_turma' && ($_SESSION['role']??'')==='admin'){ $q=db()->prepare('INSERT IGNORE INTO scp_professor_turma(professor_id,turma_id) VALUES(?,?)');$q->execute([(int)$_POST['professor_id'],(int)$_POST['turma_id']]);audit('vincular_professor_turma','scp_professores',(int)$_POST['professor_id']); }
-  elseif($a==='toggle'){ $allowed=($_SESSION['role']??'')==='admin'?['scp_alunos','scp_responsaveis','scp_turmas','scp_usuarios','scp_professores']:['scp_alunos','scp_responsaveis','scp_turmas'];$table=in_array($_POST['table'],$allowed,true)?$_POST['table']:'';if(!$table)throw new Exception('Inválido');$q=db()->prepare("UPDATE $table SET ativo=1-ativo WHERE id=?");$q->execute([(int)$_POST['id']]);audit('alterar_status',$table,(int)$_POST['id']); }
+  $schoolService->handleAction($_POST, (string)($_SESSION['role'] ?? ''));
   flash('Operação realizada.');
  } catch(Throwable $e){ flash('Não foi possível salvar: '.$e->getMessage(),'danger'); } redirect('admin/index.php');
 }
-$scp_turmas=db()->query('SELECT * FROM scp_turmas ORDER BY nome')->fetchAll();$scp_alunos=db()->query('SELECT a.*,t.nome turma FROM scp_alunos a LEFT JOIN scp_turmas t ON t.id=a.turma_id ORDER BY a.nome')->fetchAll();$resp=db()->query('SELECT * FROM scp_responsaveis ORDER BY nome')->fetchAll();$users=db()->query('SELECT * FROM scp_usuarios ORDER BY nome')->fetchAll();$professores=db()->query('SELECT p.*,u.email usuario_email FROM scp_professores p LEFT JOIN scp_usuarios u ON u.id=p.usuario_id ORDER BY p.nome')->fetchAll();$profTurmas=db()->query('SELECT pt.professor_id,GROUP_CONCAT(t.nome ORDER BY t.nome SEPARATOR ", ") turmas FROM scp_professor_turma pt JOIN scp_turmas t ON t.id=pt.turma_id GROUP BY pt.professor_id')->fetchAll(PDO::FETCH_KEY_PAIR);
+extract($schoolService->dashboardData(), EXTR_SKIP);
 layout_header('Painel da escola');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">PAINEL</span><h1>Painel da escola</h1><p>Cadastros e controle escolar</p></div><div class="page-actions"><a class="btn btn-success" href="<?=url('portaria/convites.php')?>">Convidar responsável</a><a class="btn btn-outline-primary" href="relatorios.php">Relatórios</a><a class="btn btn-primary" href="<?=url('portaria/index.php')?>">Abrir portaria</a></div></div>

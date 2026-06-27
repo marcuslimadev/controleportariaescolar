@@ -2,6 +2,11 @@
 require __DIR__.'/../../includes/bootstrap.php';
 header('Content-Type: application/json');
 require_permission('invite.manage');
-$count=(int)db()->query("SELECT COUNT(*) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();
-$latest=db()->query("SELECT MAX(preenchido_em) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();
-echo json_encode(['count'=>$count,'latest'=>$latest]);
+$inviteService = new \App\Services\InviteService(
+    new \App\Infrastructure\Persistence\PdoInviteRepository(db()),
+    new \App\Infrastructure\Persistence\PdoGuardianRepository(db()),
+    new \App\Infrastructure\Persistence\PdoStudentRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+    db(),
+);
+echo json_encode($inviteService->pendingSummary(), JSON_UNESCAPED_UNICODE);

@@ -37,6 +37,11 @@ final class InMemoryAbsenceRepository implements AbsenceRepository
     {
         return [['id' => 2, 'professor_id' => $professorId]];
     }
+
+    public function listForGuardian(int $guardianId): array
+    {
+        return [['id' => 3, 'responsavel_id' => $guardianId]];
+    }
 }
 
 final class AbsenceSpyAuditLogger implements \App\Contracts\Services\AuditLogger
@@ -78,4 +83,7 @@ return static function (): void {
 
     $teacherRows = $service->listForTeacher(12);
     if (($teacherRows[0]['professor_id'] ?? null) !== 12) throw new RuntimeException('Avisos do professor não foram filtrados.');
+
+    $guardianRows = $service->listForGuardian(7);
+    if (($guardianRows[0]['responsavel_id'] ?? null) !== 7) throw new RuntimeException('Avisos do responsável não foram filtrados.');
 };

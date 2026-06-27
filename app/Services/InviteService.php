@@ -71,4 +71,9 @@ final class InviteService
 
         return $this->invites->pendingList($limit);
     }
+
+    public function pendingSummary(): array
+    {
+        return $this->invites->pendingSummary();
+    }
 }

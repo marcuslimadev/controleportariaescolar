@@ -14,4 +14,6 @@ interface AbsenceRepository
     public function listForAdmin(?string $status = null): array;
 
     public function listForTeacher(int $professorId): array;
+
+    public function listForGuardian(int $guardianId): array;
 }

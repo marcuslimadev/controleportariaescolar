@@ -88,4 +88,19 @@ final class PdoAbsenceRepository implements AbsenceRepository
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function listForGuardian(int $guardianId): array
+    {
+        $query = $this->pdo->prepare(
+            'SELECT af.*, a.nome aluno, t.nome turma
+             FROM scp_avisos_falta af
+             JOIN scp_alunos a ON a.id=af.aluno_id
+             LEFT JOIN scp_turmas t ON t.id=af.turma_id
+             WHERE af.responsavel_id=?
+             ORDER BY af.data_falta DESC, af.id DESC'
+        );
+        $query->execute([$guardianId]);
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

@@ -40,6 +40,14 @@ final class PdoInviteRepository implements InviteRepository
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function pendingSummary(): array
+    {
+        $count = (int)$this->pdo->query("SELECT COUNT(*) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();
+        $latest = $this->pdo->query("SELECT MAX(preenchido_em) FROM scp_convites_cadastro WHERE status='preenchido'")->fetchColumn();
+
+        return ['count' => $count, 'latest' => $latest ?: null];
+    }
+
     public function findByPublicToken(string $token): ?array
     {
         $query = $this->pdo->prepare('SELECT * FROM scp_convites_cadastro WHERE token_hash=? LIMIT 1');
