@@ -161,29 +161,29 @@ function can_manage_posts(): bool {
 function portal_nav_items(): array {
     $role = current_role();
     if ($role === 'responsavel') {
-        return [
+        return with_logout_item([
             [t('timeline'), 'feed.php'],
             [current_locale()==='en' ? 'My children' : 'Meus filhos', 'responsavel/index.php'],
             [current_locale()==='en' ? 'Digital badge' : 'Crachá digital', 'cracha.php'],
             [current_locale()==='en' ? 'Report absence' : 'Avisar falta', 'responsavel/avisar-falta.php'],
             [t('events'), 'eventos.php'],
             [current_locale()==='en' ? 'History' : 'Histórico', 'responsavel/index.php'],
-        ];
+        ]);
     }
     if ($role === 'professor') {
-        return [
+        return with_logout_item([
             [t('timeline'), 'feed.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'professor/avisos-falta.php'],
             [t('events'), 'eventos.php'],
-        ];
+        ]);
     }
     if ($role === 'portaria') {
-        return [
+        return with_logout_item([
             [current_locale()==='en' ? 'QR Reader' : 'Leitor QR Code', 'portaria/index.php'],
             [current_locale()==='en' ? 'Invites' : 'Convites', 'portaria/convites.php'],
             [t('timeline'), 'feed.php'],
-        ];
+        ]);
     }
     if (in_array($role, ['admin', 'secretaria'], true)) {
         $items = [
@@ -201,9 +201,14 @@ function portal_nav_items(): array {
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Users' : 'Usuários', 'admin/index.php?tab=usuarios'];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Settings' : 'Configurações', 'admin/configuracoes.php'];
         $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
-        return $items;
+        return with_logout_item($items);
     }
     return [];
+}
+
+function with_logout_item(array $items): array {
+    $items[] = [t('logout'), 'logout.php'];
+    return $items;
 }
 
 function portal_nav_html(): string {
@@ -242,6 +247,7 @@ function portal_nav_icon(string $path, int $index): string {
     if (str_contains($path, 'eventos')) return '◷';
     if (str_contains($path, 'post-form')) return '+';
     if (str_contains($path, 'configuracoes')) return '⚙';
+    if (str_contains($path, 'logout')) return '↪';
     if (str_contains($path, 'admin/index')) return '☰';
     if (str_contains($path, 'responsavel/index')) return '👥';
     if (str_contains($path, 'feed')) return '⌂';
