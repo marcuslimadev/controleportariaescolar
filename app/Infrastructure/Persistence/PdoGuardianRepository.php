@@ -70,10 +70,25 @@ final class PdoGuardianRepository implements GuardianRepository
         return $guardian ?: null;
     }
 
+    public function findActiveById(int $id): ?array
+    {
+        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE id=? AND ativo=1 AND deleted_at IS NULL LIMIT 1');
+        $query->execute([$id]);
+        $guardian = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $guardian ?: null;
+    }
+
     public function updatePasswordHash(int $id, string $hash): void
     {
         $query = $this->pdo->prepare('UPDATE scp_responsaveis SET senha_hash=? WHERE id=?');
         $query->execute([$hash, $id]);
+    }
+
+    public function updatePhoto(int $id, string $photoUrl): void
+    {
+        $query = $this->pdo->prepare('UPDATE scp_responsaveis SET foto=? WHERE id=?');
+        $query->execute([$photoUrl, $id]);
     }
 
     public function createFromInvite(array $invite): int

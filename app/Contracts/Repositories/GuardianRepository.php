@@ -17,7 +17,11 @@ interface GuardianRepository
 
     public function findActiveByCpfOrPhone(string $digits): ?array;
 
+    public function findActiveById(int $id): ?array;
+
     public function updatePasswordHash(int $id, string $hash): void;
+
+    public function updatePhoto(int $id, string $photoUrl): void;
 
     public function createFromInvite(array $invite): int;
 

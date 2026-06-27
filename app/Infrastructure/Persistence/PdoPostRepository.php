@@ -13,7 +13,7 @@ final class PdoPostRepository implements PostRepository
     public function findActiveById(int $id): ?array
     {
         $query = $this->pdo->prepare(
-            'SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=? AND p.deleted_at IS NULL'
+            'SELECT p.*, u.perfil autor_perfil, u.foto autor_foto FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=? AND p.deleted_at IS NULL'
         );
         $query->execute([$id]);
         $post = $query->fetch(PDO::FETCH_ASSOC);
@@ -63,7 +63,7 @@ final class PdoPostRepository implements PostRepository
         $scienceColumn = $isGuardian ? 'ci.responsavel_id=?' : 'ci.usuario_id=?';
         $params = array_merge([$actorId, $actorId], $visibilityParams);
         $query = $this->pdo->prepare(
-            "SELECT p.*, u.nome autor,
+            "SELECT p.*, u.nome autor, u.foto autor_foto,
                 (SELECT COUNT(*) FROM scp_post_curtidas c WHERE c.post_id=p.id) curtidas,
                 (SELECT COUNT(*) FROM scp_post_curtidas c WHERE c.post_id=p.id AND {$actorColumn}) curtiu,
                 (SELECT confirmado_em FROM scp_post_ciencias ci WHERE ci.post_id=p.id AND {$scienceColumn} LIMIT 1) ciencia_em
@@ -82,7 +82,7 @@ final class PdoPostRepository implements PostRepository
     {
         $limit = max(1, min(20, $limit));
         $query = $this->pdo->query(
-            "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.anexo_url,p.anexo_nome,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
+            "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.anexo_url,p.anexo_nome,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor,u.foto autor_foto
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
              WHERE p.status='publicado' AND p.publico='publico' AND p.deleted_at IS NULL

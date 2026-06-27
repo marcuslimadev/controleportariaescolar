@@ -35,6 +35,14 @@ $quickActions = portal_quick_actions();
 <section class="feed-list">
 <?php foreach ($posts as $post): ?>
   <article class="feed-card <?=$post['importante'] ? 'important' : ''?> <?=$post['fixado'] ? 'pinned' : ''?>">
+    <div class="feed-author">
+      <?php $authorPhoto = $post['autor_foto'] ?: app_logo_url(); ?>
+      <img src="<?=e(media_url($authorPhoto, $post['updated_at'] ?? $post['publicado_em'] ?? ''))?>" alt="<?=e($post['autor'])?>">
+      <div>
+        <strong><?=e($post['autor'])?></strong>
+        <span><?=e(format_br_datetime($post['publicado_em'] ?: $post['created_at']))?></span>
+      </div>
+    </div>
     <div class="feed-meta">
       <span class="post-type"><?=e($post['tipo'])?></span>
       <?php if ($post['importante']): ?><span class="important-badge"><?=e(t('important'))?></span><?php endif ?>
@@ -53,7 +61,7 @@ $quickActions = portal_quick_actions();
       <div class="event-strip"><strong><?=e(date('d/m/Y', strtotime($post['data_evento'])))?></strong><?php if ($post['hora_evento']): ?> às <?=e(substr($post['hora_evento'], 0, 5))?><?php endif ?><?php if ($post['local']): ?> · <?=e($post['local'])?><?php endif ?></div>
     <?php endif ?>
     <div class="feed-footer">
-      <span><?=e($post['autor'])?> · <?=e(format_br_datetime($post['publicado_em'] ?: $post['created_at']))?></span>
+      <span><?=e(app_name())?></span>
     </div>
     <section class="comments-box" aria-label="Comentários">
       <?php foreach (($commentsByPost[(int)$post['id']] ?? []) as $comment): ?>

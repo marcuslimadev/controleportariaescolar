@@ -46,6 +46,7 @@ final class AuthService
             'id' => (int)$user['id'],
             'name' => $user['nome'],
             'role' => $user['perfil'],
+            'photo' => $user['foto'] ?? null,
             'home' => $user['perfil'] === 'portaria' ? 'portaria/index.php' : 'feed.php',
             'audit' => 'login_usuario',
         ];
@@ -66,6 +67,7 @@ final class AuthService
             'type' => 'guardian',
             'id' => (int)$guardian['id'],
             'name' => $guardian['nome'],
+            'photo' => $guardian['foto'] ?? null,
             'home' => 'feed.php',
             'audit' => 'login_responsavel',
         ];

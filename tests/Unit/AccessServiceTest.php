@@ -45,7 +45,14 @@ final class InMemoryGuardianRepository implements GuardianRepository
         return $digits === '11144477735' ? ['id' => $this->guardianId, 'nome' => 'Responsável Teste', 'senha_hash' => \App\Support\PasswordService::hash('Senha@12345')] : null;
     }
 
+    public function findActiveById(int $id): ?array
+    {
+        return $id === $this->guardianId ? $this->guardian : null;
+    }
+
     public function updatePasswordHash(int $id, string $hash): void {}
+
+    public function updatePhoto(int $id, string $photoUrl): void {}
 
     public function createFromInvite(array $invite): int
     {

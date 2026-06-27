@@ -34,6 +34,7 @@ use App\Services\InviteService;
 use App\Services\NotificationService;
 use App\Services\PostInteractionService;
 use App\Services\PostService;
+use App\Services\ProfileService;
 use App\Services\QuickRegistrationService;
 use App\Services\ReportService;
 use App\Services\SchoolAdminService;
@@ -133,6 +134,11 @@ final class ServiceFactory
     public static function accessLookup(): AccessLookupService
     {
         return new AccessLookupService(new PdoGuardianRepository(self::pdo()), new PdoStudentRepository(self::pdo()));
+    }
+
+    public static function profiles(): ProfileService
+    {
+        return new ProfileService(new PdoUserRepository(self::pdo()), new PdoGuardianRepository(self::pdo()), self::audit());
     }
 
     public static function withdrawalAuthorizations(): WithdrawalAuthorizationService

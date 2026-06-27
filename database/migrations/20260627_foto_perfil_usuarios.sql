@@ -1,0 +1,2 @@
+ALTER TABLE scp_usuarios ADD COLUMN foto VARCHAR(255) NULL AFTER email;
+

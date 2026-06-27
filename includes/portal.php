@@ -196,6 +196,7 @@ function portal_nav_items(): array {
     if ($role === 'responsavel') {
         return with_logout_item([
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'My profile' : 'Meu perfil', 'perfil.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'My children' : 'Meus filhos', 'responsavel/index.php'],
             [current_locale()==='en' ? 'Digital badge' : 'Crachá digital', 'cracha.php'],
@@ -208,6 +209,7 @@ function portal_nav_items(): array {
     if ($role === 'professor') {
         return with_logout_item([
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'My profile' : 'Meu perfil', 'perfil.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'professor/avisos-falta.php'],
@@ -217,6 +219,7 @@ function portal_nav_items(): array {
     if ($role === 'portaria') {
         return with_logout_item([
             [current_locale()==='en' ? 'QR Reader' : 'Leitor QR Code', 'portaria/index.php'],
+            [current_locale()==='en' ? 'My profile' : 'Meu perfil', 'perfil.php'],
             [current_locale()==='en' ? 'Pickup auth.' : 'Autorizações', 'portaria/autorizacoes.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'Invites' : 'Convites', 'portaria/convites.php'],
@@ -226,6 +229,7 @@ function portal_nav_items(): array {
     if (in_array($role, ['admin', 'secretaria'], true)) {
         $items = [
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'My profile' : 'Meu perfil', 'perfil.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [t('new_post'), 'admin/post-form.php'],
             [current_locale()==='en' ? 'Comments' : 'Comentários', 'admin/comentarios.php'],
@@ -280,6 +284,7 @@ function portal_nav_html(): string {
 }
 
 function portal_nav_icon(string $path, int $index): string {
+    if (str_contains($path, 'perfil')) return '◉';
     if (str_contains($path, 'autorizacoes')) return '✓';
     if (str_contains($path, 'portaria')) return '▣';
     if (str_contains($path, 'convites')) return '✚';
@@ -305,6 +310,7 @@ function portal_nav_short_label(string $label): string {
         'Nova publicação' => 'Novo',
         'Responsáveis' => 'Resp.',
         'Meus filhos' => 'Filhos',
+        'Meu perfil' => 'Perfil',
         default => $label,
     };
 }

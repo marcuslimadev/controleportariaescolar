@@ -15,10 +15,20 @@ final class InMemoryUserRepository implements UserRepository
         return $this->users[strtolower($email)] ?? null;
     }
 
+    public function findActiveById(int $id): ?array
+    {
+        foreach ($this->users as $user) {
+            if ((int)($user['id'] ?? 0) === $id) return $user;
+        }
+        return null;
+    }
+
     public function updatePasswordHash(int $id, string $hash): void
     {
         $this->updated[$id] = $hash;
     }
+
+    public function updatePhoto(int $id, string $photoUrl): void {}
 }
 
 return static function (): void {

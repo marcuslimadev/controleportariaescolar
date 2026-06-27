@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($actor) {
             session_regenerate_id(true);
             if ($actor['type'] === 'user') {
-                $_SESSION = ['user_id' => $actor['id'], 'role' => $actor['role'], 'name' => $actor['name'], 'csrf' => bin2hex(random_bytes(32))];
+                $_SESSION = ['user_id' => $actor['id'], 'role' => $actor['role'], 'name' => $actor['name'], 'photo' => $actor['photo'] ?? null, 'csrf' => bin2hex(random_bytes(32))];
             } else {
-                $_SESSION = ['responsavel_id' => $actor['id'], 'name' => $actor['name'], 'csrf' => bin2hex(random_bytes(32))];
+                $_SESSION = ['responsavel_id' => $actor['id'], 'name' => $actor['name'], 'photo' => $actor['photo'] ?? null, 'csrf' => bin2hex(random_bytes(32))];
             }
             login_rate_clear($login);
             audit($actor['audit']);
@@ -88,8 +88,9 @@ $coverUrl = app_cover_url();
         <?php foreach ($publicPosts as $post): ?>
           <article class="public-insta-post <?=$post['importante'] ? 'important' : ''?>">
             <div class="public-post-head">
-              <img src="<?=e(app_logo_url())?>" alt="">
-              <div><strong><?=e(app_name())?></strong><span><?=e(format_br_datetime($post['publicado_em']))?></span></div>
+              <?php $authorPhoto = $post['autor_foto'] ?: app_logo_url(); ?>
+              <img src="<?=e(media_url($authorPhoto, $post['publicado_em'] ?? ''))?>" alt="<?=e($post['autor'] ?: app_name())?>">
+              <div><strong><?=e($post['autor'] ?: app_name())?></strong><span><?=e(app_name())?> · <?=e(format_br_datetime($post['publicado_em']))?></span></div>
               <?php if ($post['importante']): ?><em><?=e(t('important'))?></em><?php endif ?>
             </div>
             <?php if ($post['imagem_url']): ?>
