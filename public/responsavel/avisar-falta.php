@@ -1,25 +1,17 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_parent();
-$q = db()->prepare('SELECT a.id,a.nome,a.turma_id,t.nome turma FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id LEFT JOIN scp_turmas t ON t.id=a.turma_id WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1 ORDER BY a.nome');
-$q->execute([$_SESSION['responsavel_id']]);
-$children = $q->fetchAll();
+$absenceService = new \App\Services\AbsenceService(
+    new \App\Infrastructure\Persistence\PdoAbsenceRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+$children = $absenceService->childrenForGuardian((int)$_SESSION['responsavel_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     try {
-        $alunoId = (int)($_POST['aluno_id'] ?? 0);
-        $child = null;
-        foreach ($children as $c) if ((int)$c['id'] === $alunoId) $child = $c;
-        if (!$child) throw new RuntimeException('Aluno inválido.');
-        $data = (string)($_POST['data_falta'] ?? '');
-        if (!$data) throw new RuntimeException('Informe a data da falta.');
-        $motivos = ['Doença','Consulta médica','Viagem','Compromisso familiar','Outro'];
-        $motivo = in_array($_POST['motivo'] ?? '', $motivos, true) ? $_POST['motivo'] : 'Outro';
         $anexo = !empty($_FILES['anexo']) ? save_portal_upload($_FILES['anexo'], 'faltas') : null;
-        $q = db()->prepare('INSERT INTO scp_avisos_falta(aluno_id,responsavel_id,turma_id,data_falta,motivo,observacao,anexo_url) VALUES(?,?,?,?,?,?,?)');
-        $q->execute([$alunoId, $_SESSION['responsavel_id'], $child['turma_id'] ?: null, $data, $motivo, trim((string)($_POST['observacao'] ?? '')) ?: null, $anexo]);
-        audit('enviar_aviso_falta', 'scp_avisos_falta', (int)db()->lastInsertId(), ['aluno_id'=>$alunoId]);
+        $absenceService->createFromGuardian((int)$_SESSION['responsavel_id'], $_POST, $anexo);
         flash('Aviso de falta enviado.');
         redirect('responsavel/minhas-faltas.php');
     } catch (Throwable $e) {

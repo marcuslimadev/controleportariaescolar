@@ -1,28 +1,22 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('absence.manage');
+$absenceService = new \App\Services\AbsenceService(
+    new \App\Infrastructure\Persistence\PdoAbsenceRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
-    $id = (int)($_POST['id'] ?? 0);
-    $status = (string)($_POST['status'] ?? '');
-    if (in_array($status, ['visualizado','abonado','rejeitado'], true)) {
-        $sql = $status === 'visualizado'
-            ? 'UPDATE scp_avisos_falta SET status=?, visualizado_em=COALESCE(visualizado_em,NOW()), analisado_por=?, analisado_em=NOW() WHERE id=?'
-            : 'UPDATE scp_avisos_falta SET status=?, visualizado_em=COALESCE(visualizado_em,NOW()), analisado_por=?, analisado_em=NOW() WHERE id=?';
-        $q = db()->prepare($sql);
-        $q->execute([$status, $_SESSION['user_id'], $id]);
-        audit('alterar_aviso_falta', 'scp_avisos_falta', $id, ['status'=>$status]);
+    try {
+        $absenceService->updateStatus((int)($_POST['id'] ?? 0), (string)($_POST['status'] ?? ''), (int)$_SESSION['user_id']);
         flash('Aviso atualizado.');
+    } catch (Throwable $error) {
+        flash('Não foi possível atualizar: '.$error->getMessage(), 'danger');
     }
     redirect('admin/avisos-falta.php');
 }
 $status = $_GET['status'] ?? '';
-$params = [];
-$where = '';
-if (in_array($status, ['enviado','visualizado','abonado','rejeitado'], true)) { $where = 'WHERE af.status=?'; $params[] = $status; }
-$q = db()->prepare("SELECT af.*, a.nome aluno, t.nome turma, r.nome responsavel FROM scp_avisos_falta af JOIN scp_alunos a ON a.id=af.aluno_id LEFT JOIN scp_turmas t ON t.id=af.turma_id JOIN scp_responsaveis r ON r.id=af.responsavel_id $where ORDER BY af.data_falta DESC, af.id DESC");
-$q->execute($params);
-$rows = $q->fetchAll();
+$rows = $absenceService->listForAdmin(is_string($status) ? $status : null);
 layout_header('Avisos de falta');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">SECRETARIA</span><h1>Avisos de falta</h1><p>Visualize, abone ou rejeite avisos enviados pelos responsáveis.</p></div></div>
