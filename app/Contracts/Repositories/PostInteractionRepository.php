@@ -10,4 +10,12 @@ interface PostInteractionRepository
     public function toggleLike(int $postId, ?int $guardianId, ?int $userId): void;
 
     public function confirmScience(int $postId, ?int $guardianId, ?int $userId, ?string $ip, string $userAgent): void;
+
+    public function addComment(int $postId, ?int $guardianId, ?int $userId, string $comment): int;
+
+    public function approvedCommentsForPosts(array $postIds): array;
+
+    public function pendingComments(): array;
+
+    public function moderateComment(int $commentId, string $status, int $moderatorId): void;
 }

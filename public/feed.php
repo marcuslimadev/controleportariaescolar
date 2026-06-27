@@ -6,6 +6,8 @@ require_portal_access();
 $actorId = $_SESSION['responsavel_id'] ?? $_SESSION['user_id'];
 $postService = \App\Support\ServiceFactory::posts();
 $posts = $postService->feedPosts($visibilitySql, $visibilityParams, (int)$actorId, !empty($_SESSION['responsavel_id']));
+$interactionService = \App\Support\ServiceFactory::postInteractions();
+$commentsByPost = $interactionService->approvedCommentsForPosts(array_column($posts, 'id'));
 
 layout_header(t('timeline'));
 $quickActions = portal_quick_actions();
@@ -53,6 +55,22 @@ $quickActions = portal_quick_actions();
     <div class="feed-footer">
       <span><?=e($post['autor'])?> · <?=e(format_br_datetime($post['publicado_em'] ?: $post['created_at']))?></span>
     </div>
+    <section class="comments-box" aria-label="Comentários">
+      <?php foreach (($commentsByPost[(int)$post['id']] ?? []) as $comment): ?>
+        <article class="comment-item">
+          <strong><?=e($comment['autor'] ?: 'Usuário')?></strong>
+          <p><?=nl2br(e($comment['comentario']))?></p>
+          <small><?=e(format_br_datetime($comment['created_at']))?></small>
+        </article>
+      <?php endforeach ?>
+      <form method="post" action="<?=e(url('post-comentario.php'))?>" class="comment-form">
+        <input type="hidden" name="csrf" value="<?=e(csrf())?>">
+        <input type="hidden" name="post_id" value="<?=(int)$post['id']?>">
+        <label class="form-label fw-bold" for="comentario-<?=(int)$post['id']?>">Comentário</label>
+        <textarea id="comentario-<?=(int)$post['id']?>" class="form-control" name="comentario" rows="2" maxlength="1200" placeholder="Escreva um comentário para moderação"></textarea>
+        <button class="btn btn-outline-primary btn-sm mt-2" type="submit">Enviar comentário</button>
+      </form>
+    </section>
     <?php if ($post['exige_ciencia']): ?>
       <?php if ($post['ciencia_em']): ?>
         <div class="science-box confirmed"><?=e(t('science_confirmed'))?> <?=e(format_br_datetime($post['ciencia_em']))?></div>

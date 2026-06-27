@@ -33,4 +33,42 @@ final class PostInteractionService
         $this->interactions->confirmScience($postId, $actor['responsavel_id'] ?? null, $actor['user_id'] ?? null, $ip, $userAgent);
         $this->audit->record('confirmar_ciencia_post', 'scp_posts', $postId);
     }
+
+    public function addComment(int $postId, string $comment, array $actor, string $visibilitySql, array $visibilityParams): void
+    {
+        $comment = trim($comment);
+        if ($comment === '' || strlen($comment) > 1200) {
+            throw new RuntimeException('Escreva um comentário com até 1200 caracteres.');
+        }
+        if (!$this->interactions->canInteract($postId, $visibilitySql, $visibilityParams)) {
+            throw new RuntimeException('Publicação não encontrada.');
+        }
+
+        $id = $this->interactions->addComment($postId, $actor['responsavel_id'] ?? null, $actor['user_id'] ?? null, $comment);
+        $this->audit->record('comentar_post', 'scp_post_comentarios', $id, ['post_id' => $postId]);
+    }
+
+    public function approvedCommentsForPosts(array $postIds): array
+    {
+        $grouped = [];
+        foreach ($this->interactions->approvedCommentsForPosts($postIds) as $comment) {
+            $grouped[(int)$comment['post_id']][] = $comment;
+        }
+
+        return $grouped;
+    }
+
+    public function pendingComments(): array
+    {
+        return $this->interactions->pendingComments();
+    }
+
+    public function moderateComment(int $commentId, string $status, int $moderatorId): void
+    {
+        if (!in_array($status, ['aprovado','rejeitado'], true)) {
+            throw new RuntimeException('Status inválido.');
+        }
+        $this->interactions->moderateComment($commentId, $status, $moderatorId);
+        $this->audit->record('moderar_comentario_post', 'scp_post_comentarios', $commentId, ['status' => $status]);
+    }
 }

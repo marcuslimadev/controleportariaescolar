@@ -222,6 +222,7 @@ function portal_nav_items(): array {
         $items = [
             [t('timeline'), 'feed.php'],
             [t('new_post'), 'admin/post-form.php'],
+            [current_locale()==='en' ? 'Comments' : 'Comentários', 'admin/comentarios.php'],
             [t('events'), 'eventos.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'admin/avisos-falta.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],

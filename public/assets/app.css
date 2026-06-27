@@ -546,6 +546,14 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .attachment-card:hover{background:var(--bh-yellow);color:var(--bh-black)}
 .attachment-card span{display:grid;place-items:center;width:36px;height:36px;border-radius:999px;background:#fff;border:2px solid var(--bh-black)}
 .attachment-card strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comments-box{margin-top:1rem;padding-top:1rem;border-top:1px solid #ECE7DA}
+.comment-item{background:#F8F5EC;border:1px solid #DED8C8;border-radius:14px;padding:.75rem .85rem;margin-bottom:.55rem}
+.comment-item strong{display:block;font-weight:900;font-size:.9rem}
+.comment-item p{margin:.18rem 0;color:var(--ink);line-height:1.45}
+.comment-item small{color:var(--muted);font-weight:700}
+.comment-form{margin-top:.7rem}
+.comment-form textarea{min-height:78px}
+.comment-moderation-text{font-size:1rem;line-height:1.55;margin:.5rem 0 1rem}
 
 /* Fase 1: design system e identidade visual */
 :root{
@@ -609,6 +617,9 @@ body{color:var(--ds-text)}
   box-shadow:var(--ds-shadow-soft);
 }
 .attachment-card span{border:1px solid var(--ds-border);background:#fff}
+.comments-box{border-top-color:var(--ds-border)}
+.comment-item{border:1px solid var(--ds-border);border-radius:18px;background:color-mix(in srgb,var(--ds-accent) 5%,#fff);box-shadow:var(--ds-shadow-soft)}
+.comment-moderation-card{max-width:860px}
 .public-cover-card{
   position:relative;
   margin:0;
