@@ -35,6 +35,13 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['pt','en'], true)) {
 function e(mixed $v): string { return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function url(string $path = ''): string { return rtrim(config()['base_url'] ?? '', '/') . '/' . ltrim($path, '/'); }
 function asset_url(string $path): string { $file = __DIR__ . '/../public/' . ltrim($path, '/'); $v = is_file($file) ? filemtime($file) : time(); return url($path) . '?v=' . $v; }
+function public_uploads_dir(string $folder = ''): string {
+    $root = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), "\\/");
+    if ($root !== '' && is_dir($root)) {
+        return $root . '/uploads' . ($folder !== '' ? '/' . trim($folder, '/') : '');
+    }
+    return __DIR__ . '/../public/uploads' . ($folder !== '' ? '/' . trim($folder, '/') : '');
+}
 function csrf(): string { return $_SESSION['csrf'] ??= bin2hex(random_bytes(32)); }
 function verify_csrf(): void { if (!hash_equals($_SESSION['csrf'] ?? '', (string)($_POST['csrf'] ?? ''))) { http_response_code(419); exit('Sessão expirada. Atualize a página.'); } }
 function redirect(string $path): never { header('Location: ' . url($path)); exit; }
@@ -122,7 +129,7 @@ function save_uploaded_image(array $file, string $folder): string {
     $mime=(new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
     $extensions=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
     if (!isset($extensions[$mime])) throw new RuntimeException('Use fotos JPG, PNG ou WebP.');
-    $directory=__DIR__.'/../public/uploads/'.$folder;
+    $directory=public_uploads_dir($folder);
     if (!is_dir($directory) && !mkdir($directory,0755,true)) throw new RuntimeException('Não foi possível preparar a pasta de fotos.');
     $filename=bin2hex(random_bytes(16)).'.'.$extensions[$mime];
     if (!move_uploaded_file($file['tmp_name'],$directory.'/'.$filename)) throw new RuntimeException('Não foi possível salvar uma das fotos.');

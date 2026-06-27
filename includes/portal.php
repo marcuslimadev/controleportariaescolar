@@ -379,7 +379,7 @@ function save_portal_upload(array $file, string $folder, string $type = 'documen
     ];
     if ($type === 'document') $extensions['application/pdf'] = 'pdf';
     if (!isset($extensions[$mime])) throw new RuntimeException($type === 'image' ? 'Use JPG, PNG ou WebP.' : 'Use JPG, PNG, WebP ou PDF.');
-    $directory = __DIR__ . '/../public/uploads/' . trim($folder, '/');
+    $directory = public_uploads_dir($folder);
     if (!is_dir($directory) && !mkdir($directory, 0755, true)) throw new RuntimeException('Não foi possível preparar a pasta de uploads.');
     $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
     if (!move_uploaded_file($file['tmp_name'], $directory . '/' . $filename)) throw new RuntimeException('Não foi possível salvar o arquivo.');
