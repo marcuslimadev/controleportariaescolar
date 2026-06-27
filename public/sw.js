@@ -1,4 +1,4 @@
-const CACHE='porta-aberta-shell-v10';
+const CACHE='porta-aberta-shell-v11';
 const SHELL=['./assets/app.css','./assets/pwa.js','./assets/porta-aberta-pwa-192.png','./assets/porta-aberta-pwa-512.png','./assets/login-school-bg.webp','./assets/porta-aberta-logo.jpg','./manifest.webmanifest'];
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
