@@ -194,11 +194,13 @@ function portal_nav_items(): array {
             [t('events'), 'eventos.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'admin/avisos-falta.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
-            [current_locale()==='en' ? 'Students' : 'Alunos', 'admin/index.php'],
-            [current_locale()==='en' ? 'Guardians' : 'Responsáveis', 'admin/index.php'],
-            [current_locale()==='en' ? 'Classes' : 'Turmas', 'admin/index.php'],
+            [current_locale()==='en' ? 'Students' : 'Alunos', 'admin/index.php?tab=alunos'],
+            [current_locale()==='en' ? 'Guardians' : 'Responsáveis', 'admin/index.php?tab=responsaveis'],
+            [current_locale()==='en' ? 'Classes' : 'Turmas', 'admin/index.php?tab=turmas'],
+            [current_locale()==='en' ? 'Links' : 'Vínculos', 'admin/index.php?tab=vinculos'],
         ];
-        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Teachers' : 'Professores', 'admin/index.php'];
+        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Teachers' : 'Professores', 'admin/index.php?tab=professores'];
+        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Users' : 'Usuários', 'admin/index.php?tab=usuarios'];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Settings' : 'Configurações', 'admin/configuracoes.php'];
         $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
         return $items;
@@ -214,10 +216,20 @@ function portal_nav_html(): string {
     if ($prefix !== '' && str_starts_with($current, $prefix . '/')) {
         $current = substr($current, strlen($prefix) + 1);
     }
+    $query = (string)($_SERVER['QUERY_STRING'] ?? '');
+    $currentQuery = [];
+    parse_str($query, $currentQuery);
     $html = '<div class="app-menu-overlay" aria-hidden="true"></div><div id="app-menu" class="app-nav-scroll" aria-label="Menu principal" aria-hidden="true"><div class="app-menu-head"><div><strong>Menu</strong><span>' . e(app_name()) . '</span></div><button class="app-menu-close" type="button" aria-label="Fechar menu">×</button></div><div class="container"><nav class="app-nav">';
     foreach ($items as $index => [$label, $path]) {
         $path = ltrim($path, '/');
-        $active = $current === $path;
+        $target = parse_url($path);
+        $pathOnly = (string)($target['path'] ?? $path);
+        $targetQuery = [];
+        parse_str((string)($target['query'] ?? ''), $targetQuery);
+        $active = $current === $pathOnly;
+        foreach ($targetQuery as $key => $value) {
+            $active = $active && (($currentQuery[$key] ?? null) === $value);
+        }
         $html .= '<a class="' . ($active ? 'is-active' : '') . '" href="' . e(url($path)) . '"><span class="app-nav-icon">' . e(portal_nav_icon($path, $index)) . '</span><span class="app-nav-label">' . e(portal_nav_short_label($label)) . '</span></a>';
     }
     return $html . '</nav></div></div>';
