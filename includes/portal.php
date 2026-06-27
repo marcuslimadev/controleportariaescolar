@@ -199,6 +199,7 @@ function portal_nav_items(): array {
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'My children' : 'Meus filhos', 'responsavel/index.php'],
             [current_locale()==='en' ? 'Digital badge' : 'Crachá digital', 'cracha.php'],
+            [current_locale()==='en' ? 'Pickup auth.' : 'Autorizações', 'responsavel/autorizacoes.php'],
             [current_locale()==='en' ? 'Report absence' : 'Avisar falta', 'responsavel/avisar-falta.php'],
             [t('events'), 'eventos.php'],
             [current_locale()==='en' ? 'History' : 'Histórico', 'responsavel/index.php'],
@@ -216,6 +217,7 @@ function portal_nav_items(): array {
     if ($role === 'portaria') {
         return with_logout_item([
             [current_locale()==='en' ? 'QR Reader' : 'Leitor QR Code', 'portaria/index.php'],
+            [current_locale()==='en' ? 'Pickup auth.' : 'Autorizações', 'portaria/autorizacoes.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'Invites' : 'Convites', 'portaria/convites.php'],
             [t('timeline'), 'feed.php'],
@@ -239,6 +241,7 @@ function portal_nav_items(): array {
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Users' : 'Usuários', 'admin/index.php?tab=usuarios'];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Settings' : 'Configurações', 'admin/configuracoes.php'];
         $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
+        $items[] = [current_locale()==='en' ? 'Pickup auth.' : 'Autorizações', 'portaria/autorizacoes.php'];
         return with_logout_item($items);
     }
     return [];
@@ -277,6 +280,7 @@ function portal_nav_html(): string {
 }
 
 function portal_nav_icon(string $path, int $index): string {
+    if (str_contains($path, 'autorizacoes')) return '✓';
     if (str_contains($path, 'portaria')) return '▣';
     if (str_contains($path, 'convites')) return '✚';
     if (str_contains($path, 'cracha')) return '▤';
@@ -309,9 +313,9 @@ function portal_quick_actions(): array {
     $role = current_role();
     if ($role === 'responsavel') {
         return [
+            ['Autorizações', 'responsavel/autorizacoes.php', 'Retirada temporária'],
             ['Avisar falta', 'responsavel/avisar-falta.php', 'Registrar ausência'],
             ['Eventos', 'eventos.php', 'Agenda da escola'],
-            ['Crachá', 'cracha.php', 'QR dos filhos'],
         ];
     }
     if ($role === 'professor') {
@@ -324,8 +328,8 @@ function portal_quick_actions(): array {
     if ($role === 'portaria') {
         return [
             ['Leitor QR Code', 'portaria/index.php', 'Entrada e saída'],
+            ['Autorizações', 'portaria/autorizacoes.php', 'Retirada temporária'],
             ['Convites', 'portaria/convites.php', 'Cadastro familiar'],
-            ['Eventos', 'eventos.php', 'Agenda'],
         ];
     }
     if (in_array($role, ['admin', 'secretaria'], true)) {

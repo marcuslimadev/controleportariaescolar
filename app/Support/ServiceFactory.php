@@ -20,6 +20,7 @@ use App\Infrastructure\Persistence\PdoReportRepository;
 use App\Infrastructure\Persistence\PdoSchoolAdminRepository;
 use App\Infrastructure\Persistence\PdoStudentRepository;
 use App\Infrastructure\Persistence\PdoUserRepository;
+use App\Infrastructure\Persistence\PdoWithdrawalAuthorizationRepository;
 use App\Services\AbsenceService;
 use App\Services\AccessLookupService;
 use App\Services\AccessService;
@@ -36,6 +37,7 @@ use App\Services\PostService;
 use App\Services\QuickRegistrationService;
 use App\Services\ReportService;
 use App\Services\SchoolAdminService;
+use App\Services\WithdrawalAuthorizationService;
 use PDO;
 
 final class ServiceFactory
@@ -131,6 +133,11 @@ final class ServiceFactory
     public static function accessLookup(): AccessLookupService
     {
         return new AccessLookupService(new PdoGuardianRepository(self::pdo()), new PdoStudentRepository(self::pdo()));
+    }
+
+    public static function withdrawalAuthorizations(): WithdrawalAuthorizationService
+    {
+        return new WithdrawalAuthorizationService(new PdoWithdrawalAuthorizationRepository(self::pdo()), self::audit());
     }
 
     private static function pdo(): PDO
