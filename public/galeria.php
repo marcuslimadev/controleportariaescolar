@@ -32,7 +32,7 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
     <section class="public-gallery-grid">
       <?php foreach ($items as $item): ?>
         <article class="public-gallery-card">
-          <img src="<?=e($item['imagem_url'])?>" alt="<?=e($item['titulo'])?>">
+          <img src="<?=e(media_url($item['imagem_url'], $item['publicado_em'] ?? ''))?>" alt="<?=e($item['titulo'])?>">
           <div>
             <span><?=e($item['tipo'])?> · <?=e(format_br_datetime($item['publicado_em']))?></span>
             <h2><?=e($item['titulo'])?></h2>

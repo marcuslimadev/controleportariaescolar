@@ -386,6 +386,14 @@ function save_portal_upload(array $file, string $folder, string $type = 'documen
     return url('uploads/' . trim($folder, '/') . '/' . $filename);
 }
 
+function media_url(?string $url, mixed $version = ''): string {
+    $url = trim((string)$url);
+    if ($url === '') return '';
+    $versionValue = $version !== '' ? (string)$version : substr(hash('sha256', $url), 0, 10);
+    $separator = str_contains($url, '?') ? '&' : '?';
+    return $url . $separator . 'v=' . rawurlencode($versionValue);
+}
+
 function format_br_datetime(?string $value): string {
     return $value ? date('d/m/Y H:i', strtotime($value)) : '-';
 }

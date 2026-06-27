@@ -42,7 +42,7 @@ $quickActions = portal_quick_actions();
     </div>
     <h2><?=e($post['titulo'])?></h2>
     <p class="feed-content"><?=nl2br(e(portal_excerpt($post['conteudo'])))?></p>
-    <?php if ($post['imagem_url']): ?><img class="feed-image" src="<?=e($post['imagem_url'])?>" alt="<?=e(current_locale()==='en'?'Post image':'Imagem da publicação')?>"><?php endif ?>
+    <?php if ($post['imagem_url']): ?><img class="feed-image" src="<?=e(media_url($post['imagem_url'], $post['updated_at'] ?? $post['publicado_em'] ?? ''))?>" alt="<?=e(current_locale()==='en'?'Post image':'Imagem da publicação')?>"><?php endif ?>
     <?php if (!empty($post['anexo_url'])): ?>
       <a class="attachment-card" href="<?=e($post['anexo_url'])?>" target="_blank" rel="noopener">
         <span>📎</span>

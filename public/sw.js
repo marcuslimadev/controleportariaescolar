@@ -1,4 +1,4 @@
-const CACHE='porta-aberta-shell-v13';
+const CACHE='porta-aberta-shell-v14';
 const SHELL=['./assets/app.css','./assets/pwa.js','./assets/porta-aberta-app-v2-192.png','./assets/porta-aberta-app-v2-512.png','./assets/login-school-bg.webp','./assets/porta-aberta-logo.jpg','./manifest.webmanifest'];
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
@@ -8,5 +8,6 @@ self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);
   if(url.origin!==location.origin)return;
   if(event.request.mode==='navigate'){event.respondWith(fetch(event.request));return;}
-  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response})));
+  if(url.pathname.includes('/uploads/')){event.respondWith(fetch(event.request,{cache:'no-store'}));return;}
+  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}return response})));
 });

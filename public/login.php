@@ -93,7 +93,7 @@ $coverUrl = app_cover_url();
               <?php if ($post['importante']): ?><em><?=e(t('important'))?></em><?php endif ?>
             </div>
             <?php if ($post['imagem_url']): ?>
-              <img class="public-post-image" src="<?=e($post['imagem_url'])?>" alt="<?=e(current_locale() === 'en' ? 'Post image' : 'Imagem da publicação')?>">
+              <img class="public-post-image" src="<?=e(media_url($post['imagem_url'], $post['publicado_em'] ?? ''))?>" alt="<?=e(current_locale() === 'en' ? 'Post image' : 'Imagem da publicação')?>" loading="eager" decoding="async">
             <?php endif ?>
             <div class="public-post-body">
               <div class="feed-meta"><span class="post-type"><?=e($post['tipo'])?></span></div>
