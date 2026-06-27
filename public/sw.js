@@ -1,5 +1,5 @@
-const CACHE='porta-aberta-shell-v12';
-const SHELL=['./assets/app.css','./assets/pwa.js','./assets/porta-aberta-pwa-192.png','./assets/porta-aberta-pwa-512.png','./assets/login-school-bg.webp','./assets/porta-aberta-logo.jpg','./manifest.webmanifest'];
+const CACHE='porta-aberta-shell-v13';
+const SHELL=['./assets/app.css','./assets/pwa.js','./assets/porta-aberta-app-v2-192.png','./assets/porta-aberta-app-v2-512.png','./assets/login-school-bg.webp','./assets/porta-aberta-logo.jpg','./manifest.webmanifest'];
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
