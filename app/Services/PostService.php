@@ -16,6 +16,7 @@ final class PostService
     public function __construct(
         private PostRepository $posts,
         private AuditLogger $audit,
+        private ?NotificationService $notifications = null,
     ) {}
 
     public function deletePost(int $id, int $actorId, string $actorRole): void
@@ -112,12 +113,18 @@ final class PostService
         if ($id > 0) {
             $this->posts->update($id, $data);
             $this->audit->record('editar_post', 'scp_posts', $id);
+            if (($current['status'] ?? '') !== 'publicado' && $data['status'] === 'publicado') {
+                $this->notifications?->notifyPostPublished($id, $data, $actorId);
+            }
 
             return $id;
         }
 
         $id = $this->posts->create($data);
         $this->audit->record('criar_post', 'scp_posts', $id);
+        if ($data['status'] === 'publicado') {
+            $this->notifications?->notifyPostPublished($id, $data, $actorId);
+        }
 
         return $id;
     }

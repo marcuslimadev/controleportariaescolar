@@ -196,6 +196,7 @@ function portal_nav_items(): array {
     if ($role === 'responsavel') {
         return with_logout_item([
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'My children' : 'Meus filhos', 'responsavel/index.php'],
             [current_locale()==='en' ? 'Digital badge' : 'Crachá digital', 'cracha.php'],
             [current_locale()==='en' ? 'Report absence' : 'Avisar falta', 'responsavel/avisar-falta.php'],
@@ -206,6 +207,7 @@ function portal_nav_items(): array {
     if ($role === 'professor') {
         return with_logout_item([
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'professor/avisos-falta.php'],
             [t('events'), 'eventos.php'],
@@ -214,6 +216,7 @@ function portal_nav_items(): array {
     if ($role === 'portaria') {
         return with_logout_item([
             [current_locale()==='en' ? 'QR Reader' : 'Leitor QR Code', 'portaria/index.php'],
+            [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [current_locale()==='en' ? 'Invites' : 'Convites', 'portaria/convites.php'],
             [t('timeline'), 'feed.php'],
         ]);
@@ -221,6 +224,7 @@ function portal_nav_items(): array {
     if (in_array($role, ['admin', 'secretaria'], true)) {
         $items = [
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [t('new_post'), 'admin/post-form.php'],
             [current_locale()==='en' ? 'Comments' : 'Comentários', 'admin/comentarios.php'],
             [t('events'), 'eventos.php'],

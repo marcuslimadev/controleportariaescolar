@@ -12,6 +12,7 @@ use App\Infrastructure\Persistence\PdoFrequencyRepository;
 use App\Infrastructure\Persistence\PdoGuardianPortalRepository;
 use App\Infrastructure\Persistence\PdoGuardianRepository;
 use App\Infrastructure\Persistence\PdoInviteRepository;
+use App\Infrastructure\Persistence\PdoNotificationRepository;
 use App\Infrastructure\Persistence\PdoPostInteractionRepository;
 use App\Infrastructure\Persistence\PdoPostRepository;
 use App\Infrastructure\Persistence\PdoQuickRegistrationRepository;
@@ -29,6 +30,7 @@ use App\Services\FamilyOnboardingService;
 use App\Services\FrequencyService;
 use App\Services\GuardianPortalService;
 use App\Services\InviteService;
+use App\Services\NotificationService;
 use App\Services\PostInteractionService;
 use App\Services\PostService;
 use App\Services\QuickRegistrationService;
@@ -52,7 +54,12 @@ final class ServiceFactory
 
     public static function posts(): PostService
     {
-        return new PostService(new PdoPostRepository(self::pdo()), self::audit());
+        return new PostService(new PdoPostRepository(self::pdo()), self::audit(), self::notifications());
+    }
+
+    public static function notifications(): NotificationService
+    {
+        return new NotificationService(new PdoNotificationRepository(self::pdo()));
     }
 
     public static function postInteractions(): PostInteractionService
