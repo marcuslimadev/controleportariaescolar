@@ -46,11 +46,6 @@ $quickActions = portal_quick_actions();
     <?php endif ?>
     <div class="feed-footer">
       <span><?=e($post['autor'])?> · <?=e(format_br_datetime($post['publicado_em'] ?: $post['created_at']))?></span>
-      <form method="post" action="<?=e(url('post-like.php'))?>">
-        <input type="hidden" name="csrf" value="<?=e(csrf())?>">
-        <input type="hidden" name="post_id" value="<?=(int)$post['id']?>">
-        <button class="like-button <?=$post['curtiu'] ? 'liked' : ''?>" type="submit"><?=e($post['curtiu'] ? t('liked') : t('like'))?> · <?=(int)$post['curtidas']?></button>
-      </form>
     </div>
     <?php if ($post['exige_ciencia']): ?>
       <?php if ($post['ciencia_em']): ?>
