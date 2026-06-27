@@ -242,6 +242,12 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .app-nav-icon{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--surface);border:2px solid var(--bh-black);font-size:.78rem;line-height:1}
 .app-nav-label{display:inline-block}
 .app-menu-head,.app-menu-overlay{display:none}
+.pwa-banner{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));z-index:1050;transform:translateX(-50%);width:min(94vw,520px);display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.75rem;background:var(--surface);border:3px solid var(--bh-black);border-radius:16px;padding:.85rem;box-shadow:6px 6px 0 var(--bh-black)}
+.pwa-banner[hidden]{display:none}
+.pwa-banner strong{display:block;font-weight:900;line-height:1.1}
+.pwa-banner span{display:block;color:var(--muted);font-size:.84rem}
+.pwa-banner-action{border:2px solid var(--bh-black);border-radius:999px;background:var(--gate);color:#fff;font-weight:900;padding:.55rem .85rem}
+.pwa-banner-close{width:34px;height:34px;border:2px solid var(--bh-black);border-radius:999px;background:var(--bh-paper);font-size:1.35rem;line-height:1}
 .feed-list{display:grid;gap:1rem;max-width:760px;margin:0 auto}
 .quick-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;max-width:760px;margin:0 auto 1rem}
 .quick-action-card{display:flex;flex-direction:column;justify-content:space-between;min-height:92px;background:#fff;color:var(--ink);text-decoration:none;border:3px solid var(--bh-black);border-radius:10px;padding:.9rem;box-shadow:4px 4px 0 var(--bh-black)}

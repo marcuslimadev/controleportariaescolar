@@ -199,6 +199,7 @@ function portal_nav_items(): array {
             [current_locale()==='en' ? 'Classes' : 'Turmas', 'admin/index.php'],
         ];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Teachers' : 'Professores', 'admin/index.php'];
+        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Settings' : 'Configurações', 'admin/configuracoes.php'];
         $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
         return $items;
     }
@@ -230,6 +231,7 @@ function portal_nav_icon(string $path, int $index): string {
     if (str_contains($path, 'frequencia')) return '✓';
     if (str_contains($path, 'eventos')) return '◷';
     if (str_contains($path, 'post-form')) return '+';
+    if (str_contains($path, 'configuracoes')) return '⚙';
     if (str_contains($path, 'admin/index')) return '☰';
     if (str_contains($path, 'responsavel/index')) return '👥';
     if (str_contains($path, 'feed')) return '⌂';
