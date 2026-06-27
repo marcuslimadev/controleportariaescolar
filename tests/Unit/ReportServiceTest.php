@@ -22,4 +22,6 @@ return static function (): void {
 
     if (($report['from'] ?? null) !== '2026-06-01') throw new RuntimeException('Período do relatório não foi normalizado.');
     if (count($report['rows'] ?? []) !== 1) throw new RuntimeException('Relatório não retornou linhas.');
+    if (($report['summary']['entradas'] ?? null) !== 1) throw new RuntimeException('Resumo de entradas incorreto.');
+    if (($report['summary']['alunos'] ?? null) !== 1) throw new RuntimeException('Resumo de alunos incorreto.');
 };

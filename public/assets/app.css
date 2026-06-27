@@ -595,6 +595,11 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .authorization-person strong{font-size:1.08rem;font-weight:950}
 .authorization-person span{color:var(--muted);font-weight:700}
 .authorization-note{border-left:4px solid var(--gate);padding:.6rem .8rem;background:#fff;border-radius:12px;color:var(--ink)}
+.report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.85rem;margin:0 auto 1rem;max-width:960px}
+.report-metrics article{padding:1rem;border:1px solid var(--ds-border,#DED8C8);border-radius:22px;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--gate) 5%,#fff));box-shadow:0 16px 36px #15171A0D}
+.report-metrics span{display:block;color:var(--muted);font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.report-metrics strong{display:block;font-size:clamp(1.45rem,5vw,2.2rem);font-weight:950;letter-spacing:-.06em;color:var(--ink)}
+@media(max-width:720px){.report-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* Fase 1: design system e identidade visual */
 :root{

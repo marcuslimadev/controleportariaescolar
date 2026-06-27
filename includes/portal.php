@@ -233,6 +233,7 @@ function portal_nav_items(): array {
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [t('new_post'), 'admin/post-form.php'],
             [current_locale()==='en' ? 'Comments' : 'Comentários', 'admin/comentarios.php'],
+            [current_locale()==='en' ? 'Reports' : 'Relatórios', 'admin/relatorios.php'],
             [t('events'), 'eventos.php'],
             [current_locale()==='en' ? 'Absence notices' : 'Avisos de falta', 'admin/avisos-falta.php'],
             [current_locale()==='en' ? 'Attendance' : 'Frequência', 'professor/frequencia.php'],
@@ -293,6 +294,7 @@ function portal_nav_icon(string $path, int $index): string {
     if (str_contains($path, 'frequencia')) return '✓';
     if (str_contains($path, 'eventos')) return '◷';
     if (str_contains($path, 'post-form')) return '+';
+    if (str_contains($path, 'relatorios')) return '▤';
     if (str_contains($path, 'configuracoes')) return '⚙';
     if (str_contains($path, 'logout')) return '↪';
     if (str_contains($path, 'admin/index')) return '☰';
@@ -311,6 +313,7 @@ function portal_nav_short_label(string $label): string {
         'Responsáveis' => 'Resp.',
         'Meus filhos' => 'Filhos',
         'Meu perfil' => 'Perfil',
+        'Relatórios' => 'Relat.',
         default => $label,
     };
 }
