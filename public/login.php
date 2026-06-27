@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = t('invalid_login');
     }
 }
-layout_header('Entrar');
+layout_header(t('public_portal'));
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
 ?>
 <section class="public-home <?=$showLogin ? 'show-login' : ''?>">

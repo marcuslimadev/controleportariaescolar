@@ -247,8 +247,10 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .public-home:not(.show-login) .login-card{display:none}
 .public-home .login-card{margin:0 auto 1rem;box-shadow:6px 6px 0 var(--bh-yellow)}
 .public-feed-shell{display:grid;gap:1rem}
-.public-feed-title{padding:.2rem .3rem}
-.public-feed-title h1{font-size:1.7rem;font-weight:950;letter-spacing:-.05em;margin:0}
+.public-feed-title{padding:1rem 1.05rem;background:#FFFFFFE8;border:1px solid #DED8C8;border-radius:24px;box-shadow:0 18px 42px #15171A12;backdrop-filter:blur(14px)}
+.public-feed-title .gate-eyebrow{color:#6B7280}
+.public-feed-title .gate-eyebrow:before{display:none}
+.public-feed-title h1{font-size:1.7rem;font-weight:950;letter-spacing:-.05em;margin:.18rem 0 0;color:var(--ink)}
 .public-instagram-feed{display:grid;gap:1rem}
 .public-insta-post{background:#fff;border:2px solid var(--bh-black);border-radius:18px;overflow:hidden;box-shadow:5px 5px 0 var(--bh-black)}
 .public-insta-post.important{border-color:var(--bh-red)}
@@ -455,6 +457,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
   linear-gradient(180deg,#FBFAF6 0%,#F1EEE6 100%)}
 .theme-classic .navbar{border-bottom:1px solid #DED8C8;background:linear-gradient(135deg,#155BA8,#1C6CC4)!important;box-shadow:0 18px 42px #155BA820}
 .theme-classic .public-topbar,
+.theme-classic .public-feed-title,
 .theme-classic .public-insta-post,
 .theme-classic .section-card,
 .theme-classic .data-table-card,
@@ -493,6 +496,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
   radial-gradient(circle at 85% 8%,#F8FBFF 0 260px,transparent 261px),
   linear-gradient(180deg,#FFFFFF 0%,#F5FAFF 100%)}
 .theme-blue-white .public-topbar,
+.theme-blue-white .public-feed-title,
 .theme-blue-white .public-insta-post,
 .theme-blue-white .login-card,
 .theme-blue-white .public-post-head,
@@ -518,6 +522,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
   linear-gradient(180deg,#FAFAFA 0%,#EFEFEF 100%)}
 .theme-black-white .navbar{background:linear-gradient(135deg,#0F0F10,#3D3D3F)!important}
 .theme-black-white .public-topbar,
+.theme-black-white .public-feed-title,
 .theme-black-white .public-insta-post,
 .theme-black-white .login-card,
 .theme-black-white .theme-choice{border:1px solid #cecece!important;border-radius:26px;box-shadow:0 24px 62px #00000010;background:#FFFFFFE8;backdrop-filter:blur(14px)}
