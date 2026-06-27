@@ -16,6 +16,9 @@
     "check": [
       "php scripts/ci_check.php",
       "php scripts/unit_check.php"
+    ],
+    "smoke": [
+      "php scripts/http_smoke.php"
     ]
   }
 }

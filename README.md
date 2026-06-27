@@ -36,3 +36,9 @@ php scripts/ci_check.php
 ```
 
 O GitHub Actions executa a mesma validação em pushes e pull requests para a `main`.
+
+Após publicar, rode ou deixe o deploy executar:
+
+```powershell
+php scripts/http_smoke.php https://scp.lojadaesquina.store
+```

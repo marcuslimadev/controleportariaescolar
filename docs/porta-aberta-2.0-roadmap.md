@@ -43,12 +43,13 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Cadastro rápido da portaria migrado para `QuickRegistrationService`.
 - Conferência de cadastro por convite passou a usar `InviteService`.
 - Páginas públicas, de portaria e administrativas principais ficaram sem SQL direto.
+- Smoke HTTP não destrutivo criado e acoplado ao deploy.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 92%.
-- Restante estimado: 8%.
+- Base aproveitável do 2.0 no MVP atual: 95%.
+- Restante estimado: 5%.
 
 ## Próximas fases
 

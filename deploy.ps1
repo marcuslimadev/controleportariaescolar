@@ -52,6 +52,7 @@ try {
   $cmd = "if [ -f '$RemotePath/config/config.php' ]; then cp '$RemotePath/config/config.php' /tmp/scp-config.php; fi && mkdir -p '$RemotePath/public_html' && find '$RemotePath/public_html' -mindepth 1 -maxdepth 1 -exec rm -rf {} + && rm -rf '$RemotePath/includes' '$RemotePath/database' '$RemotePath/scripts' '$RemotePath/config' && tar -xzf /tmp/scp-deploy.tar.gz -C '$RemotePath' && if [ -f /tmp/scp-config.php ]; then mv /tmp/scp-config.php '$RemotePath/config/config.php'; fi && cd '$RemotePath' && php scripts/migrate.php && cp -a '$RemotePath/public/.' '$RemotePath/public_html/' && rm -rf '$RemotePath/public' /tmp/scp-deploy.tar.gz && chmod -R u=rwX,go=rX '$RemotePath'"
   & plink -batch -P $Port -l $User -pw $password $HostName $cmd
   if ($LASTEXITCODE) { throw 'Falha na publicação remota.' }
+  php scripts/http_smoke.php 'https://scp.lojadaesquina.store'
   Write-Host 'Deploy concluído: https://scp.lojadaesquina.store'
 } finally {
   Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
