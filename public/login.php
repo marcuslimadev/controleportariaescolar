@@ -99,6 +99,7 @@ $coverUrl = app_cover_url();
               <h2><?=e($post['titulo'])?></h2>
               <p><?=nl2br(e(portal_excerpt($post['conteudo'], 260)))?></p>
               <?php if ($post['data_evento']): ?><div class="event-strip"><strong><?=e(date('d/m/Y', strtotime($post['data_evento'])))?></strong><?php if ($post['hora_evento']): ?> às <?=e(substr($post['hora_evento'], 0, 5))?><?php endif ?><?php if ($post['local']): ?> · <?=e($post['local'])?><?php endif ?></div><?php endif ?>
+              <?php if (!empty($post['anexo_url'])): ?><a class="attachment-card" href="<?=e($post['anexo_url'])?>" target="_blank" rel="noopener"><span>📎</span><strong><?=e($post['anexo_nome'] ?: 'Abrir anexo')?></strong></a><?php endif ?>
             </div>
           </article>
         <?php endforeach ?>

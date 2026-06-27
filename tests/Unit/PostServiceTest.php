@@ -42,6 +42,8 @@ final class InMemoryPostRepository implements PostRepository
 
     public function listAdmin(int $limit = 100): array { return $this->adminList; }
 
+    public function scienceHistory(int $postId): array { return []; }
+
     public function feed(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian, int $limit = 80): array
     {
         return $this->feedList ?: [['actor_id' => $actorId, 'is_guardian' => $isGuardian]];
@@ -104,14 +106,14 @@ return static function (): void {
         'tipo' => 'comunicado',
         'publico' => 'toda_escola',
         'status' => 'publicado',
-    ], null, 7, 'admin');
+    ], null, null, null, 7, 'admin');
     if ($createdId !== 99) throw new RuntimeException('Criação não retornou id.');
     if (($repo->created[0]['publicado_em'] ?? null) === null) throw new RuntimeException('Publicado sem data de publicação.');
     if (($audit->records[0]['action'] ?? null) !== 'criar_post') throw new RuntimeException('Criação não auditou.');
 
     $repo = new InMemoryPostRepository();
     $audit = new SpyAuditLogger();
-    $repo->posts[20] = ['id' => 20, 'autor_id' => 7, 'autor_perfil' => 'secretaria', 'imagem_url' => 'old.jpg', 'publicado_em' => null];
+    $repo->posts[20] = ['id' => 20, 'autor_id' => 7, 'autor_perfil' => 'secretaria', 'imagem_url' => 'old.jpg', 'anexo_url' => 'old.pdf', 'anexo_nome' => 'old.pdf', 'publicado_em' => null];
     $service = new PostService($repo, $audit);
     $updatedId = $service->savePost([
         'id' => 20,
@@ -120,9 +122,10 @@ return static function (): void {
         'tipo' => 'alerta',
         'publico' => 'toda_escola',
         'status' => 'rascunho',
-    ], null, 7, 'secretaria');
+    ], null, null, null, 7, 'secretaria');
     if ($updatedId !== 20) throw new RuntimeException('Edição não retornou id original.');
     if (($repo->updated[20]['imagem_url'] ?? null) !== 'old.jpg') throw new RuntimeException('Imagem antiga não foi preservada.');
+    if (($repo->updated[20]['anexo_url'] ?? null) !== 'old.pdf') throw new RuntimeException('Anexo antigo não foi preservado.');
     if (($audit->records[0]['action'] ?? null) !== 'editar_post') throw new RuntimeException('Edição não auditou.');
 
     $form = $service->formData(20, 7, 'secretaria');

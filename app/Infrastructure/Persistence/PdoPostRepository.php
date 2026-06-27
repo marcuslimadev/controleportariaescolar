@@ -25,7 +25,8 @@ final class PdoPostRepository implements PostRepository
     {
         $limit = max(1, min(200, $limit));
         $query = $this->pdo->query(
-            "SELECT p.*, u.nome autor, t.nome turma, a.nome aluno
+            "SELECT p.*, u.nome autor, t.nome turma, a.nome aluno,
+                (SELECT COUNT(*) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_total
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
              LEFT JOIN scp_turmas t ON t.id=p.turma_id
@@ -34,6 +35,23 @@ final class PdoPostRepository implements PostRepository
              ORDER BY p.created_at DESC
              LIMIT {$limit}"
         );
+
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function scienceHistory(int $postId): array
+    {
+        $query = $this->pdo->prepare(
+            "SELECT ci.confirmado_em, ci.ip, ci.user_agent,
+                    COALESCE(r.nome, u.nome) pessoa,
+                    CASE WHEN ci.responsavel_id IS NOT NULL THEN 'responsavel' ELSE u.perfil END perfil
+             FROM scp_post_ciencias ci
+             LEFT JOIN scp_responsaveis r ON r.id=ci.responsavel_id
+             LEFT JOIN scp_usuarios u ON u.id=ci.usuario_id
+             WHERE ci.post_id=?
+             ORDER BY ci.confirmado_em DESC"
+        );
+        $query->execute([$postId]);
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -64,7 +82,7 @@ final class PdoPostRepository implements PostRepository
     {
         $limit = max(1, min(20, $limit));
         $query = $this->pdo->query(
-            "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
+            "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.anexo_url,p.anexo_nome,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
              WHERE p.status='publicado' AND p.publico='publico' AND p.deleted_at IS NULL
@@ -112,7 +130,7 @@ final class PdoPostRepository implements PostRepository
     public function create(array $data): int
     {
         $query = $this->pdo->prepare(
-            'INSERT INTO scp_posts(autor_id,tipo,titulo,conteudo,imagem_url,publico,turma_id,aluno_id,data_evento,hora_evento,local,importante,exige_ciencia,fixado,status,publicado_em) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            'INSERT INTO scp_posts(autor_id,tipo,titulo,conteudo,imagem_url,anexo_url,anexo_nome,publico,turma_id,aluno_id,data_evento,hora_evento,local,importante,exige_ciencia,fixado,status,publicado_em) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         );
         $query->execute([
             $data['autor_id'],
@@ -120,6 +138,8 @@ final class PdoPostRepository implements PostRepository
             $data['titulo'],
             $data['conteudo'],
             $data['imagem_url'],
+            $data['anexo_url'],
+            $data['anexo_nome'],
             $data['publico'],
             $data['turma_id'],
             $data['aluno_id'],
@@ -139,13 +159,15 @@ final class PdoPostRepository implements PostRepository
     public function update(int $id, array $data): void
     {
         $query = $this->pdo->prepare(
-            'UPDATE scp_posts SET tipo=?,titulo=?,conteudo=?,imagem_url=?,publico=?,turma_id=?,aluno_id=?,data_evento=?,hora_evento=?,local=?,importante=?,exige_ciencia=?,fixado=?,status=?,publicado_em=? WHERE id=?'
+            'UPDATE scp_posts SET tipo=?,titulo=?,conteudo=?,imagem_url=?,anexo_url=?,anexo_nome=?,publico=?,turma_id=?,aluno_id=?,data_evento=?,hora_evento=?,local=?,importante=?,exige_ciencia=?,fixado=?,status=?,publicado_em=? WHERE id=?'
         );
         $query->execute([
             $data['tipo'],
             $data['titulo'],
             $data['conteudo'],
             $data['imagem_url'],
+            $data['anexo_url'],
+            $data['anexo_nome'],
             $data['publico'],
             $data['turma_id'],
             $data['aluno_id'],

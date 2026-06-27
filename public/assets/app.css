@@ -542,6 +542,10 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .theme-black-white .btn-outline-secondary{background:#FFFFFFDD;border:1px solid #cecece;color:#171717;box-shadow:0 10px 24px #0000000B}
 .theme-black-white .event-strip{background:#F6F6F6;border:1px solid #cecece;color:#171717}
 .theme-black-white .public-post-head em{background:#F1F1F1;border:1px solid #cecece;color:#111}
+.attachment-card{display:flex;align-items:center;gap:.75rem;margin:.85rem 0 0;padding:.85rem 1rem;border:2px solid var(--bh-black);border-radius:12px;background:#F8F5EC;color:var(--ink);text-decoration:none;font-weight:900}
+.attachment-card:hover{background:var(--bh-yellow);color:var(--bh-black)}
+.attachment-card span{display:grid;place-items:center;width:36px;height:36px;border-radius:999px;background:#fff;border:2px solid var(--bh-black)}
+.attachment-card strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Fase 1: design system e identidade visual */
 :root{
@@ -598,6 +602,13 @@ body{color:var(--ds-text)}
   border-radius:999px;
   box-shadow:none;
 }
+.attachment-card{
+  border:1px solid var(--ds-border)!important;
+  border-radius:18px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--ds-accent) 8%,#fff),#fff);
+  box-shadow:var(--ds-shadow-soft);
+}
+.attachment-card span{border:1px solid var(--ds-border);background:#fff}
 .public-cover-card{
   position:relative;
   margin:0;

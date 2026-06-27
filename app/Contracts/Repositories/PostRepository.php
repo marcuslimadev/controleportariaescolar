@@ -9,6 +9,8 @@ interface PostRepository
 
     public function listAdmin(int $limit = 100): array;
 
+    public function scienceHistory(int $postId): array;
+
     public function feed(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian, int $limit = 80): array;
 
     public function publicFeed(int $limit = 6): array;

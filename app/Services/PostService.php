@@ -69,7 +69,7 @@ final class PostService
     public function formData(int $id, int $actorId, string $actorRole): array
     {
         $post = [
-            'id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'publico',
+            'id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','anexo_url'=>'','anexo_nome'=>'','publico'=>'publico',
             'turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'',
             'importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho',
         ];
@@ -89,7 +89,7 @@ final class PostService
         ];
     }
 
-    public function savePost(array $input, ?string $imageUrl, int $actorId, string $actorRole): int
+    public function savePost(array $input, ?string $imageUrl, ?string $attachmentUrl, ?string $attachmentName, int $actorId, string $actorRole): int
     {
         $id = (int)($input['id'] ?? 0);
         $current = null;
@@ -101,7 +101,14 @@ final class PostService
             $this->assertCanManageExistingPost($current, $actorId, $actorRole, 'editar');
         }
 
-        $data = $this->normalizePostData($input, $imageUrl ?: ($current['imagem_url'] ?? null), $actorId, $current);
+        $data = $this->normalizePostData(
+            $input,
+            $imageUrl ?: ($current['imagem_url'] ?? null),
+            $attachmentUrl ?: ($current['anexo_url'] ?? null),
+            $attachmentName ?: ($current['anexo_nome'] ?? null),
+            $actorId,
+            $current
+        );
         if ($id > 0) {
             $this->posts->update($id, $data);
             $this->audit->record('editar_post', 'scp_posts', $id);
@@ -115,7 +122,18 @@ final class PostService
         return $id;
     }
 
-    private function normalizePostData(array $input, ?string $imageUrl, int $actorId, ?array $current): array
+    public function scienceHistory(int $postId, int $actorId, string $actorRole): array
+    {
+        $post = $this->posts->findActiveById($postId);
+        if (!$post) {
+            throw new RuntimeException('Publicação não encontrada.');
+        }
+        $this->assertCanManageExistingPost($post, $actorId, $actorRole, 'ver');
+
+        return ['post' => $post, 'rows' => $this->posts->scienceHistory($postId)];
+    }
+
+    private function normalizePostData(array $input, ?string $imageUrl, ?string $attachmentUrl, ?string $attachmentName, int $actorId, ?array $current): array
     {
         $type = in_array($input['tipo'] ?? '', self::TYPES, true) ? (string)$input['tipo'] : 'comunicado';
         $scope = in_array($input['publico'] ?? '', self::SCOPES, true) ? (string)$input['publico'] : 'toda_escola';
@@ -144,6 +162,8 @@ final class PostService
             'titulo' => $title,
             'conteudo' => $body,
             'imagem_url' => $imageUrl,
+            'anexo_url' => $attachmentUrl,
+            'anexo_nome' => $attachmentName,
             'publico' => $scope,
             'turma_id' => $classId,
             'aluno_id' => $studentId,

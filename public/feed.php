@@ -41,6 +41,12 @@ $quickActions = portal_quick_actions();
     <h2><?=e($post['titulo'])?></h2>
     <p class="feed-content"><?=nl2br(e(portal_excerpt($post['conteudo'])))?></p>
     <?php if ($post['imagem_url']): ?><img class="feed-image" src="<?=e($post['imagem_url'])?>" alt="<?=e(current_locale()==='en'?'Post image':'Imagem da publicação')?>"><?php endif ?>
+    <?php if (!empty($post['anexo_url'])): ?>
+      <a class="attachment-card" href="<?=e($post['anexo_url'])?>" target="_blank" rel="noopener">
+        <span>📎</span>
+        <strong><?=e($post['anexo_nome'] ?: (current_locale()==='en' ? 'Open attachment' : 'Abrir anexo'))?></strong>
+      </a>
+    <?php endif ?>
     <?php if ($post['data_evento']): ?>
       <div class="event-strip"><strong><?=e(date('d/m/Y', strtotime($post['data_evento'])))?></strong><?php if ($post['hora_evento']): ?> às <?=e(substr($post['hora_evento'], 0, 5))?><?php endif ?><?php if ($post['local']): ?> · <?=e($post['local'])?><?php endif ?></div>
     <?php endif ?>
