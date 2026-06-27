@@ -213,7 +213,7 @@ function portal_nav_html(): string {
     if ($prefix !== '' && str_starts_with($current, $prefix . '/')) {
         $current = substr($current, strlen($prefix) + 1);
     }
-    $html = '<div class="app-nav-scroll" aria-label="Menu principal"><div class="container"><nav class="app-nav">';
+    $html = '<div class="app-menu-overlay" aria-hidden="true"></div><div id="app-menu" class="app-nav-scroll" aria-label="Menu principal" aria-hidden="true"><div class="app-menu-head"><div><strong>Menu</strong><span>' . e(app_name()) . '</span></div><button class="app-menu-close" type="button" aria-label="Fechar menu">×</button></div><div class="container"><nav class="app-nav">';
     foreach ($items as $index => [$label, $path]) {
         $path = ltrim($path, '/');
         $active = $current === $path || ($path === 'admin/index.php' && str_starts_with($current, 'admin/'));
