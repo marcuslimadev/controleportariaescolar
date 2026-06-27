@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 function app_name(): string {
-    return 'Porta Aberta Escolar';
+    return t('app_name');
 }
 
 function app_tagline(): string {
@@ -41,6 +41,7 @@ function t(string $key): string {
     static $messages = [
         'pt' => [
             'app_tagline' => 'O canal oficial entre escola, família e portaria.',
+            'app_name' => 'Porta Aberta Escolar',
             'logout' => 'Sair',
             'language' => 'Idioma',
             'portuguese' => 'Português',
@@ -82,6 +83,7 @@ function t(string $key): string {
         ],
         'en' => [
             'app_tagline' => 'The official channel between school, family, and gatehouse.',
+            'app_name' => 'Open School Door',
             'logout' => 'Sign out',
             'language' => 'Language',
             'portuguese' => 'Português',
