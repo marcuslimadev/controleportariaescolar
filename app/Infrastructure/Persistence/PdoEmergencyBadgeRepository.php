@@ -12,7 +12,7 @@ final class PdoEmergencyBadgeRepository implements EmergencyBadgeRepository
 
     public function findActiveStudentByToken(string $token): ?array
     {
-        $query = $this->pdo->prepare('SELECT id,qr_token FROM scp_alunos WHERE qr_token=? AND ativo=1 LIMIT 1');
+        $query = $this->pdo->prepare('SELECT id,qr_token FROM scp_alunos WHERE qr_token=? AND ativo=1 AND deleted_at IS NULL LIMIT 1');
         $query->execute([$token]);
         $student = $query->fetch(PDO::FETCH_ASSOC);
 

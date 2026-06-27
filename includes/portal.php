@@ -120,7 +120,7 @@ function post_visible_sql(string $alias = 'p'): array {
     $role = current_role();
     if (in_array($role, ['admin', 'secretaria'], true)) return ['1=1', []];
     if ($role === 'responsavel') {
-        return ["($alias.publico='toda_escola' OR ($alias.publico='turma' AND $alias.turma_id IN (SELECT a.turma_id FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id WHERE ar.responsavel_id=?)) OR ($alias.publico='aluno' AND $alias.aluno_id IN (SELECT aluno_id FROM scp_aluno_responsavel WHERE responsavel_id=?)))", [$_SESSION['responsavel_id'], $_SESSION['responsavel_id']]];
+        return ["($alias.publico='toda_escola' OR ($alias.publico='turma' AND $alias.turma_id IN (SELECT a.turma_id FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id WHERE ar.responsavel_id=? AND a.deleted_at IS NULL)) OR ($alias.publico='aluno' AND $alias.aluno_id IN (SELECT ar.aluno_id FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id WHERE ar.responsavel_id=? AND a.deleted_at IS NULL)))", [$_SESSION['responsavel_id'], $_SESSION['responsavel_id']]];
     }
     if ($role === 'professor') {
         return ["($alias.publico IN ('toda_escola','equipe') OR ($alias.publico='turma' AND $alias.turma_id IN (SELECT turma_id FROM scp_professor_turma pt JOIN scp_professores pr ON pr.id=pt.professor_id WHERE pr.usuario_id=? AND pr.ativo=1)))", [$_SESSION['user_id']]];

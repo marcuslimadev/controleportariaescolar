@@ -76,5 +76,5 @@ layout_header('Entrar');
     </div>
   </div>
 </section>
-<script>const password=document.querySelector('#senha'),toggle=document.querySelector('#toggle-password');toggle.addEventListener('click',()=>{const show=password.type==='password';password.type=show?'text':'password';toggle.textContent=show?'Ocultar':'Mostrar';toggle.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha')});</script>
+<script nonce="<?=e(csp_nonce())?>">const password=document.querySelector('#senha'),toggle=document.querySelector('#toggle-password');toggle.addEventListener('click',()=>{const show=password.type==='password';password.type=show?'text':'password';toggle.textContent=show?'Ocultar':'Mostrar';toggle.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha')});</script>
 <?php layout_footer();

@@ -18,7 +18,7 @@ final class PdoReportRepository implements ReportRepository
              JOIN scp_alunos a ON a.id=r.aluno_id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
              JOIN scp_usuarios u ON u.id=r.usuario_id
-             WHERE DATE(r.registrado_em) BETWEEN ? AND ?
+             WHERE DATE(r.registrado_em) BETWEEN ? AND ? AND a.deleted_at IS NULL AND u.deleted_at IS NULL
              ORDER BY r.registrado_em DESC'
         );
         $query->execute([$from, $to]);

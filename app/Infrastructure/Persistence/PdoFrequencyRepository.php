@@ -28,7 +28,7 @@ final class PdoFrequencyRepository implements FrequencyRepository
     public function dailyRows(string $date, ?int $classId, string $studentName, string $role, int $professorId): array
     {
         $params = [$date, $date, $date];
-        $where = 'a.ativo=1';
+        $where = 'a.ativo=1 AND a.deleted_at IS NULL';
 
         if ($classId !== null && $classId > 0) {
             $where .= ' AND a.turma_id=?';

@@ -84,9 +84,9 @@ final class PdoSchoolAdminRepository implements SchoolAdminRepository
     {
         return [
             'scp_turmas' => $this->pdo->query('SELECT * FROM scp_turmas ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC),
-            'scp_alunos' => $this->pdo->query('SELECT a.*,t.nome turma FROM scp_alunos a LEFT JOIN scp_turmas t ON t.id=a.turma_id ORDER BY a.nome')->fetchAll(PDO::FETCH_ASSOC),
-            'resp' => $this->pdo->query('SELECT * FROM scp_responsaveis ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC),
-            'users' => $this->pdo->query('SELECT * FROM scp_usuarios ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC),
+            'scp_alunos' => $this->pdo->query('SELECT a.*,t.nome turma FROM scp_alunos a LEFT JOIN scp_turmas t ON t.id=a.turma_id WHERE a.deleted_at IS NULL ORDER BY a.nome')->fetchAll(PDO::FETCH_ASSOC),
+            'resp' => $this->pdo->query('SELECT * FROM scp_responsaveis WHERE deleted_at IS NULL ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC),
+            'users' => $this->pdo->query('SELECT * FROM scp_usuarios WHERE deleted_at IS NULL ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC),
             'professores' => $this->pdo->query('SELECT p.*,u.email usuario_email FROM scp_professores p LEFT JOIN scp_usuarios u ON u.id=p.usuario_id ORDER BY p.nome')->fetchAll(PDO::FETCH_ASSOC),
             'profTurmas' => $this->pdo->query('SELECT pt.professor_id,GROUP_CONCAT(t.nome ORDER BY t.nome SEPARATOR ", ") turmas FROM scp_professor_turma pt JOIN scp_turmas t ON t.id=pt.turma_id GROUP BY pt.professor_id')->fetchAll(PDO::FETCH_KEY_PAIR),
         ];

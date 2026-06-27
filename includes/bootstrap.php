@@ -9,9 +9,10 @@ spl_autoload_register(static function (string $class): void {
     if (is_file($path)) require_once $path;
 });
 
+function csp_nonce(): string { static $nonce = null; return $nonce ??= bin2hex(random_bytes(16)); }
 function send_security_headers(): void {
     if (headers_sent()) return;
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self' data: https://cdn.jsdelivr.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-" . csp_nonce() . "' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self' data: https://cdn.jsdelivr.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     header('X-Frame-Options: DENY');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -131,4 +132,4 @@ function layout_header(string $title): void {
     if (!empty($_SESSION['user_id']) || !empty($_SESSION['responsavel_id'])) echo '<nav class="navbar navbar-dark bg-primary"><div class="container"><a class="navbar-brand brand-lockup" href="'.e(url(portal_home())).'"><img src="'.e(asset_url('assets/porta-aberta-logo.jpg')).'" alt="'.e(app_name()).'"><span>'.e(app_name()).'</span></a><a class="btn btn-outline-light btn-sm" href="'.e(url('logout.php')).'">Sair</a></div></nav>'.portal_nav_html();
     echo '<main class="container pb-5">'; if ($flash) echo '<div class="alert alert-'.e($flash[1]).'">'.e($flash[0]).'</div>';
 }
-function layout_footer(): void { echo '</main><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("'.e(url('sw.js')).'"));}</script></body></html>'; }
+function layout_footer(): void { echo '</main><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script nonce="'.e(csp_nonce()).'">if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("'.e(url('sw.js')).'"));}</script></body></html>'; }

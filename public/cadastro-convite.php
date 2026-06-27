@@ -34,7 +34,7 @@ layout_header('Cadastro da família');
   </form>
   <?php endif?>
 </section>
-<script>
+<script nonce="<?=e(csp_nonce())?>">
 for(const [inputId,previewId] of [['responsavel_foto','responsavel-preview'],['aluno_foto','aluno-preview']]){const input=document.getElementById(inputId);if(input)input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;const preview=document.getElementById(previewId);preview.src=URL.createObjectURL(file);preview.classList.add('show')})}
 const onboardingForm=document.querySelector('.onboarding-form');
 if(onboardingForm){

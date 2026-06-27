@@ -28,7 +28,7 @@ final class PdoQuickRegistrationRepository implements QuickRegistrationRepositor
     {
         $this->pdo->beginTransaction();
         try {
-            $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? LIMIT 1');
+            $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? AND deleted_at IS NULL LIMIT 1');
             $query->execute([$data['responsavel_cpf']]);
             $guardianId = (int)$query->fetchColumn();
 

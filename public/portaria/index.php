@@ -29,7 +29,7 @@
   <div id="result" class="result-area" aria-live="polite"></div>
 </section>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script><script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script><script nonce="<?=e(csp_nonce())?>">
 const csrf=<?=json_encode(csrf())?>;
 const reader=new Html5Qrcode('reader');
 const startButton=document.querySelector('#start-scan');

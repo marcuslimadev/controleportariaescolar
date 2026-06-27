@@ -22,10 +22,10 @@ layout_header('QR de segurança de '.$a['nome']);
     <div id="security-qrcode" style="display:flex;justify-content:center;padding:12px"></div>
   </div>
   <div class="badge-actions">
-    <button class="btn btn-outline-primary btn-lg w-100" type="button" onclick="window.print()">Imprimir</button>
+    <button class="btn btn-outline-primary btn-lg w-100" id="print-security-badge" type="button">Imprimir</button>
     <a class="btn btn-link" href="<?=e(url('admin/index.php'))?>">Voltar ao painel</a>
   </div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script>new QRCode(document.querySelector('#security-qrcode'),{text:<?=json_encode($emergencyUrl)?>,width:260,height:260,correctLevel:QRCode.CorrectLevel.H});</script>
+<script nonce="<?=e(csp_nonce())?>">document.querySelector('#print-security-badge').addEventListener('click',()=>window.print());new QRCode(document.querySelector('#security-qrcode'),{text:<?=json_encode($emergencyUrl)?>,width:260,height:260,correctLevel:QRCode.CorrectLevel.H});</script>
 <?php layout_footer();

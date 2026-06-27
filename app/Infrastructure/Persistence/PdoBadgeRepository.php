@@ -12,7 +12,7 @@ final class PdoBadgeRepository implements BadgeRepository
 
     public function findGuardianByQrToken(string $token): ?array
     {
-        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE qr_token=? AND ativo=1');
+        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE qr_token=? AND ativo=1 AND deleted_at IS NULL');
         $query->execute([$token]);
         $row = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -25,7 +25,7 @@ final class PdoBadgeRepository implements BadgeRepository
             "SELECT r.*
              FROM scp_convites_cadastro c
              JOIN scp_responsaveis r ON r.id=c.responsavel_id
-             WHERE c.token_hash=? AND c.responsavel_id=? AND c.status='aprovado'"
+             WHERE c.token_hash=? AND c.responsavel_id=? AND c.status='aprovado' AND r.deleted_at IS NULL"
         );
         $query->execute([hash('sha256', $inviteToken), $guardianId]);
         $row = $query->fetch(PDO::FETCH_ASSOC);
@@ -35,7 +35,7 @@ final class PdoBadgeRepository implements BadgeRepository
 
     public function findActiveGuardianById(int $id): ?array
     {
-        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE id=? AND ativo=1');
+        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE id=? AND ativo=1 AND deleted_at IS NULL');
         $query->execute([$id]);
         $row = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -44,7 +44,7 @@ final class PdoBadgeRepository implements BadgeRepository
 
     public function findGuardianById(int $id): ?array
     {
-        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE id=?');
+        $query = $this->pdo->prepare('SELECT * FROM scp_responsaveis WHERE id=? AND deleted_at IS NULL');
         $query->execute([$id]);
         $row = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -64,7 +64,7 @@ final class PdoBadgeRepository implements BadgeRepository
              FROM scp_alunos a
              JOIN scp_aluno_responsavel ar ON ar.aluno_id=a.id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
-             WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1
+             WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1 AND a.deleted_at IS NULL
              ORDER BY a.nome'
         );
         $query->execute([$guardianId]);
@@ -80,7 +80,7 @@ final class PdoBadgeRepository implements BadgeRepository
 
     public function findActiveStudentSecurityBadge(int $studentId): ?array
     {
-        $query = $this->pdo->prepare('SELECT id,nome,qr_token FROM scp_alunos WHERE id=? AND ativo=1');
+        $query = $this->pdo->prepare('SELECT id,nome,qr_token FROM scp_alunos WHERE id=? AND ativo=1 AND deleted_at IS NULL');
         $query->execute([$studentId]);
         $row = $query->fetch(PDO::FETCH_ASSOC);
 

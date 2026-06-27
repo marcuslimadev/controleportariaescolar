@@ -35,10 +35,10 @@ layout_header('Convites de cadastro');
     <div class="success-check">✓</div><h2>Convite pronto</h2><p>Mostre este QR Code para o responsável ler agora.</p><div id="invite-qrcode"></div>
     <a class="btn-whatsapp d-flex align-items-center justify-content-center text-decoration-none mt-3" href="<?=e($waUrl)?>" target="_blank" rel="noopener">Enviar convite pelo WhatsApp</a>
     <label class="form-label small text-muted mt-3 mb-1 d-block text-start" for="wa-link-field">Link do WhatsApp</label>
-    <div class="input-group input-group-sm"><input type="text" class="form-control" readonly value="<?=e($waUrl)?>" id="wa-link-field" aria-label="Link do WhatsApp" onclick="this.select()"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('wa-link-field').value)">Copiar</button></div>
-    <button class="btn btn-outline-secondary w-100 mt-2" type="button" onclick="navigator.clipboard.writeText(<?=e(json_encode($inviteUrl))?>)">Copiar link do cadastro</button>
+    <div class="input-group input-group-sm"><input type="text" class="form-control" readonly value="<?=e($waUrl)?>" id="wa-link-field" aria-label="Link do WhatsApp"><button class="btn btn-outline-secondary" id="copy-wa-link" type="button">Copiar</button></div>
+    <button class="btn btn-outline-secondary w-100 mt-2" id="copy-invite-link" type="button" data-link="<?=e($inviteUrl)?>">Copiar link do cadastro</button>
   </article>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script>new QRCode(document.querySelector('#invite-qrcode'),{text:<?=json_encode($inviteUrl)?>,width:230,height:230,correctLevel:QRCode.CorrectLevel.M});</script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script nonce="<?=e(csp_nonce())?>">const waLinkField=document.querySelector('#wa-link-field');waLinkField.addEventListener('click',()=>waLinkField.select());document.querySelector('#copy-wa-link').addEventListener('click',()=>navigator.clipboard.writeText(waLinkField.value));document.querySelector('#copy-invite-link').addEventListener('click',event=>navigator.clipboard.writeText(event.currentTarget.dataset.link));new QRCode(document.querySelector('#invite-qrcode'),{text:<?=json_encode($inviteUrl)?>,width:230,height:230,correctLevel:QRCode.CorrectLevel.M});</script>
   <?php endif?>
 
   <div class="d-flex align-items-center justify-content-between mt-4 mb-2"><h2 class="h4 mb-0">Acompanhamento</h2><span class="pending-live"><i></i> Atualização automática</span></div>
@@ -47,7 +47,7 @@ layout_header('Convites de cadastro');
     <?php foreach($invites as $item):?><article class="invite-item <?=$item['status']==='preenchido'?'ready':''?>"><div><span class="invite-status"><?=$item['status']==='preenchido'?'Cadastro concluído':'Aguardando responsável'?></span><h3><?=$item['aluno_nome']?e($item['aluno_nome']):'WhatsApp •••• '.e(substr($item['telefone'],-4))?></h3><p><?=$item['responsavel_nome']?'Responsável: '.e($item['responsavel_nome']):'Convite criado '.e(date('d/m H:i',strtotime($item['created_at'])))?></p></div><?php if($item['status']==='preenchido'):?><a class="btn btn-success btn-lg" href="<?=e(url('portaria/aprovar.php?id='.$item['id']))?>">Revisar e aprovar</a><?php endif?></article><?php endforeach?>
   </div>
 </section>
-<script>
+<script nonce="<?=e(csp_nonce())?>">
 const telefoneInput=document.getElementById('telefone');
 setInterval(async()=>{
   try{

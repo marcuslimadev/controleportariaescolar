@@ -24,8 +24,8 @@ layout_header('Crachá digital');
     <?php foreach($children as $c):?><article><?php if($c['foto']):?><img src="<?=e($c['foto'])?>" alt="Foto de <?=e($c['nome'])?>"><?php endif?><div><strong><?=e($c['nome'])?></strong><span><?=e($c['turma']??'Sem turma')?></span></div></article><?php endforeach?>
   </div>
   <?php endif?>
-  <div class="badge-actions"><button class="btn-scan" type="button" onclick="window.print()">Imprimir ou salvar em PDF</button><a class="btn btn-outline-primary btn-lg" href="<?=e(url('login.php'))?>">Entrar no portal da família</a></div>
+  <div class="badge-actions"><button class="btn-scan" id="print-badge" type="button">Imprimir ou salvar em PDF</button><a class="btn btn-outline-primary btn-lg" href="<?=e(url('login.php'))?>">Entrar no portal da família</a></div>
   <p class="privacy-note">Não compartilhe este link publicamente. Ele funciona como identificação digital.</p>
 </section>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script>new QRCode(document.querySelector('#public-qrcode'),{text:<?=json_encode($responsavel['qr_token'])?>,width:250,height:250,correctLevel:QRCode.CorrectLevel.H});</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script nonce="<?=e(csp_nonce())?>">document.querySelector('#print-badge').addEventListener('click',()=>window.print());new QRCode(document.querySelector('#public-qrcode'),{text:<?=json_encode($responsavel['qr_token'])?>,width:250,height:250,correctLevel:QRCode.CorrectLevel.H});</script>
 <?php layout_footer();

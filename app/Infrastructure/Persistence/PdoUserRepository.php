@@ -12,7 +12,7 @@ final class PdoUserRepository implements UserRepository
 
     public function findActiveByEmail(string $email): ?array
     {
-        $query = $this->pdo->prepare('SELECT * FROM scp_usuarios WHERE email=? AND ativo=1 LIMIT 1');
+        $query = $this->pdo->prepare('SELECT * FROM scp_usuarios WHERE email=? AND ativo=1 AND deleted_at IS NULL LIMIT 1');
         $query->execute([strtolower(trim($email))]);
         $user = $query->fetch(PDO::FETCH_ASSOC);
 

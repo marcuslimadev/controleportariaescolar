@@ -106,7 +106,7 @@ final class PdoPostRepository implements PostRepository
 
     public function activeStudents(): array
     {
-        return $this->pdo->query('SELECT id,nome FROM scp_alunos WHERE ativo=1 ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC);
+        return $this->pdo->query('SELECT id,nome FROM scp_alunos WHERE ativo=1 AND deleted_at IS NULL ORDER BY nome')->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create(array $data): int

@@ -12,7 +12,7 @@ final class PdoGuardianRepository implements GuardianRepository
 
     public function findActiveIdByQrToken(string $token): ?int
     {
-        $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE qr_token=? AND ativo=1');
+        $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE qr_token=? AND ativo=1 AND deleted_at IS NULL');
         $query->execute([$token]);
         $id = (int)$query->fetchColumn();
 
@@ -21,7 +21,7 @@ final class PdoGuardianRepository implements GuardianRepository
 
     public function findActiveByQrToken(string $token): ?array
     {
-        $query = $this->pdo->prepare('SELECT id,nome,foto,qr_token FROM scp_responsaveis WHERE qr_token=? AND ativo=1');
+        $query = $this->pdo->prepare('SELECT id,nome,foto,qr_token FROM scp_responsaveis WHERE qr_token=? AND ativo=1 AND deleted_at IS NULL');
         $query->execute([$token]);
         $guardian = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -36,7 +36,7 @@ final class PdoGuardianRepository implements GuardianRepository
              FROM scp_alunos a
              JOIN scp_aluno_responsavel ar ON ar.aluno_id=a.id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
-             WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1
+             WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1 AND a.deleted_at IS NULL
              ORDER BY a.nome"
         );
         $query->execute([$guardianId]);
@@ -54,7 +54,7 @@ final class PdoGuardianRepository implements GuardianRepository
 
     public function findIdByCpf(string $cpf): ?int
     {
-        $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? LIMIT 1');
+        $query = $this->pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? AND deleted_at IS NULL LIMIT 1');
         $query->execute([$cpf]);
         $id = (int)$query->fetchColumn();
 
@@ -63,7 +63,7 @@ final class PdoGuardianRepository implements GuardianRepository
 
     public function findActiveByCpfOrPhone(string $digits): ?array
     {
-        $query = $this->pdo->prepare("SELECT * FROM scp_responsaveis WHERE ativo=1 AND (cpf=? OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,' ',''),'-',''),'(',''),')','')=?) LIMIT 1");
+        $query = $this->pdo->prepare("SELECT * FROM scp_responsaveis WHERE ativo=1 AND deleted_at IS NULL AND (cpf=? OR REPLACE(REPLACE(REPLACE(REPLACE(telefone,' ',''),'-',''),'(',''),')','')=?) LIMIT 1");
         $query->execute([$digits, $digits]);
         $guardian = $query->fetch(PDO::FETCH_ASSOC);
 

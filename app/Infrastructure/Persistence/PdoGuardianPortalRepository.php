@@ -17,7 +17,7 @@ final class PdoGuardianPortalRepository implements GuardianPortalRepository
              FROM scp_aluno_responsavel ar
              JOIN scp_alunos a ON a.id=ar.aluno_id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
-             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1
+             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1 AND a.deleted_at IS NULL
              ORDER BY a.nome'
         );
         $query->execute([$guardianId]);
@@ -33,7 +33,7 @@ final class PdoGuardianPortalRepository implements GuardianPortalRepository
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
              LEFT JOIN scp_registros_acesso r ON r.aluno_id=a.id AND DATE(r.registrado_em) BETWEEN ? AND ?
              LEFT JOIN scp_responsaveis resp ON resp.id=r.responsavel_id
-             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1
+             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.deleted_at IS NULL
              ORDER BY r.registrado_em DESC'
         );
         $query->execute([$from, $to, $guardianId]);
@@ -47,7 +47,7 @@ final class PdoGuardianPortalRepository implements GuardianPortalRepository
              FROM scp_avisos_falta af
              JOIN scp_alunos a ON a.id=af.aluno_id
              LEFT JOIN scp_turmas t ON t.id=af.turma_id
-             WHERE af.responsavel_id=?
+             WHERE af.responsavel_id=? AND a.deleted_at IS NULL
              ORDER BY af.data_falta DESC, af.id DESC'
         );
         $query->execute([$guardianId]);

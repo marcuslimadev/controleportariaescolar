@@ -47,6 +47,8 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - `DatabaseAuditLogger` passou a gravar direto no banco, sem depender da função global `audit()`.
 - `InviteService` passou a exigir `PDO` tipado na transação de aprovação.
 - Exemplos e defaults de deploy foram higienizados para não expor IP, usuário e caminho real de produção.
+- CSP final sem `unsafe-inline`, com nonce por requisição para scripts inline.
+- Soft delete adicionado em alunos, responsáveis e usuários, com filtros nas consultas principais.
 - Smoke HTTP não destrutivo criado e acoplado ao deploy.
 - CI bloqueia regressão de SQL direto em `public/`.
 - Deploy roda lint, testes unitários e smoke HTTP.
@@ -54,14 +56,14 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 96%.
-- Restante estimado: 4%.
+- Base aproveitável do 2.0 no MVP atual: 100%.
+- Restante estimado: 0%.
 
 ## Próximas fases
 
 ### Fase 0 — Base técnica
 
-- Restam hardening final de CSP sem `unsafe-inline`, soft delete nas tabelas principais e smoke HTTP pós-deploy.
+- Concluída para o escopo viável do MVP atual.
 
 ### Fase 1 — Portaria 2.0
 

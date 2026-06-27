@@ -63,7 +63,7 @@ layout_header('Cadastro rápido');
   </form>
   <div class="text-center mt-3"><a class="btn btn-link" href="<?=e(url('portaria/index.php'))?>">Voltar ao leitor</a></div>
 </section>
-<script>
+<script nonce="<?=e(csp_nonce())?>">
 const photoInput=document.querySelector('#foto'),photoPreview=document.querySelector('#photo-preview');
 photoInput.addEventListener('change',()=>{const file=photoInput.files[0];if(!file)return;photoPreview.src=URL.createObjectURL(file);photoPreview.classList.add('show');document.querySelector('label[for="foto"] strong').textContent='Trocar foto';});
 const respPhotoInput=document.querySelector('#responsavel_foto'),respPhotoPreview=document.querySelector('#responsavel-photo-preview');

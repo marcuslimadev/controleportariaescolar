@@ -17,7 +17,7 @@ final class PdoAbsenceRepository implements AbsenceRepository
              FROM scp_aluno_responsavel ar
              JOIN scp_alunos a ON a.id=ar.aluno_id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
-             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1
+             WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1 AND a.deleted_at IS NULL
              ORDER BY a.nome'
         );
         $query->execute([$guardianId]);
@@ -56,8 +56,10 @@ final class PdoAbsenceRepository implements AbsenceRepository
         $params = [];
         $where = '';
         if ($status !== null) {
-            $where = 'WHERE af.status=?';
+            $where = 'WHERE af.status=? AND a.deleted_at IS NULL AND r.deleted_at IS NULL';
             $params[] = $status;
+        } else {
+            $where = 'WHERE a.deleted_at IS NULL AND r.deleted_at IS NULL';
         }
         $query = $this->pdo->prepare(
             "SELECT af.*, a.nome aluno, t.nome turma, r.nome responsavel
@@ -81,7 +83,7 @@ final class PdoAbsenceRepository implements AbsenceRepository
              JOIN scp_alunos a ON a.id=af.aluno_id
              LEFT JOIN scp_turmas t ON t.id=af.turma_id
              JOIN scp_responsaveis r ON r.id=af.responsavel_id
-             WHERE af.turma_id IN (SELECT turma_id FROM scp_professor_turma WHERE professor_id=?)
+             WHERE af.turma_id IN (SELECT turma_id FROM scp_professor_turma WHERE professor_id=?) AND a.deleted_at IS NULL AND r.deleted_at IS NULL
              ORDER BY af.data_falta DESC, af.id DESC"
         );
         $query->execute([$professorId]);
@@ -96,7 +98,7 @@ final class PdoAbsenceRepository implements AbsenceRepository
              FROM scp_avisos_falta af
              JOIN scp_alunos a ON a.id=af.aluno_id
              LEFT JOIN scp_turmas t ON t.id=af.turma_id
-             WHERE af.responsavel_id=?
+             WHERE af.responsavel_id=? AND a.deleted_at IS NULL
              ORDER BY af.data_falta DESC, af.id DESC'
         );
         $query->execute([$guardianId]);

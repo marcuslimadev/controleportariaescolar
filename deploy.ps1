@@ -23,6 +23,9 @@ if ($env:SCP_SSH_PORT) { $Port = [int]$env:SCP_SSH_PORT }
 if ($env:SCP_SSH_USER) { $User = $env:SCP_SSH_USER }
 if ($env:SCP_REMOTE_PATH) { $RemotePath = $env:SCP_REMOTE_PATH }
 $BaseUrl = $env:SCP_BASE_URL
+if (-not $BaseUrl -and (Test-Path 'config/config.php')) {
+  $BaseUrl = (& php -r '$c=require "config/config.php"; echo rtrim((string)($c["base_url"] ?? ""), "/");').Trim()
+}
 if (-not $HostName) { throw 'Defina SCP_SSH_HOST no arquivo .env local ou passe -HostName.' }
 if (-not $User) { throw 'Defina SCP_SSH_USER no arquivo .env local ou passe -User.' }
 if (-not $RemotePath) { throw 'Defina SCP_REMOTE_PATH no arquivo .env local ou passe -RemotePath.' }

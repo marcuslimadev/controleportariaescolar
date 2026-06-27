@@ -38,7 +38,7 @@ layout_header('Crachá de '.$r['nome']);
   <p id="share-status" class="scanner-status" role="status" aria-live="polite"></p>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script>
+<script nonce="<?=e(csp_nonce())?>">
 const badgeData={
   name:<?=json_encode($r['nome'],JSON_UNESCAPED_UNICODE)?>,
   photo:<?=json_encode($r['foto']??'')?>,

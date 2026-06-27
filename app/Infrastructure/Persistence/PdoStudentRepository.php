@@ -12,7 +12,7 @@ final class PdoStudentRepository implements StudentRepository
 
     public function activeExistsByQrToken(string $token): bool
     {
-        $query = $this->pdo->prepare('SELECT id FROM scp_alunos WHERE qr_token=? AND ativo=1 LIMIT 1');
+        $query = $this->pdo->prepare('SELECT id FROM scp_alunos WHERE qr_token=? AND ativo=1 AND deleted_at IS NULL LIMIT 1');
         $query->execute([$token]);
 
         return (bool)$query->fetchColumn();
