@@ -3,21 +3,12 @@ require __DIR__ . '/../includes/bootstrap.php';
 require_portal_access();
 
 [$visibilitySql, $visibilityParams] = post_visible_sql('p');
-$params = $visibilityParams;
-$sql = "SELECT p.*, u.nome autor,
-        (SELECT COUNT(*) FROM scp_post_curtidas c WHERE c.post_id=p.id) curtidas,
-        (SELECT COUNT(*) FROM scp_post_curtidas c WHERE c.post_id=p.id AND " . (!empty($_SESSION['responsavel_id']) ? 'c.responsavel_id=?' : 'c.usuario_id=?') . ") curtiu,
-        (SELECT confirmado_em FROM scp_post_ciencias ci WHERE ci.post_id=p.id AND " . (!empty($_SESSION['responsavel_id']) ? 'ci.responsavel_id=?' : 'ci.usuario_id=?') . " LIMIT 1) ciencia_em
-        FROM scp_posts p
-        JOIN scp_usuarios u ON u.id=p.autor_id
-        WHERE p.status='publicado' AND p.deleted_at IS NULL AND $visibilitySql
-        ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
-        LIMIT 80";
 $actorId = $_SESSION['responsavel_id'] ?? $_SESSION['user_id'];
-array_unshift($params, $actorId, $actorId);
-$q = db()->prepare($sql);
-$q->execute($params);
-$posts = $q->fetchAll();
+$postService = new \App\Services\PostService(
+    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+$posts = $postService->feedPosts($visibilitySql, $visibilityParams, (int)$actorId, !empty($_SESSION['responsavel_id']));
 
 layout_header('Timeline oficial');
 $quickActions = portal_quick_actions();

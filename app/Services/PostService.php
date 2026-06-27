@@ -36,6 +36,59 @@ final class PostService
         ]);
     }
 
+    public function listAdminPosts(): array
+    {
+        return $this->posts->listAdmin(100);
+    }
+
+    public function publicPosts(int $limit = 6): array
+    {
+        return $this->posts->publicFeed($limit);
+    }
+
+    public function feedPosts(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian): array
+    {
+        return $this->posts->feed($visibilitySql, $visibilityParams, $actorId, $isGuardian, 80);
+    }
+
+    public function eventsForMonth(string $month, string $visibilitySql, array $visibilityParams, ?int $classId): array
+    {
+        if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+            $month = date('Y-m');
+        }
+        $start = $month . '-01';
+        $end = date('Y-m-t', strtotime($start));
+
+        return [
+            'month' => $month,
+            'events' => $this->posts->events($start, $end, $visibilitySql, $visibilityParams, $classId),
+            'classes' => $this->posts->activeClasses(),
+        ];
+    }
+
+    public function formData(int $id, int $actorId, string $actorRole): array
+    {
+        $post = [
+            'id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'toda_escola',
+            'turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'',
+            'importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho',
+        ];
+        if ($id > 0) {
+            $loaded = $this->posts->findActiveById($id);
+            if (!$loaded) {
+                throw new RuntimeException('Publicação não encontrada.');
+            }
+            $this->assertCanManageExistingPost($loaded, $actorId, $actorRole, 'editar');
+            $post = $loaded;
+        }
+
+        return [
+            'post' => $post,
+            'classes' => $this->posts->activeClasses(),
+            'students' => $this->posts->activeStudents(),
+        ];
+    }
+
     public function savePost(array $input, ?string $imageUrl, int $actorId, string $actorRole): int
     {
         $id = (int)($input['id'] ?? 0);

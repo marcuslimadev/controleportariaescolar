@@ -2,23 +2,22 @@
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('badge.issue');
 $responsavelId=(int)($_GET['responsavel_id']??0);
-$q=db()->prepare('SELECT * FROM scp_responsaveis WHERE id=?');
-$q->execute([$responsavelId]);
-$r=$q->fetch();
-if(!$r){http_response_code(404);exit('Responsável não encontrado');}
-if(!$r['qr_token']){
-    $r['qr_token']=bin2hex(random_bytes(32));
-    db()->prepare('UPDATE scp_responsaveis SET qr_token=? WHERE id=?')->execute([$r['qr_token'],$responsavelId]);
+$badgeService = new \App\Services\BadgeService(
+    new \App\Infrastructure\Persistence\PdoBadgeRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+try {
+    $badge = $badgeService->adminGuardianBadge($responsavelId, ($_GET['emit']??'')==='1', (int)$_SESSION['user_id']);
+} catch (Throwable $error) {
+    http_response_code(404);
+    exit($error->getMessage());
 }
-$q=db()->prepare('SELECT a.nome,a.foto,t.nome turma FROM scp_alunos a JOIN scp_aluno_responsavel ar ON ar.aluno_id=a.id LEFT JOIN scp_turmas t ON t.id=a.turma_id WHERE ar.responsavel_id=? AND ar.autoriza_retirada=1 AND a.ativo=1 ORDER BY a.nome');
-$q->execute([$responsavelId]);
-$children=$q->fetchAll();
+$r=$badge['guardian'];
+$children=$badge['children'];
 $publicCard=url('cracha.php?token='.$r['qr_token']);
 $telefone=normalize_phone((string)$r['telefone']);
 
 if(($_GET['emit']??'')==='1'){
-    db()->prepare('INSERT INTO scp_crachas_responsavel_emitidos(responsavel_id,emitido_por,token_no_momento) VALUES(?,?,?)')->execute([$responsavelId,$_SESSION['user_id'],$r['qr_token']]);
-    audit('emitir_cracha_responsavel','scp_responsaveis',$responsavelId);
     redirect('admin/cracha.php?responsavel_id='.$responsavelId.'&ready=1');
 }
 layout_header('Crachá de '.$r['nome']);

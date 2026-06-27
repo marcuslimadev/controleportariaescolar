@@ -76,4 +76,14 @@ final class InviteService
     {
         return $this->invites->pendingSummary();
     }
+
+    public function approvalPreview(int $id): array
+    {
+        $invite = $this->invites->approvalPreview($id);
+        if (!$invite) {
+            throw new RuntimeException('Cadastro não encontrado ou já processado.');
+        }
+
+        return $invite;
+    }
 }

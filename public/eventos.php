@@ -1,9 +1,7 @@
 <?php
 require __DIR__ . '/../includes/bootstrap.php';
 $isPublic = empty($_SESSION['user_id']) && empty($_SESSION['responsavel_id']);
-$month = preg_match('/^\d{4}-\d{2}$/', (string)($_GET['mes'] ?? '')) ? $_GET['mes'] : date('Y-m');
-$start = $month . '-01';
-$end = date('Y-m-t', strtotime($start));
+$month = (string)($_GET['mes'] ?? date('Y-m'));
 $turmaId = (int)($_GET['turma_id'] ?? 0);
 if ($isPublic) {
     $visibilitySql = "p.publico='toda_escola'";
@@ -12,13 +10,14 @@ if ($isPublic) {
 } else {
     [$visibilitySql, $visibilityParams] = post_visible_sql('p');
 }
-$params = array_merge([$start, $end], $visibilityParams);
-$extra = '';
-if ($turmaId) { $extra = ' AND (p.turma_id=? OR p.turma_id IS NULL)'; $params[] = $turmaId; }
-$q = db()->prepare("SELECT p.*, u.nome autor, t.nome turma FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id WHERE p.status='publicado' AND p.deleted_at IS NULL AND p.tipo IN ('evento','programação') AND p.data_evento BETWEEN ? AND ? AND $visibilitySql $extra ORDER BY p.data_evento ASC, p.hora_evento ASC");
-$q->execute($params);
-$events = $q->fetchAll();
-$turmas = $isPublic ? [] : db()->query('SELECT id,nome FROM scp_turmas WHERE ativo=1 ORDER BY nome')->fetchAll();
+$postService = new \App\Services\PostService(
+    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+$eventData = $postService->eventsForMonth($month, $visibilitySql, $visibilityParams, $turmaId ?: null);
+$month = $eventData['month'];
+$events = $eventData['events'];
+$turmas = $isPublic ? [] : $eventData['classes'];
 layout_header('Eventos');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">AGENDA</span><h1>Eventos e programação</h1><p>Próximos eventos e programação oficial da escola.</p></div><?php if($isPublic):?><div class="page-actions"><a class="btn btn-primary" href="<?=e(url('login.php'))?>">Entrar</a></div><?php endif?></div>

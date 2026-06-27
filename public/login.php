@@ -2,13 +2,11 @@
 require __DIR__ . '/../includes/bootstrap.php';
 $publicPosts = [];
 try {
-    $q = db()->query("SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
-        FROM scp_posts p
-        JOIN scp_usuarios u ON u.id=p.autor_id
-        WHERE p.status='publicado' AND p.publico='toda_escola' AND p.deleted_at IS NULL
-        ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
-        LIMIT 6");
-    $publicPosts = $q->fetchAll();
+    $postService = new \App\Services\PostService(
+        new \App\Infrastructure\Persistence\PdoPostRepository(db()),
+        new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+    );
+    $publicPosts = $postService->publicPosts(6);
 } catch (Throwable $ignored) {}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

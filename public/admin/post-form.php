@@ -2,17 +2,19 @@
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('post.manage');
 $id = (int)($_GET['id'] ?? 0);
-$post = ['id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'toda_escola','turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'','importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho'];
-if ($id) {
-    $q = db()->prepare('SELECT p.*, u.perfil autor_perfil FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id WHERE p.id=? AND p.deleted_at IS NULL');
-    $q->execute([$id]);
-    $loaded = $q->fetch();
-    if (!$loaded) { flash('Publicação não encontrada.', 'warning'); redirect('admin/posts.php'); }
-    if (($_SESSION['role'] ?? '') === 'secretaria' && (int)$loaded['autor_id'] !== (int)$_SESSION['user_id'] && $loaded['autor_perfil'] !== 'secretaria') { flash('Você só pode editar publicações da secretaria ou criadas por você.', 'warning'); redirect('admin/posts.php'); }
-    $post = $loaded;
+$postService = new \App\Services\PostService(
+    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+try {
+    $formData = $postService->formData($id, (int)$_SESSION['user_id'], (string)($_SESSION['role'] ?? ''));
+} catch (Throwable $error) {
+    flash($error->getMessage(), 'warning');
+    redirect('admin/posts.php');
 }
-$turmas = db()->query('SELECT id,nome FROM scp_turmas WHERE ativo=1 ORDER BY nome')->fetchAll();
-$alunos = db()->query('SELECT id,nome FROM scp_alunos WHERE ativo=1 ORDER BY nome')->fetchAll();
+$post = $formData['post'];
+$turmas = $formData['classes'];
+$alunos = $formData['students'];
 layout_header($id ? 'Editar publicação' : 'Nova publicação');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">COMUNICAÇÃO</span><h1><?=$id?'Editar publicação':'Nova publicação'?></h1><p>Publique apenas informação oficial e útil para a rotina.</p></div></div>

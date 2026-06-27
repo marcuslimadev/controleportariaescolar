@@ -1,8 +1,11 @@
 <?php
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('post.manage');
-$q = db()->query("SELECT p.*, u.nome autor, t.nome turma, a.nome aluno FROM scp_posts p JOIN scp_usuarios u ON u.id=p.autor_id LEFT JOIN scp_turmas t ON t.id=p.turma_id LEFT JOIN scp_alunos a ON a.id=p.aluno_id WHERE p.deleted_at IS NULL ORDER BY p.created_at DESC LIMIT 100");
-$posts = $q->fetchAll();
+$postService = new \App\Services\PostService(
+    new \App\Infrastructure\Persistence\PdoPostRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+$posts = $postService->listAdminPosts();
 layout_header('Publicações');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">COMUNICAÇÃO</span><h1>Publicações</h1><p>Comunicados, eventos, alertas e lembretes oficiais.</p></div><div class="page-actions"><a class="btn btn-primary" href="<?=e(url('admin/post-form.php'))?>">Nova publicação</a></div></div>

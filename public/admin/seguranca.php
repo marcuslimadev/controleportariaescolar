@@ -2,10 +2,16 @@
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('badge.issue');
 $id=(int)($_GET['id']??0);
-$q=db()->prepare('SELECT id,nome,qr_token FROM scp_alunos WHERE id=? AND ativo=1');
-$q->execute([$id]);
-$a=$q->fetch();
-if(!$a){http_response_code(404);exit('Aluno não encontrado');}
+$badgeService = new \App\Services\BadgeService(
+    new \App\Infrastructure\Persistence\PdoBadgeRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
+try {
+    $a=$badgeService->securityBadge($id);
+} catch (Throwable $error) {
+    http_response_code(404);
+    exit($error->getMessage());
+}
 $emergencyUrl=url('c/'.$a['qr_token']);
 layout_header('QR de segurança de '.$a['nome']);
 ?>

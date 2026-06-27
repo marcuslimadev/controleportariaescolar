@@ -1,23 +1,14 @@
 <?php
 require __DIR__.'/../../includes/bootstrap.php';
 require_permission('student.quick_create');
+$quickRegistrationService = new \App\Services\QuickRegistrationService(
+    new \App\Infrastructure\Persistence\PdoQuickRegistrationRepository(db()),
+    new \App\Infrastructure\Logging\DatabaseAuditLogger(),
+);
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
     verify_csrf();
-    $nome=trim((string)($_POST['nome']??''));
-    $turmaId=(int)($_POST['turma_id']??0);
-    $cpf=preg_replace('/\D/','',(string)($_POST['cpf']??''));
-    $nascimento=trim((string)($_POST['data_nascimento']??''));
-    $parentesco=trim((string)($_POST['parentesco']??'')) ?: 'Responsável';
-    $respNome=trim((string)($_POST['responsavel_nome']??''));
-    $respCpf=preg_replace('/\D/','',(string)($_POST['responsavel_cpf']??''));
-    $respTelefone=normalize_phone((string)($_POST['responsavel_telefone']??''));
     try{
-        if(strlen($nome)<3)throw new RuntimeException('Informe o nome completo do aluno.');
-        if(strlen($respNome)<3)throw new RuntimeException('Informe o nome completo do responsável.');
-        if(strlen($respCpf)!==11)throw new RuntimeException('Informe um CPF válido para o responsável (11 números).');
-        if(strlen($respTelefone)<10)throw new RuntimeException('Informe um telefone com DDD para o responsável.');
-        if($turmaId){$check=db()->prepare('SELECT COUNT(*) FROM scp_turmas WHERE id=? AND ativo=1');$check->execute([$turmaId]);if(!$check->fetchColumn())throw new RuntimeException('Selecione uma turma válida.');}
         $foto=null;
         if(isset($_FILES['foto'])&&($_FILES['foto']['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE){
             if($_FILES['foto']['error']!==UPLOAD_ERR_OK)throw new RuntimeException('Não foi possível receber a foto do aluno.');
@@ -36,31 +27,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $respFoto=save_uploaded_image($_FILES['responsavel_foto'],'responsaveis');
         }
 
-        $pdo=db();$pdo->beginTransaction();
-        $q=$pdo->prepare('SELECT id FROM scp_responsaveis WHERE cpf=? LIMIT 1');$q->execute([$respCpf]);
-        $responsavelId=(int)$q->fetchColumn();
-        if($responsavelId){
-            $q=$pdo->prepare('UPDATE scp_responsaveis SET telefone=?,foto=COALESCE(?,foto),ativo=1 WHERE id=?');
-            $q->execute([$respTelefone,$respFoto,$responsavelId]);
-        }else{
-            $q=$pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,telefone,foto,senha_hash) VALUES(?,?,?,?,?)');
-            $q->execute([$respNome,$respCpf,$respTelefone,$respFoto,password_hash_secure(bin2hex(random_bytes(8)))]);
-            $responsavelId=(int)$pdo->lastInsertId();
-        }
-        $q=$pdo->prepare('INSERT INTO scp_alunos(nome,cpf,data_nascimento,turma_id,foto,qr_token) VALUES(?,?,?,?,?,?)');
-        $q->execute([$nome,$cpf?:null,$nascimento?:null,$turmaId?:null,$foto,bin2hex(random_bytes(32))]);
-        $alunoId=(int)$pdo->lastInsertId();
-        $q=$pdo->prepare('INSERT INTO scp_aluno_responsavel(aluno_id,responsavel_id,parentesco,autoriza_consulta,autoriza_retirada) VALUES(?,?,?,1,1)');
-        $q->execute([$alunoId,$responsavelId,$parentesco]);
-        $pdo->commit();
-        audit('cadastro_rapido_aluno','scp_alunos',$alunoId,['responsavel_id'=>$responsavelId]);
-        redirect('admin/cracha.php?responsavel_id='.$responsavelId.'&emit=1');
+        $result=$quickRegistrationService->create($_POST, $foto, $respFoto);
+        redirect('admin/cracha.php?responsavel_id='.(int)$result['responsavel_id'].'&emit=1');
     }catch(Throwable $error){
-        if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();
         $message=$error instanceof PDOException?'Não foi possível cadastrar. Verifique se algum CPF já está em uso.':$error->getMessage();
     }
 }
-$turmas=db()->query('SELECT id,nome,turno FROM scp_turmas WHERE ativo=1 ORDER BY nome')->fetchAll();
+$turmas=$quickRegistrationService->classes();
 layout_header('Cadastro rápido');
 ?>
 <section class="quick-register">

@@ -13,6 +13,8 @@ interface InviteRepository
 
     public function pendingSummary(): array;
 
+    public function approvalPreview(int $id): ?array;
+
     public function findByPublicToken(string $token): ?array;
 
     public function expire(int $id): void;

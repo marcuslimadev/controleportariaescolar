@@ -48,6 +48,20 @@ final class PdoInviteRepository implements InviteRepository
         return ['count' => $count, 'latest' => $latest ?: null];
     }
 
+    public function approvalPreview(int $id): ?array
+    {
+        $query = $this->pdo->prepare(
+            "SELECT c.*,u.nome criado_por_nome
+             FROM scp_convites_cadastro c
+             JOIN scp_usuarios u ON u.id=c.criado_por
+             WHERE c.id=? AND c.status='preenchido'"
+        );
+        $query->execute([$id]);
+        $invite = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $invite ?: null;
+    }
+
     public function findByPublicToken(string $token): ?array
     {
         $query = $this->pdo->prepare('SELECT * FROM scp_convites_cadastro WHERE token_hash=? LIMIT 1');

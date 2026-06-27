@@ -38,12 +38,17 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Pendências da portaria passaram a usar `InviteService`.
 - Portal público de emergência do QR migrado para `EmergencyBadgeService`.
 - Curtidas e ciência de comunicados migradas para `PostInteractionService`.
+- Timeline, eventos, portal público de login e gestão de publicações migrados para leituras pelo `PostService`.
+- Crachá digital do responsável e QR de segurança migrados para `BadgeService`.
+- Cadastro rápido da portaria migrado para `QuickRegistrationService`.
+- Conferência de cadastro por convite passou a usar `InviteService`.
+- Páginas públicas, de portaria e administrativas principais ficaram sem SQL direto.
 - CI básico para lint PHP/JSON e teste unitário leve.
 
 ## Progresso estimado
 
-- Base aproveitável do 2.0 no MVP atual: 79%.
-- Restante estimado: 21%.
+- Base aproveitável do 2.0 no MVP atual: 92%.
+- Restante estimado: 8%.
 
 ## Próximas fases
 
@@ -83,3 +88,4 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - Relatórios exportáveis.
 - Dashboard de acessos e comunicados.
 - Melhorias offline do PWA.
+- Smoke tests HTTP pós-deploy e hardening final antes de marcar 100%.

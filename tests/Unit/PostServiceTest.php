@@ -11,6 +11,12 @@ final class InMemoryPostRepository implements PostRepository
     public array $deleted = [];
     public array $created = [];
     public array $updated = [];
+    public array $adminList = [];
+    public array $feedList = [];
+    public array $publicList = [];
+    public array $eventList = [];
+    public array $classes = [['id' => 1, 'nome' => '1A']];
+    public array $students = [['id' => 2, 'nome' => 'Aluno']];
 
     public function findActiveById(int $id): ?array
     {
@@ -33,6 +39,24 @@ final class InMemoryPostRepository implements PostRepository
         $this->deleted[] = $id;
         unset($this->posts[$id]);
     }
+
+    public function listAdmin(int $limit = 100): array { return $this->adminList; }
+
+    public function feed(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian, int $limit = 80): array
+    {
+        return $this->feedList ?: [['actor_id' => $actorId, 'is_guardian' => $isGuardian]];
+    }
+
+    public function publicFeed(int $limit = 6): array { return $this->publicList; }
+
+    public function events(string $start, string $end, string $visibilitySql, array $visibilityParams, ?int $classId): array
+    {
+        return $this->eventList ?: [['start' => $start, 'end' => $end, 'class_id' => $classId]];
+    }
+
+    public function activeClasses(): array { return $this->classes; }
+
+    public function activeStudents(): array { return $this->students; }
 }
 
 final class SpyAuditLogger implements AuditLogger
@@ -100,4 +124,14 @@ return static function (): void {
     if ($updatedId !== 20) throw new RuntimeException('Edição não retornou id original.');
     if (($repo->updated[20]['imagem_url'] ?? null) !== 'old.jpg') throw new RuntimeException('Imagem antiga não foi preservada.');
     if (($audit->records[0]['action'] ?? null) !== 'editar_post') throw new RuntimeException('Edição não auditou.');
+
+    $form = $service->formData(20, 7, 'secretaria');
+    if (($form['post']['id'] ?? null) !== 20) throw new RuntimeException('Formulário não carregou post.');
+    if (($form['classes'][0]['nome'] ?? null) !== '1A') throw new RuntimeException('Turmas do formulário não carregaram.');
+
+    $feed = $service->feedPosts('1=1', [], 7, true);
+    if (($feed[0]['is_guardian'] ?? null) !== true) throw new RuntimeException('Feed não repassou ator responsável.');
+
+    $events = $service->eventsForMonth('2026-06', '1=1', [], 1);
+    if (($events['month'] ?? null) !== '2026-06') throw new RuntimeException('Mês de eventos não foi preservado.');
 };

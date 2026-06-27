@@ -22,6 +22,8 @@ final class InMemoryInviteRepository implements InviteRepository
 
     public function pendingSummary(): array { return ['count' => 1, 'latest' => '2026-06-26 08:00:00']; }
 
+    public function approvalPreview(int $id): ?array { return $id === 33 ? ['id' => 33, 'status' => 'preenchido'] : null; }
+
     public function findByPublicToken(string $token): ?array
     {
         return $token === 'PUBLIC_TOKEN' ? $this->publicInvite : null;
@@ -62,6 +64,7 @@ return static function (): void {
     if (($repo->created[0]['phone'] ?? null) !== '919632142134') throw new RuntimeException('Telefone não foi normalizado.');
     if (($repo->created[0]['createdBy'] ?? null) !== 77) throw new RuntimeException('Criador não foi registrado.');
     if (($service->pendingSummary()['count'] ?? null) !== 1) throw new RuntimeException('Resumo de pendências falhou.');
+    if (($service->approvalPreview(33)['status'] ?? null) !== 'preenchido') throw new RuntimeException('Prévia de aprovação falhou.');
 
     $blocked = false;
     try {
