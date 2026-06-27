@@ -30,6 +30,7 @@ final class SchoolAdminService
             'professor' => $this->adminOnly($role, fn() => $this->createTeacher($input)),
             'professor_turma' => $this->adminOnly($role, fn() => $this->linkTeacherClass($input)),
             'tema' => $this->adminOnly($role, fn() => $this->saveTheme($input)),
+            'identidade' => $this->adminOnly($role, fn() => $this->saveIdentity($input)),
             'toggle' => $this->toggle($input, $role),
             default => throw new RuntimeException('Ação inválida.'),
         };
@@ -143,6 +144,52 @@ final class SchoolAdminService
         $theme = in_array($input['tema'] ?? '', ['classico','azul_branco','preto_branco'], true) ? (string)$input['tema'] : 'classico';
         $this->school->saveSetting('tema', $theme);
         $this->audit->record('alterar_tema', 'scp_configuracoes', null, ['tema' => $theme]);
+    }
+
+    private function saveIdentity(array $input): void
+    {
+        $name = trim((string)($input['nome_escola'] ?? ''));
+        if ($name === '' || strlen($name) > 120) {
+            throw new RuntimeException('Informe um nome da escola com até 80 caracteres.');
+        }
+
+        $tagline = trim((string)($input['texto_institucional'] ?? ''));
+        if (strlen($tagline) > 240) {
+            throw new RuntimeException('O texto institucional deve ter até 180 caracteres.');
+        }
+
+        $primary = strtoupper(trim((string)($input['cor_principal'] ?? '#1356A2')));
+        if (!preg_match('/^#[0-9A-F]{6}$/', $primary)) {
+            throw new RuntimeException('Informe uma cor principal válida.');
+        }
+
+        $logo = $this->normalizeVisualUrl((string)($input['logo_url'] ?? ''), 'logo');
+        $cover = $this->normalizeVisualUrl((string)($input['capa_url'] ?? ''), 'capa');
+
+        foreach ([
+            'nome_escola' => $name,
+            'texto_institucional' => $tagline,
+            'cor_principal' => $primary,
+            'logo_url' => $logo,
+            'capa_url' => $cover,
+        ] as $key => $value) {
+            $this->school->saveSetting($key, $value);
+        }
+
+        $this->audit->record('alterar_identidade_visual', 'scp_configuracoes', null, [
+            'nome_escola' => $name,
+            'cor_principal' => $primary,
+        ]);
+    }
+
+    private function normalizeVisualUrl(string $value, string $field): string
+    {
+        $value = trim($value);
+        if ($value === '') return '';
+        if (filter_var($value, FILTER_VALIDATE_URL)) return $value;
+        $value = ltrim($value, '/');
+        if (preg_match('/^(assets|uploads)\/[A-Za-z0-9._\/-]+$/', $value)) return $value;
+        throw new RuntimeException('Use uma URL válida ou caminho em assets/ ou uploads/ para ' . $field . '.');
     }
 
     private function adminOnly(string $role, callable $action): void

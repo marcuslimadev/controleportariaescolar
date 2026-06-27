@@ -34,11 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 layout_header(t('public_portal'));
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
+$coverUrl = app_cover_url();
 ?>
 <section class="public-home <?=$showLogin ? 'show-login' : ''?>">
   <header class="public-topbar">
     <a class="public-brand" href="<?=e(url('login.php'))?>">
-      <img src="<?=e(asset_url('assets/porta-aberta-logo.jpg'))?>" alt="<?=e(app_name())?>">
+      <img src="<?=e(app_logo_url())?>" alt="<?=e(app_name())?>">
       <span><strong><?=e(app_name())?></strong><small><?=e(app_tagline())?></small></span>
     </a>
     <nav class="public-top-actions" aria-label="Ações iniciais">
@@ -51,9 +52,16 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
     </nav>
   </header>
 
+  <?php if ($coverUrl): ?>
+    <figure class="public-cover-card">
+      <img src="<?=e($coverUrl)?>" alt="<?=e(app_name())?>">
+      <figcaption><?=e(app_tagline())?></figcaption>
+    </figure>
+  <?php endif ?>
+
   <div id="login-card" class="login-card card">
     <div class="card-body">
-      <div class="login-mobile-brand official"><img src="<?=e(asset_url('assets/porta-aberta-logo.jpg'))?>" alt="<?=e(app_name())?>"></div>
+      <div class="login-mobile-brand official"><img src="<?=e(app_logo_url())?>" alt="<?=e(app_name())?>"></div>
       <span class="gate-eyebrow"><?=e(t('welcome'))?></span>
       <h2><?=e(t('access_account'))?></h2>
       <p class="login-hint"><?=e(app_tagline())?></p>
@@ -79,7 +87,7 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
         <?php foreach ($publicPosts as $post): ?>
           <article class="public-insta-post <?=$post['importante'] ? 'important' : ''?>">
             <div class="public-post-head">
-              <img src="<?=e(asset_url('assets/porta-aberta-logo.jpg'))?>" alt="">
+              <img src="<?=e(app_logo_url())?>" alt="">
               <div><strong><?=e(app_name())?></strong><span><?=e(format_br_datetime($post['publicado_em']))?></span></div>
               <?php if ($post['importante']): ?><em><?=e(t('important'))?></em><?php endif ?>
             </div>

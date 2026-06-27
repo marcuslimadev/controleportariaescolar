@@ -1,12 +1,47 @@
 <?php
 declare(strict_types=1);
 
+function app_setting(string $key, ?string $fallback = null): string {
+    static $settings = null;
+    if ($settings === null) {
+        $settings = [];
+        try {
+            $query = db()->query('SELECT chave, valor FROM scp_configuracoes');
+            foreach ($query->fetchAll() as $row) {
+                $settings[(string)$row['chave']] = (string)$row['valor'];
+            }
+        } catch (Throwable) {}
+    }
+    $value = trim((string)($settings[$key] ?? ''));
+    return $value !== '' ? $value : (string)$fallback;
+}
+
+function app_setting_url(string $key, string $fallback = ''): string {
+    $value = app_setting($key, '');
+    if ($value === '') return $fallback;
+    if (filter_var($value, FILTER_VALIDATE_URL)) return $value;
+    return url(ltrim($value, '/'));
+}
+
 function app_name(): string {
-    return t('app_name');
+    return app_setting('nome_escola', t('app_name'));
 }
 
 function app_tagline(): string {
-    return t('app_tagline');
+    return app_setting('texto_institucional', t('app_tagline'));
+}
+
+function app_logo_url(): string {
+    return app_setting_url('logo_url', asset_url('assets/porta-aberta-logo.jpg'));
+}
+
+function app_cover_url(): string {
+    return app_setting_url('capa_url', '');
+}
+
+function app_primary_color(): string {
+    $color = app_setting('cor_principal', '#1356A2');
+    return preg_match('/^#[0-9A-Fa-f]{6}$/', $color) ? strtoupper($color) : '#1356A2';
 }
 
 function app_theme(): string {
@@ -14,9 +49,7 @@ function app_theme(): string {
     if ($theme !== null) return $theme;
     $theme = 'classico';
     try {
-        $query = db()->prepare("SELECT valor FROM scp_configuracoes WHERE chave='tema' LIMIT 1");
-        $query->execute();
-        $value = (string)$query->fetchColumn();
+        $value = app_setting('tema', 'classico');
         if (in_array($value, ['classico','azul_branco','preto_branco'], true)) {
             $theme = $value;
         }
