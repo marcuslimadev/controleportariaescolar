@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS scp_posts (
   titulo VARCHAR(190) NOT NULL,
   conteudo TEXT NOT NULL,
   imagem_url VARCHAR(255) NULL,
-  publico ENUM('toda_escola','turma','aluno','equipe') NOT NULL DEFAULT 'toda_escola',
+  publico ENUM('publico','toda_escola','turma','aluno','equipe') NOT NULL DEFAULT 'toda_escola',
   turma_id INT UNSIGNED NULL,
   aluno_id INT UNSIGNED NULL,
   data_evento DATE NULL,

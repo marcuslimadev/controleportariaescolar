@@ -10,7 +10,7 @@ use RuntimeException;
 final class PostService
 {
     private const TYPES = ['comunicado','atividade','evento','programação','alerta','cardápio','lembrete'];
-    private const SCOPES = ['toda_escola','turma','aluno','equipe'];
+    private const SCOPES = ['publico','toda_escola','turma','aluno','equipe'];
     private const STATUSES = ['rascunho','publicado','arquivado'];
 
     public function __construct(
@@ -69,7 +69,7 @@ final class PostService
     public function formData(int $id, int $actorId, string $actorRole): array
     {
         $post = [
-            'id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'toda_escola',
+            'id'=>0,'tipo'=>'comunicado','titulo'=>'','conteudo'=>'','imagem_url'=>'','publico'=>'publico',
             'turma_id'=>'','aluno_id'=>'','data_evento'=>'','hora_evento'=>'','local'=>'',
             'importante'=>0,'exige_ciencia'=>0,'fixado'=>0,'status'=>'rascunho',
         ];
@@ -130,6 +130,8 @@ final class PostService
         $studentId = ($input['aluno_id'] ?? '') !== '' ? (int)$input['aluno_id'] : null;
         if ($scope === 'turma' && !$classId) throw new RuntimeException('Selecione a turma.');
         if ($scope === 'aluno' && !$studentId) throw new RuntimeException('Selecione o aluno.');
+        if ($scope !== 'turma') $classId = null;
+        if ($scope !== 'aluno') $studentId = null;
 
         $publishedAt = null;
         if ($status === 'publicado') {

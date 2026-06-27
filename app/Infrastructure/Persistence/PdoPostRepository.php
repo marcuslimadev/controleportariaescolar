@@ -67,7 +67,7 @@ final class PdoPostRepository implements PostRepository
             "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
-             WHERE p.status='publicado' AND p.publico='toda_escola' AND p.deleted_at IS NULL
+             WHERE p.status='publicado' AND p.publico='publico' AND p.deleted_at IS NULL
              ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
              LIMIT {$limit}"
         );

@@ -302,7 +302,7 @@ function portal_quick_actions(): array {
 
 function post_visible_sql(string $alias = 'p'): array {
     $role = current_role();
-    if (in_array($role, ['admin', 'secretaria'], true)) return ['1=1', []];
+    if (in_array($role, ['admin', 'secretaria'], true)) return ["$alias.publico<>'publico'", []];
     if ($role === 'responsavel') {
         return ["($alias.publico='toda_escola' OR ($alias.publico='turma' AND $alias.turma_id IN (SELECT a.turma_id FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id WHERE ar.responsavel_id=? AND a.deleted_at IS NULL)) OR ($alias.publico='aluno' AND $alias.aluno_id IN (SELECT ar.aluno_id FROM scp_aluno_responsavel ar JOIN scp_alunos a ON a.id=ar.aluno_id WHERE ar.responsavel_id=? AND a.deleted_at IS NULL)))", [$_SESSION['responsavel_id'], $_SESSION['responsavel_id']]];
     }

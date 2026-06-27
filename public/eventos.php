@@ -4,7 +4,7 @@ $isPublic = empty($_SESSION['user_id']) && empty($_SESSION['responsavel_id']);
 $month = (string)($_GET['mes'] ?? date('Y-m'));
 $turmaId = (int)($_GET['turma_id'] ?? 0);
 if ($isPublic) {
-    $visibilitySql = "p.publico='toda_escola'";
+    $visibilitySql = "p.publico='publico'";
     $visibilityParams = [];
     $turmaId = 0;
 } else {
