@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS scp_configuracoes (
+  chave VARCHAR(80) PRIMARY KEY,
+  valor VARCHAR(255) NOT NULL,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO scp_configuracoes(chave,valor) VALUES('tema','classico')
+ON DUPLICATE KEY UPDATE valor=valor;

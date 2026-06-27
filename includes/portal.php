@@ -9,6 +9,29 @@ function app_tagline(): string {
     return t('app_tagline');
 }
 
+function app_theme(): string {
+    static $theme = null;
+    if ($theme !== null) return $theme;
+    $theme = 'classico';
+    try {
+        $query = db()->prepare("SELECT valor FROM scp_configuracoes WHERE chave='tema' LIMIT 1");
+        $query->execute();
+        $value = (string)$query->fetchColumn();
+        if (in_array($value, ['classico','azul_branco','preto_branco'], true)) {
+            $theme = $value;
+        }
+    } catch (Throwable) {}
+    return $theme;
+}
+
+function app_theme_class(): string {
+    return match (app_theme()) {
+        'azul_branco' => 'theme-blue-white',
+        'preto_branco' => 'theme-black-white',
+        default => 'theme-classic',
+    };
+}
+
 function current_locale(): string {
     $lang = (string)($_SESSION['lang'] ?? config()['locale'] ?? 'pt');
     return $lang === 'en' ? 'en' : 'pt';

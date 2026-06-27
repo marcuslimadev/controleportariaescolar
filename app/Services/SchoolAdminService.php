@@ -29,6 +29,7 @@ final class SchoolAdminService
             'usuario' => $this->adminOnly($role, fn() => $this->createUser($input)),
             'professor' => $this->adminOnly($role, fn() => $this->createTeacher($input)),
             'professor_turma' => $this->adminOnly($role, fn() => $this->linkTeacherClass($input)),
+            'tema' => $this->adminOnly($role, fn() => $this->saveTheme($input)),
             'toggle' => $this->toggle($input, $role),
             default => throw new RuntimeException('Ação inválida.'),
         };
@@ -135,6 +136,13 @@ final class SchoolAdminService
         if ($table === '' || $id <= 0) throw new RuntimeException('Inválido.');
         $this->school->toggleActive($table, $id);
         $this->audit->record('alterar_status', $table, $id);
+    }
+
+    private function saveTheme(array $input): void
+    {
+        $theme = in_array($input['tema'] ?? '', ['classico','azul_branco','preto_branco'], true) ? (string)$input['tema'] : 'classico';
+        $this->school->saveSetting('tema', $theme);
+        $this->audit->record('alterar_tema', 'scp_configuracoes', null, ['tema' => $theme]);
     }
 
     private function adminOnly(string $role, callable $action): void

@@ -16,6 +16,7 @@ final class InMemorySchoolAdminRepository implements SchoolAdminRepository
     public function createTeacher(array $data): int { $this->actions[] = ['teacher', $data]; return 5; }
     public function linkTeacherClass(int $teacherId, int $classId): void { $this->actions[] = ['teacher_class', $teacherId, $classId]; }
     public function toggleActive(string $table, int $id): void { $this->actions[] = ['toggle', $table, $id]; }
+    public function saveSetting(string $key, string $value): void { $this->actions[] = ['setting', $key, $value]; }
     public function dashboardData(): array { return ['scp_turmas' => []]; }
 }
 

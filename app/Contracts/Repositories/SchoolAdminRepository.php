@@ -13,5 +13,6 @@ interface SchoolAdminRepository
     public function createTeacher(array $data): int;
     public function linkTeacherClass(int $teacherId, int $classId): void;
     public function toggleActive(string $table, int $id): void;
+    public function saveSetting(string $key, string $value): void;
     public function dashboardData(): array;
 }
