@@ -229,6 +229,7 @@ function portal_nav_items(): array {
     if (in_array($role, ['admin', 'secretaria'], true)) {
         $items = [
             [t('timeline'), 'feed.php'],
+            [current_locale()==='en' ? 'Dashboard' : 'Dashboard', 'admin/dashboard.php'],
             [current_locale()==='en' ? 'My profile' : 'Meu perfil', 'perfil.php'],
             [current_locale()==='en' ? 'Notifications' : 'Notificações', 'notificacoes.php'],
             [t('new_post'), 'admin/post-form.php'],
@@ -286,6 +287,7 @@ function portal_nav_html(): string {
 
 function portal_nav_icon(string $path, int $index): string {
     if (str_contains($path, 'perfil')) return '◉';
+    if (str_contains($path, 'dashboard')) return '▦';
     if (str_contains($path, 'autorizacoes')) return '✓';
     if (str_contains($path, 'portaria')) return '▣';
     if (str_contains($path, 'convites')) return '✚';

@@ -16,6 +16,12 @@ final class ReportService
         return ['from' => $from, 'to' => $to, 'rows' => $rows, 'summary' => $this->summarizeAccessRows($rows)];
     }
 
+    public function dashboard(string $date = ''): array
+    {
+        [$date] = $this->period($date, $date);
+        return $this->reports->dashboardSummary($date);
+    }
+
     private function summarizeAccessRows(array $rows): array
     {
         $students = [];
