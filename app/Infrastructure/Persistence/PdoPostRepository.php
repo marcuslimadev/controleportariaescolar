@@ -26,7 +26,10 @@ final class PdoPostRepository implements PostRepository
         $limit = max(1, min(200, $limit));
         $query = $this->pdo->query(
             "SELECT p.*, u.nome autor, t.nome turma, a.nome aluno,
-                (SELECT COUNT(*) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_total
+                (SELECT COUNT(*) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_total,
+                (SELECT MAX(ci.confirmado_em) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_ultima,
+                (SELECT COUNT(*) FROM scp_post_comentarios co WHERE co.post_id=p.id) comentarios_total,
+                (SELECT COUNT(*) FROM scp_post_comentarios co WHERE co.post_id=p.id AND co.status='pendente') comentarios_pendentes
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
              LEFT JOIN scp_turmas t ON t.id=p.turma_id
