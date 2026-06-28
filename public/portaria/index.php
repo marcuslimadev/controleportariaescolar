@@ -44,6 +44,9 @@ let locked=false,scanning=false,current=null;
 let pendingCount=<?=$pending?>;
 const initialToken=<?=json_encode(extract_qr_token((string)($_GET['token']??'')))?>;
 const offlineKey='portaAbertaAccessQueue:v1';
+const offlineDbName='portaAbertaPortaria';
+const offlineStore='accessQueue';
+let offlineDbPromise=null;
 const offlineBanner=document.querySelector('#offline-banner');
 const offlineCount=document.querySelector('#offline-count');
 
@@ -51,7 +54,7 @@ startButton.addEventListener('click',startScanner);
 stopButton.addEventListener('click',()=>stopScanner(true));
 offlineBanner.addEventListener('click',syncOfflineQueue);
 window.addEventListener('online',syncOfflineQueue);
-updateOfflineBanner();
+initOfflineQueue();
 
 async function startScanner(){
   if(scanning)return;
@@ -63,7 +66,7 @@ async function startScanner(){
   }catch(firstError){
     try{await reader.start({facingMode:'environment'},{fps:12,qrbox:{width:250,height:250}},scan)}catch(error){
       startButton.disabled=false;
-      setStatus(cameraMessage(error),'error');
+      setScanState('erro',cameraMessage(error));
       return;
     }
   }
@@ -154,7 +157,7 @@ async function record(token){
     showSuccess(data.message);
   }catch(error){
     if(isNetworkError(error)){
-      queueAccess({id:batchId,token,items,createdAt:new Date().toISOString()});
+      await queueAccess({id:batchId,token,items,createdAt:new Date().toISOString()});
       showQueued('Sem conexão. Registro salvo neste aparelho e será sincronizado automaticamente.');
       return;
     }
@@ -186,32 +189,87 @@ function postAccess(token,items){
 }
 function isNetworkError(error){return !navigator.onLine||error instanceof TypeError}
 function createBatchId(){return 'pa-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
-function readQueue(){try{return JSON.parse(localStorage.getItem(offlineKey)||'[]').filter(item=>item&&item.id&&item.token&&Array.isArray(item.items))}catch(error){return[]}}
-function writeQueue(queue){localStorage.setItem(offlineKey,JSON.stringify(queue));updateOfflineBanner()}
-function queueAccess(payload){const queue=readQueue().filter(item=>item.id!==payload.id);queue.push(payload);writeQueue(queue)}
-function updateOfflineBanner(){const total=readQueue().length;offlineBanner.classList.toggle('d-none',total===0);offlineCount.textContent=String(total)}
+async function initOfflineQueue(){await migrateLocalStorageQueue();await updateOfflineBanner();if(navigator.onLine)syncOfflineQueue()}
+function openOfflineDb(){
+  if(!('indexedDB'in window))return Promise.resolve(null);
+  if(offlineDbPromise)return offlineDbPromise;
+  offlineDbPromise=new Promise(resolve=>{
+    const request=indexedDB.open(offlineDbName,1);
+    request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(offlineStore))db.createObjectStore(offlineStore,{keyPath:'id'})};
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>resolve(null);
+    request.onblocked=()=>resolve(null);
+  });
+  return offlineDbPromise;
+}
+async function readQueue(){
+  const db=await openOfflineDb();
+  if(!db)return readLocalQueue();
+  return new Promise(resolve=>{
+    const request=db.transaction(offlineStore,'readonly').objectStore(offlineStore).getAll();
+    request.onsuccess=()=>resolve((request.result||[]).filter(isValidQueueItem).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||''))));
+    request.onerror=()=>resolve(readLocalQueue());
+  });
+}
+async function queueAccess(payload){
+  if(!isValidQueueItem(payload))return;
+  const db=await openOfflineDb();
+  if(!db){const queue=readLocalQueue().filter(item=>item.id!==payload.id);queue.push(payload);writeLocalQueue(queue);await updateOfflineBanner();return}
+  await new Promise(resolve=>{
+    const request=db.transaction(offlineStore,'readwrite').objectStore(offlineStore).put(payload);
+    request.onsuccess=()=>resolve();
+    request.onerror=()=>resolve();
+  });
+  await updateOfflineBanner();
+}
+async function removeQueued(ids){
+  const idSet=new Set(ids);
+  const db=await openOfflineDb();
+  if(!db){writeLocalQueue(readLocalQueue().filter(item=>!idSet.has(item.id)));await updateOfflineBanner();return}
+  await new Promise(resolve=>{
+    const tx=db.transaction(offlineStore,'readwrite');
+    const store=tx.objectStore(offlineStore);
+    ids.forEach(id=>store.delete(id));
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>resolve();
+  });
+  await updateOfflineBanner();
+}
+async function updateOfflineBanner(){const total=(await readQueue()).length;offlineBanner.classList.toggle('d-none',total===0);offlineCount.textContent=String(total)}
+function isValidQueueItem(item){return !!(item&&item.id&&item.token&&Array.isArray(item.items))}
+function readLocalQueue(){try{return JSON.parse(localStorage.getItem(offlineKey)||'[]').filter(isValidQueueItem)}catch(error){return[]}}
+function writeLocalQueue(queue){try{localStorage.setItem(offlineKey,JSON.stringify(queue))}catch(error){}}
+async function migrateLocalStorageQueue(){
+  const local=readLocalQueue();
+  if(!local.length)return;
+  const db=await openOfflineDb();
+  if(!db)return;
+  for(const item of local)await queueAccess(item);
+  try{localStorage.removeItem(offlineKey)}catch(error){}
+}
 async function syncOfflineQueue(){
-  const queue=readQueue();
+  const queue=await readQueue();
   if(!queue.length){updateOfflineBanner();return}
   if(!navigator.onLine){setScanState('erro','Ainda sem internet para sincronizar.');return}
   offlineBanner.disabled=true;
-  const remaining=[];
+  const sentIds=[];
   let sent=0;
   for(const payload of queue){
     try{
       const response=await postAccess(payload.token,payload.items);
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.message||'Falha ao sincronizar');
+      sentIds.push(payload.id);
       sent++;
     }catch(error){
-      remaining.push(payload);
     }
   }
-  writeQueue(remaining);
+  await removeQueued(sentIds);
+  const remaining=(await readQueue()).length;
   offlineBanner.disabled=false;
   if(sent>0){
     if(navigator.vibrate)navigator.vibrate([80,50,80]);
-    setScanState(remaining.length?'erro':'sucesso',remaining.length?`${sent} registro(s) sincronizado(s). ${remaining.length} ainda pendente(s).`:`${sent} registro(s) sincronizado(s).`);
+    setScanState(remaining?'erro':'sucesso',remaining?`${sent} registro(s) sincronizado(s). ${remaining} ainda pendente(s).`:`${sent} registro(s) sincronizado(s).`);
   }
 }
 function setScanState(state,message){
@@ -226,6 +284,5 @@ function labelType(type){return type==='saida'?'saída':'entrada'}
 function cameraMessage(error){const text=String(error&&error.message||error);return /permission|denied|notallowed/i.test(text)?'Permita o acesso à câmera para escanear o crachá.':'Não foi possível abrir a câmera. Verifique se ela está disponível.'}
 setInterval(async()=>{try{const response=await fetch('pendencias.php');const data=await response.json();if(data.count>pendingCount&&navigator.vibrate)navigator.vibrate([180,80,180]);pendingCount=data.count;const banner=document.querySelector('#pending-banner');banner.classList.toggle('d-none',!data.count);document.querySelector('#pending-count').textContent=data.count;document.querySelector('#pending-title').textContent=data.count===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'}catch(error){}},12000);
 setInterval(syncOfflineQueue,15000);
-if(navigator.onLine)syncOfflineQueue();
 if(initialToken)scan(initialToken);
 </script><?php layout_footer();
