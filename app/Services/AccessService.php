@@ -38,8 +38,13 @@ final class AccessService
             $type = (string)($item['tipo'] ?? '');
             $manual = !empty($item['manual']);
             $note = trim((string)($item['observacao'] ?? ''));
+            $clientUid = $this->clientUid($item['client_uid'] ?? null);
 
             if (!in_array($type, ['entrada', 'saida'], true)) {
+                continue;
+            }
+            if ($clientUid !== null && $this->accessLogs->clientUidExists($clientUid)) {
+                $registered[] = $type;
                 continue;
             }
             if ($manual && strlen($note) < 5) {
@@ -49,7 +54,7 @@ final class AccessService
                 continue;
             }
 
-            $this->accessLogs->record($studentId, $guardianId, $type, $operatorId, $origin, $note !== '' ? $note : null, $manual, $ip);
+            $this->accessLogs->record($studentId, $guardianId, $type, $operatorId, $origin, $note !== '' ? $note : null, $manual, $ip, $clientUid);
             $this->audit->record($manual ? 'correcao_manual' : 'registrar_acesso', 'scp_alunos', $studentId, [
                 'tipo' => $type,
                 'responsavel_id' => $guardianId,
@@ -76,5 +81,12 @@ final class AccessService
         if ($saidas > 0) $parts[] = $saidas . ' saída' . ($saidas > 1 ? 's' : '');
 
         return implode(' e ', $parts) . ' registrada' . (count($registered) > 1 ? 's' : '') . ' com sucesso.';
+    }
+
+    private function clientUid(mixed $value): ?string
+    {
+        $uid = trim((string)$value);
+        if ($uid === '') return null;
+        return preg_match('/^[A-Za-z0-9._:-]{8,80}$/', $uid) ? $uid : null;
     }
 }

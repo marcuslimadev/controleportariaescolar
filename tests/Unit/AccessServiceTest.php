@@ -74,9 +74,18 @@ final class InMemoryAccessLogRepository implements AccessLogRepository
         string $origin,
         ?string $note,
         bool $manual,
-        ?string $ip
+        ?string $ip,
+        ?string $clientUid = null
     ): void {
-        $this->records[] = compact('studentId', 'guardianId', 'type', 'operatorId', 'origin', 'note', 'manual', 'ip');
+        $this->records[] = compact('studentId', 'guardianId', 'type', 'operatorId', 'origin', 'note', 'manual', 'ip', 'clientUid');
+    }
+
+    public function clientUidExists(string $clientUid): bool
+    {
+        foreach ($this->records as $record) {
+            if (($record['clientUid'] ?? null) === $clientUid) return true;
+        }
+        return false;
     }
 }
 
@@ -121,6 +130,14 @@ return static function (): void {
     if (count($logs->records) !== 2) throw new RuntimeException('Acessos não registrados.');
     if (!str_contains($result['message'], '1 entrada e 1 saída')) throw new RuntimeException('Mensagem de registro incorreta.');
     if (($audit->records[1]['action'] ?? null) !== 'correcao_manual') throw new RuntimeException('Auditoria manual não registrada.');
+
+    $retry = $service->registerGuardianAccess('TOKEN_OK', [
+        ['aluno_id' => 10, 'tipo' => 'entrada', 'client_uid' => 'offline-test-10'],
+    ], 99, 'teste', '127.0.0.1');
+    $retryAgain = $service->registerGuardianAccess('TOKEN_OK', [
+        ['aluno_id' => 10, 'tipo' => 'entrada', 'client_uid' => 'offline-test-10'],
+    ], 99, 'teste', '127.0.0.1');
+    if (count($logs->records) !== 3 || !str_contains($retryAgain['message'], 'entrada')) throw new RuntimeException('Idempotência offline falhou.');
 
     $blocked = false;
     try {

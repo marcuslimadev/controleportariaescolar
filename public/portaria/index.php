@@ -8,6 +8,7 @@
   </header>
 
   <a id="pending-banner" class="pending-banner <?=$pending?'':'d-none'?>" href="<?=e(url('portaria/convites.php'))?>"><span id="pending-count"><?=$pending?></span><strong id="pending-title"><?=$pending===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'?></strong><small>Toque para revisar</small></a>
+  <button id="offline-banner" class="offline-sync-banner d-none" type="button"><span id="offline-count">0</span><strong>Registro pendente no aparelho</strong><small>Toque para sincronizar quando houver internet</small></button>
 
   <div id="scanner-panel" class="scanner-panel">
     <div id="scanner-state" class="scanner-state" aria-hidden="true">Pronto</div>
@@ -42,9 +43,15 @@ const resultBox=document.querySelector('#result');
 let locked=false,scanning=false,current=null;
 let pendingCount=<?=$pending?>;
 const initialToken=<?=json_encode(extract_qr_token((string)($_GET['token']??'')))?>;
+const offlineKey='portaAbertaAccessQueue:v1';
+const offlineBanner=document.querySelector('#offline-banner');
+const offlineCount=document.querySelector('#offline-count');
 
 startButton.addEventListener('click',startScanner);
 stopButton.addEventListener('click',()=>stopScanner(true));
+offlineBanner.addEventListener('click',syncOfflineQueue);
+window.addEventListener('online',syncOfflineQueue);
+updateOfflineBanner();
 
 async function startScanner(){
   if(scanning)return;
@@ -134,17 +141,25 @@ async function record(token){
     note=(prompt('Informe o motivo da correção (mínimo de 5 caracteres):')||'').trim();
     if(note.length<5){setScanState('erro','Correção precisa de motivo.');return}
   }
-  const items=rows.map(row=>({aluno_id:row.dataset.id,tipo:row.dataset.tipo,manual:row.dataset.tipo!==row.dataset.sugerida,observacao:row.dataset.tipo!==row.dataset.sugerida?note:''}));
+  const batchId=createBatchId();
+  const items=rows.map((row,index)=>({aluno_id:row.dataset.id,tipo:row.dataset.tipo,manual:row.dataset.tipo!==row.dataset.sugerida,observacao:row.dataset.tipo!==row.dataset.sugerida?note:'',client_uid:batchId+'-'+index+'-'+row.dataset.id}));
   const button=resultBox.querySelector('.btn-confirm');if(button)button.disabled=true;
   const hasExit=items.some(item=>item.tipo==='saida');
   setScanState(hasExit?'saida':'entrada',hasExit?'Registrando saída…':'Registrando entrada…');
   try{
-    const response=await fetch('registrar.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token,items:JSON.stringify(items)})});
+    const response=await postAccess(token,items);
     const data=await response.json();
     if(!response.ok)throw new Error(data.message||'Falha no registro');
     if(navigator.vibrate)navigator.vibrate([100,60,100]);
     showSuccess(data.message);
-  }catch(error){if(button)button.disabled=false;setScanState('erro',error.message||'Não foi possível registrar.')}
+  }catch(error){
+    if(isNetworkError(error)){
+      queueAccess({id:batchId,token,items,createdAt:new Date().toISOString()});
+      showQueued('Sem conexão. Registro salvo neste aparelho e será sincronizado automaticamente.');
+      return;
+    }
+    if(button)button.disabled=false;setScanState('erro',error.message||'Não foi possível registrar.')
+  }
 }
 
 function showSuccess(message){
@@ -157,6 +172,48 @@ function showSuccess(message){
 
 function resetAndScan(){locked=false;current=null;resultBox.replaceChildren();startButton.classList.remove('d-none');startScanner()}
 function showError(message){setScanState('erro',message);startButton.classList.remove('d-none');startButton.disabled=false;startButton.querySelector('span:last-child').textContent='Tentar novamente'}
+function showQueued(message){
+  const box=document.createElement('div');box.className='success-card offline-card';
+  const icon=document.createElement('span');icon.className='success-check';icon.textContent='⌛';
+  const title=document.createElement('h2');title.textContent='Registro pendente';
+  const text=document.createElement('p');text.textContent=message;
+  const sync=document.createElement('button');sync.className='btn btn-primary w-100 mt-3';sync.type='button';sync.textContent='Tentar sincronizar agora';sync.addEventListener('click',syncOfflineQueue);
+  const next=document.createElement('button');next.className='btn-another';next.type='button';next.textContent='Escanear próximo crachá';next.addEventListener('click',resetAndScan);
+  box.append(icon,title,text,sync,next);resultBox.replaceChildren(box);setScanState('erro','Registro pendente de sincronização.');updateOfflineBanner();
+}
+function postAccess(token,items){
+  return fetch('registrar.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf,token,items:JSON.stringify(items)})});
+}
+function isNetworkError(error){return !navigator.onLine||error instanceof TypeError}
+function createBatchId(){return 'pa-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
+function readQueue(){try{return JSON.parse(localStorage.getItem(offlineKey)||'[]').filter(item=>item&&item.id&&item.token&&Array.isArray(item.items))}catch(error){return[]}}
+function writeQueue(queue){localStorage.setItem(offlineKey,JSON.stringify(queue));updateOfflineBanner()}
+function queueAccess(payload){const queue=readQueue().filter(item=>item.id!==payload.id);queue.push(payload);writeQueue(queue)}
+function updateOfflineBanner(){const total=readQueue().length;offlineBanner.classList.toggle('d-none',total===0);offlineCount.textContent=String(total)}
+async function syncOfflineQueue(){
+  const queue=readQueue();
+  if(!queue.length){updateOfflineBanner();return}
+  if(!navigator.onLine){setScanState('erro','Ainda sem internet para sincronizar.');return}
+  offlineBanner.disabled=true;
+  const remaining=[];
+  let sent=0;
+  for(const payload of queue){
+    try{
+      const response=await postAccess(payload.token,payload.items);
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.message||'Falha ao sincronizar');
+      sent++;
+    }catch(error){
+      remaining.push(payload);
+    }
+  }
+  writeQueue(remaining);
+  offlineBanner.disabled=false;
+  if(sent>0){
+    if(navigator.vibrate)navigator.vibrate([80,50,80]);
+    setScanState(remaining.length?'erro':'sucesso',remaining.length?`${sent} registro(s) sincronizado(s). ${remaining.length} ainda pendente(s).`:`${sent} registro(s) sincronizado(s).`);
+  }
+}
 function setScanState(state,message){
   panel.dataset.state=state||'pronto';
   statusBox.textContent=message||'';
@@ -168,5 +225,7 @@ function setScanState(state,message){
 function labelType(type){return type==='saida'?'saída':'entrada'}
 function cameraMessage(error){const text=String(error&&error.message||error);return /permission|denied|notallowed/i.test(text)?'Permita o acesso à câmera para escanear o crachá.':'Não foi possível abrir a câmera. Verifique se ela está disponível.'}
 setInterval(async()=>{try{const response=await fetch('pendencias.php');const data=await response.json();if(data.count>pendingCount&&navigator.vibrate)navigator.vibrate([180,80,180]);pendingCount=data.count;const banner=document.querySelector('#pending-banner');banner.classList.toggle('d-none',!data.count);document.querySelector('#pending-count').textContent=data.count;document.querySelector('#pending-title').textContent=data.count===1?'Cadastro aguardando aprovação':'Cadastros aguardando aprovação'}catch(error){}},12000);
+setInterval(syncOfflineQueue,15000);
+if(navigator.onLine)syncOfflineQueue();
 if(initialToken)scan(initialToken);
 </script><?php layout_footer();

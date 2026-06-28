@@ -18,11 +18,19 @@ final class PdoAccessLogRepository implements AccessLogRepository
         string $origin,
         ?string $note,
         bool $manual,
-        ?string $ip
+        ?string $ip,
+        ?string $clientUid = null
     ): void {
         $query = $this->pdo->prepare(
-            'INSERT INTO scp_registros_acesso(aluno_id,responsavel_id,tipo,usuario_id,origem,observacao,correcao_manual,ip) VALUES(?,?,?,?,?,?,?,?)'
+            'INSERT INTO scp_registros_acesso(aluno_id,responsavel_id,tipo,usuario_id,origem,observacao,correcao_manual,ip,client_uid) VALUES(?,?,?,?,?,?,?,?,?)'
         );
-        $query->execute([$studentId, $guardianId, $type, $operatorId, $origin, $note, $manual ? 1 : 0, $ip]);
+        $query->execute([$studentId, $guardianId, $type, $operatorId, $origin, $note, $manual ? 1 : 0, $ip, $clientUid]);
+    }
+
+    public function clientUidExists(string $clientUid): bool
+    {
+        $query = $this->pdo->prepare('SELECT COUNT(*) FROM scp_registros_acesso WHERE client_uid=?');
+        $query->execute([$clientUid]);
+        return (int)$query->fetchColumn() > 0;
     }
 }

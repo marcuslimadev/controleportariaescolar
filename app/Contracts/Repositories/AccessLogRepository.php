@@ -13,6 +13,9 @@ interface AccessLogRepository
         string $origin,
         ?string $note,
         bool $manual,
-        ?string $ip
+        ?string $ip,
+        ?string $clientUid = null
     ): void;
+
+    public function clientUidExists(string $clientUid): bool;
 }
