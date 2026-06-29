@@ -7,7 +7,7 @@ interface PostRepository
 {
     public function findActiveById(int $id): ?array;
 
-    public function listAdmin(int $limit = 100): array;
+    public function listAdmin(int $limit = 100, array $filters = []): array;
 
     public function scienceHistory(int $postId): array;
 

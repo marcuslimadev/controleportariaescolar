@@ -2,10 +2,47 @@
 require __DIR__ . '/../../includes/bootstrap.php';
 require_permission('post.manage');
 $postService = \App\Support\ServiceFactory::posts();
-$posts = $postService->listAdminPosts();
+$filters = [
+    'q' => (string)($_GET['q'] ?? ''),
+    'status' => (string)($_GET['status'] ?? ''),
+    'publico' => (string)($_GET['publico'] ?? ''),
+    'tipo' => (string)($_GET['tipo'] ?? ''),
+];
+$posts = $postService->listAdminPosts($filters);
 layout_header('Publicações');
 ?>
 <div class="page-heading"><div><span class="gate-eyebrow">COMUNICAÇÃO</span><h1>Publicações</h1><p>Comunicados, eventos, alertas e lembretes oficiais.</p></div><div class="page-actions"><a class="btn btn-primary" href="<?=e(url('admin/post-form.php'))?>">Nova publicação</a></div></div>
+<form class="section-card post-filter-form">
+  <div>
+    <label class="form-label fw-bold" for="q">Buscar</label>
+    <input id="q" class="form-control" name="q" value="<?=e($filters['q'])?>" placeholder="Título, conteúdo ou autor">
+  </div>
+  <div>
+    <label class="form-label fw-bold" for="status">Status</label>
+    <select id="status" class="form-select" name="status">
+      <option value="">Todos</option>
+      <?php foreach(['rascunho'=>'Rascunho','publicado'=>'Publicado','arquivado'=>'Arquivado'] as $value=>$label): ?><option value="<?=e($value)?>" <?=$filters['status']===$value?'selected':''?>><?=e($label)?></option><?php endforeach ?>
+    </select>
+  </div>
+  <div>
+    <label class="form-label fw-bold" for="publico">Público</label>
+    <select id="publico" class="form-select" name="publico">
+      <option value="">Todos</option>
+      <?php foreach(['publico'=>'Feed público','toda_escola'=>'Privado - todos','turma'=>'Privado - turma','aluno'=>'Privado - aluno','equipe'=>'Privado - equipe'] as $value=>$label): ?><option value="<?=e($value)?>" <?=$filters['publico']===$value?'selected':''?>><?=e($label)?></option><?php endforeach ?>
+    </select>
+  </div>
+  <div>
+    <label class="form-label fw-bold" for="tipo">Tipo</label>
+    <select id="tipo" class="form-select" name="tipo">
+      <option value="">Todos</option>
+      <?php foreach(['comunicado','atividade','evento','programação','alerta','cardápio','lembrete'] as $value): ?><option value="<?=e($value)?>" <?=$filters['tipo']===$value?'selected':''?>><?=e(ucfirst($value))?></option><?php endforeach ?>
+    </select>
+  </div>
+  <div class="post-filter-actions">
+    <button class="btn btn-primary">Filtrar</button>
+    <a class="btn btn-outline-primary" href="<?=e(url('admin/posts.php'))?>">Limpar</a>
+  </div>
+</form>
 <?php if ($posts): ?>
 <div class="data-table-card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Título</th><th>Tipo</th><th>Público</th><th>Status</th><th>Autor</th><th>Engajamento</th><th></th></tr></thead><tbody>
 <?php foreach ($posts as $post): ?>

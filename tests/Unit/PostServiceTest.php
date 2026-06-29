@@ -15,6 +15,7 @@ final class InMemoryPostRepository implements PostRepository
     public array $feedList = [];
     public array $publicList = [];
     public array $eventList = [];
+    public array $lastAdminFilters = [];
     public array $classes = [['id' => 1, 'nome' => '1A']];
     public array $students = [['id' => 2, 'nome' => 'Aluno']];
 
@@ -40,7 +41,7 @@ final class InMemoryPostRepository implements PostRepository
         unset($this->posts[$id]);
     }
 
-    public function listAdmin(int $limit = 100): array { return $this->adminList; }
+    public function listAdmin(int $limit = 100, array $filters = []): array { $this->lastAdminFilters = $filters; return $this->adminList; }
 
     public function scienceHistory(int $postId): array { return []; }
 
@@ -102,6 +103,9 @@ return static function (): void {
     $repo = new InMemoryPostRepository();
     $audit = new SpyAuditLogger();
     $service = new PostService($repo, $audit);
+    $service->listAdminPosts(['q' => ' aviso ', 'status' => 'publicado', 'publico' => 'publico', 'tipo' => 'alerta']);
+    if (($repo->lastAdminFilters['q'] ?? null) !== 'aviso') throw new RuntimeException('Filtro de busca não foi normalizado.');
+    if (($repo->lastAdminFilters['status'] ?? null) !== 'publicado') throw new RuntimeException('Filtro de status não foi repassado.');
     $createdId = $service->savePost([
         'titulo' => 'Comunicado',
         'conteudo' => 'Texto oficial',

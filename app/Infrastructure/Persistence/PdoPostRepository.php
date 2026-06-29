@@ -21,10 +21,25 @@ final class PdoPostRepository implements PostRepository
         return $post ?: null;
     }
 
-    public function listAdmin(int $limit = 100): array
+    public function listAdmin(int $limit = 100, array $filters = []): array
     {
         $limit = max(1, min(200, $limit));
-        $query = $this->pdo->query(
+        $where = ['p.deleted_at IS NULL'];
+        $params = [];
+        $q = trim((string)($filters['q'] ?? ''));
+        if ($q !== '') {
+            $where[] = '(p.titulo LIKE ? OR p.conteudo LIKE ? OR u.nome LIKE ?)';
+            $like = '%' . $q . '%';
+            array_push($params, $like, $like, $like);
+        }
+        foreach (['status', 'publico', 'tipo'] as $field) {
+            $value = trim((string)($filters[$field] ?? ''));
+            if ($value !== '') {
+                $where[] = "p.{$field}=?";
+                $params[] = $value;
+            }
+        }
+        $sql =
             "SELECT p.*, u.nome autor, t.nome turma, a.nome aluno,
                 (SELECT COUNT(*) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_total,
                 (SELECT MAX(ci.confirmado_em) FROM scp_post_ciencias ci WHERE ci.post_id=p.id) ciencia_ultima,
@@ -34,10 +49,11 @@ final class PdoPostRepository implements PostRepository
              JOIN scp_usuarios u ON u.id=p.autor_id
              LEFT JOIN scp_turmas t ON t.id=p.turma_id
              LEFT JOIN scp_alunos a ON a.id=p.aluno_id
-             WHERE p.deleted_at IS NULL
+             WHERE " . implode(' AND ', $where) . "
              ORDER BY p.created_at DESC
-             LIMIT {$limit}"
-        );
+             LIMIT {$limit}";
+        $query = $this->pdo->prepare($sql);
+        $query->execute($params);
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }

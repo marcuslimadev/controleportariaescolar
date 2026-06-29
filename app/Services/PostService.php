@@ -37,9 +37,15 @@ final class PostService
         ]);
     }
 
-    public function listAdminPosts(): array
+    public function listAdminPosts(array $filters = []): array
     {
-        return $this->posts->listAdmin(100);
+        $normalized = [
+            'q' => trim((string)($filters['q'] ?? '')),
+            'status' => in_array($filters['status'] ?? '', self::STATUSES, true) ? (string)$filters['status'] : '',
+            'publico' => in_array($filters['publico'] ?? '', self::SCOPES, true) ? (string)$filters['publico'] : '',
+            'tipo' => in_array($filters['tipo'] ?? '', self::TYPES, true) ? (string)$filters['tipo'] : '',
+        ];
+        return $this->posts->listAdmin(120, $normalized);
     }
 
     public function publicPosts(int $limit = 6): array
