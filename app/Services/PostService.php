@@ -53,9 +53,13 @@ final class PostService
         return $this->posts->publicFeed($limit);
     }
 
-    public function publicGallery(int $limit = 60): array
+    public function publicGallery(int $limit = 60, array $filters = []): array
     {
-        return $this->posts->publicGallery($limit);
+        $normalized = [
+            'q' => trim((string)($filters['q'] ?? '')),
+            'tipo' => in_array($filters['tipo'] ?? '', self::TYPES, true) ? (string)$filters['tipo'] : '',
+        ];
+        return $this->posts->publicGallery($limit, $normalized);
     }
 
     public function feedPosts(string $visibilitySql, array $visibilityParams, int $actorId, bool $isGuardian): array

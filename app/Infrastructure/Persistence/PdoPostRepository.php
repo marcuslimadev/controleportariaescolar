@@ -112,17 +112,31 @@ final class PdoPostRepository implements PostRepository
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function publicGallery(int $limit = 60): array
+    public function publicGallery(int $limit = 60, array $filters = []): array
     {
         $limit = max(1, min(100, $limit));
-        $query = $this->pdo->query(
+        $where = ["p.status='publicado'", "p.publico='publico'", "p.imagem_url IS NOT NULL", "p.imagem_url<>''", "p.deleted_at IS NULL"];
+        $params = [];
+        $q = trim((string)($filters['q'] ?? ''));
+        if ($q !== '') {
+            $where[] = '(p.titulo LIKE ? OR p.conteudo LIKE ?)';
+            $like = '%' . $q . '%';
+            array_push($params, $like, $like);
+        }
+        $type = trim((string)($filters['tipo'] ?? ''));
+        if ($type !== '') {
+            $where[] = 'p.tipo=?';
+            $params[] = $type;
+        }
+        $query = $this->pdo->prepare(
             "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.publicado_em,u.nome autor
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
-             WHERE p.status='publicado' AND p.publico='publico' AND p.imagem_url IS NOT NULL AND p.imagem_url<>'' AND p.deleted_at IS NULL
+             WHERE " . implode(' AND ', $where) . "
              ORDER BY p.publicado_em DESC, p.id DESC
              LIMIT {$limit}"
         );
+        $query->execute($params);
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }

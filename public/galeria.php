@@ -1,8 +1,12 @@
 <?php
 require __DIR__ . '/../includes/bootstrap.php';
+$filters = [
+    'q' => (string)($_GET['q'] ?? ''),
+    'tipo' => (string)($_GET['tipo'] ?? ''),
+];
 $items = [];
 try {
-    $items = \App\Support\ServiceFactory::posts()->publicGallery(80);
+    $items = \App\Support\ServiceFactory::posts()->publicGallery(80, $filters);
 } catch (Throwable $ignored) {}
 layout_header(current_locale()==='en' ? 'Gallery' : 'Galeria');
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
@@ -28,6 +32,17 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
     <h1><?=e(current_locale()==='en' ? 'School moments' : 'Momentos da escola')?></h1>
   </div>
 
+  <form class="public-gallery-filter">
+    <input type="hidden" name="lang" value="<?=e(current_locale())?>">
+    <input class="form-control" name="q" value="<?=e($filters['q'])?>" placeholder="<?=e(current_locale()==='en' ? 'Search public moments' : 'Buscar momentos públicos')?>">
+    <select class="form-select" name="tipo">
+      <option value=""><?=e(current_locale()==='en' ? 'All types' : 'Todos os tipos')?></option>
+      <?php foreach(['comunicado','atividade','evento','programação','alerta','cardápio','lembrete'] as $type): ?><option value="<?=e($type)?>" <?=$filters['tipo']===$type?'selected':''?>><?=e(ucfirst($type))?></option><?php endforeach ?>
+    </select>
+    <button class="btn btn-primary"><?=e(current_locale()==='en' ? 'Filter' : 'Filtrar')?></button>
+    <a class="btn btn-outline-primary" href="<?=e(url('galeria.php'))?>"><?=e(current_locale()==='en' ? 'Clear' : 'Limpar')?></a>
+  </form>
+
   <?php if ($items): ?>
     <section class="public-gallery-grid">
       <?php foreach ($items as $item): ?>
@@ -42,7 +57,7 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
       <?php endforeach ?>
     </section>
   <?php else: ?>
-    <div class="empty-state"><?=e(current_locale()==='en' ? 'No public images yet.' : 'Nenhuma imagem pública por enquanto.')?></div>
+    <div class="empty-state"><?=e(current_locale()==='en' ? 'No public images found.' : 'Nenhuma imagem pública encontrada.')?></div>
   <?php endif ?>
 </section>
 <?php layout_footer();

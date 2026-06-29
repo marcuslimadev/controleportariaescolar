@@ -16,6 +16,7 @@ final class InMemoryPostRepository implements PostRepository
     public array $publicList = [];
     public array $eventList = [];
     public array $lastAdminFilters = [];
+    public array $lastGalleryFilters = [];
     public array $classes = [['id' => 1, 'nome' => '1A']];
     public array $students = [['id' => 2, 'nome' => 'Aluno']];
 
@@ -52,7 +53,7 @@ final class InMemoryPostRepository implements PostRepository
 
     public function publicFeed(int $limit = 6): array { return $this->publicList; }
 
-    public function publicGallery(int $limit = 60): array { return $this->publicList; }
+    public function publicGallery(int $limit = 60, array $filters = []): array { $this->lastGalleryFilters = $filters; return $this->publicList; }
 
     public function events(string $start, string $end, string $visibilitySql, array $visibilityParams, ?int $classId): array
     {
@@ -143,4 +144,7 @@ return static function (): void {
 
     $events = $service->eventsForMonth('2026-06', '1=1', [], 1);
     if (($events['month'] ?? null) !== '2026-06') throw new RuntimeException('Mês de eventos não foi preservado.');
+
+    $service->publicGallery(60, ['q' => ' festa ', 'tipo' => 'evento']);
+    if (($repo->lastGalleryFilters['q'] ?? null) !== 'festa') throw new RuntimeException('Filtro da galeria não foi normalizado.');
 };
