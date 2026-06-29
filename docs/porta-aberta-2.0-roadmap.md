@@ -53,11 +53,27 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 - CI bloqueia regressão de SQL direto em `public/`.
 - Deploy roda lint, testes unitários e smoke HTTP.
 - CI básico para lint PHP/JSON e teste unitário leve.
+- Deploy preserva uploads em produção e publica o app no `public_html`.
+- PWA usa ícone oficial atualizado, prompt de instalação/atualização e fallback offline.
+- Portaria possui fila offline com IndexedDB e idempotência por `client_uid`.
+- Usuários internos e responsáveis podem definir foto de perfil.
+- Feed público e privado exibem avatar/nome do autor da publicação.
+- Dashboard administrativo criado com indicadores de portaria e comunicação.
+- Relatórios administrativos exportam CSV.
+- Portal do responsável mostra resumo dos filhos, último status de entrada/saída e exportação CSV.
+- Galeria pública e gestão administrativa de publicações possuem filtros.
+- Agenda de eventos possui resumo mensal e navegação mês anterior/próximo.
 
 ## Progresso estimado
 
 - Base aproveitável do 2.0 no MVP atual: 100%.
-- Restante estimado: 0%.
+- Fase 1 — Portaria 2.0: 95%.
+- Fase 2 — Comunicação: 92%.
+- Fase 3 — Portal público: 92%.
+- Fase 4 — Responsáveis: 94%.
+- Fase 5 — Relatórios e PWA: 94%.
+- Progresso geral estimado do roadmap atual: 94%.
+- Restante estimado antes de abrir o roadmap de cursos: 6%.
 
 ## Próximas fases
 
@@ -67,32 +83,57 @@ Roadmap técnico para evoluir o MVP atual sem interromper o uso em produção.
 
 ### Fase 1 — Portaria 2.0
 
-- Melhorar o leitor QR com estado claro: procurando, encontrado, entrada, saída, erro.
-- Aceitar token puro e URL pública.
-- Preservar câmera traseira como padrão no PWA.
-- Preparar modo offline para registros pendentes.
+- Concluído: leitor QR com estado claro: pronto, procurando, encontrado, entrada, saída, erro e sucesso.
+- Concluído: aceita token puro e URL pública.
+- Concluído: prioriza câmera traseira no PWA.
+- Concluído: fila offline para registros pendentes.
+- Concluído: IndexedDB como banco local do PWA, com fallback e migração de `localStorage`.
+- Pendente: tela administrativa para auditar/sinalizar registros sincronizados posteriormente.
 
 ### Fase 2 — Comunicação
 
-- Evoluir publicações com anexos, comentários moderados e notificações.
-- Manter exclusão/edição com permissão por perfil.
-- Criar histórico de ciência para comunicados importantes.
+- Concluído: publicações com anexos.
+- Concluído: comentários moderados.
+- Concluído: notificações internas.
+- Concluído: exclusão/edição com permissão por perfil.
+- Concluído: histórico de ciência para comunicados importantes.
+- Concluído: indicadores de engajamento na lista administrativa.
+- Concluído: filtros administrativos por busca, status, público e tipo.
+- Pendente: exportação CSV do histórico de ciência/comentários, se necessário.
 
 ### Fase 3 — Portal público
 
-- Separar conteúdos públicos de conteúdos internos.
-- Manter publicações públicas sem dados sensíveis.
-- Melhorar eventos e galeria.
+- Concluído: conteúdos públicos e internos separados.
+- Concluído: feed público sem dados sensíveis.
+- Concluído: galeria pública com filtros por busca/tipo.
+- Concluído: eventos com resumo mensal e navegação.
+- Pendente: revisão visual final da home pública em celulares reais.
 
 ### Fase 4 — Responsáveis
 
-- Crachá digital por responsável.
-- Histórico permitido por aluno.
-- Solicitações e autorizações de retirada.
+- Concluído: crachá digital por responsável.
+- Concluído: histórico permitido por aluno.
+- Concluído: solicitações e autorizações de retirada.
+- Concluído: resumo de filhos, status dentro/fora da escola e exportação CSV.
+- Pendente: detalhe individual por aluno, com histórico dedicado.
 
 ### Fase 5 — Relatórios e PWA
 
-- Relatórios exportáveis.
-- Dashboard de acessos e comunicados.
-- Melhorias offline do PWA.
-- Smoke tests HTTP pós-deploy e hardening final concluídos.
+- Concluído: relatórios exportáveis.
+- Concluído: dashboard de acessos e comunicados.
+- Concluído: melhorias offline do PWA.
+- Concluído: smoke tests HTTP pós-deploy.
+- Concluído: hardening final aplicado ao escopo atual.
+- Pendente: checklist manual final por perfil em produção.
+
+## Pendências finais antes do módulo de cursos
+
+1. Criar detalhe individual do aluno para o responsável.
+2. Adicionar exportação CSV de ciência/comentários, se for útil para operação.
+3. Revisar visualmente home pública, agenda, galeria, portal do responsável e portaria em celular real.
+4. Registrar um checklist de teste manual por perfil: admin, secretaria, professor, portaria e responsável.
+5. Ajustar pequenos textos/traduções restantes que aparecerem no teste manual.
+
+## Próximo roadmap planejado
+
+Após fechar as pendências finais acima, abrir um roadmap separado para a plataforma de cursos gratuitos/interativos para alunos.
