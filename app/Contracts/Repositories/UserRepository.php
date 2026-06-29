@@ -12,4 +12,6 @@ interface UserRepository
     public function updatePasswordHash(int $id, string $hash): void;
 
     public function updatePhoto(int $id, string $photoUrl): void;
+
+    public function updateProfile(int $id, string $name, ?string $bio): void;
 }

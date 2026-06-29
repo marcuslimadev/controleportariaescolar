@@ -23,6 +23,8 @@ interface GuardianRepository
 
     public function updatePhoto(int $id, string $photoUrl): void;
 
+    public function updateProfile(int $id, string $name, ?string $bio): void;
+
     public function createFromInvite(array $invite): int;
 
     public function updateFromInvite(int $guardianId, array $invite): void;

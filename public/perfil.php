@@ -7,13 +7,14 @@ $profileService = \App\Support\ServiceFactory::profiles();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     try {
+        $updatedProfile = $profileService->updateProfile($_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $_POST);
+        $_SESSION['name'] = $updatedProfile['name'];
         $photoUrl = save_portal_upload($_FILES['foto'] ?? [], 'perfis', 'image');
-        if (!$photoUrl) {
-            throw new RuntimeException(current_locale() === 'en' ? 'Choose a profile photo.' : 'Escolha uma foto de perfil.');
+        if ($photoUrl) {
+            $profileService->updatePhoto($_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $photoUrl);
+            $_SESSION['photo'] = $photoUrl;
         }
-        $profileService->updatePhoto($_SESSION['user_id'] ?? null, $_SESSION['responsavel_id'] ?? null, $photoUrl);
-        $_SESSION['photo'] = $photoUrl;
-        flash(current_locale() === 'en' ? 'Profile photo updated.' : 'Foto de perfil atualizada.');
+        flash(current_locale() === 'en' ? 'Profile updated.' : 'Perfil atualizado.');
         redirect('perfil.php');
     } catch (Throwable $error) {
         flash((current_locale() === 'en' ? 'Unable to save: ' : 'Não foi possível salvar: ') . $error->getMessage(), 'danger');
@@ -31,6 +32,7 @@ try {
 $profile = $profileData['profile'];
 $photo = $profile['foto'] ?: app_logo_url();
 $name = (string)($profile['nome'] ?? $_SESSION['name'] ?? app_name());
+$bio = (string)($profile['bio'] ?? '');
 $role = (string)($_SESSION['role'] ?? $profileData['type']);
 $roleLabels = [
     'admin' => current_locale() === 'en' ? 'Administrator' : 'Administrador',
@@ -59,6 +61,7 @@ layout_header(current_locale() === 'en' ? 'My profile' : 'Meu perfil');
     <div class="profile-summary">
       <span><?=e($roleLabels[$role] ?? ucfirst($role))?></span>
       <h2><?=e($name)?></h2>
+      <?php if ($bio !== ''): ?><p class="profile-bio"><?=e($bio)?></p><?php endif ?>
       <?php if (!empty($profile['email'])): ?><p><?=e($profile['email'])?></p><?php endif ?>
       <?php if (!empty($profile['telefone'])): ?><p><?=e($profile['telefone'])?></p><?php endif ?>
     </div>
@@ -66,21 +69,30 @@ layout_header(current_locale() === 'en' ? 'My profile' : 'Meu perfil');
 
   <form method="post" enctype="multipart/form-data" class="section-card profile-upload-card">
     <input type="hidden" name="csrf" value="<?=e(csrf())?>">
-    <h2><?=e(current_locale() === 'en' ? 'Profile photo' : 'Foto de perfil')?></h2>
-    <p class="text-muted"><?=e(current_locale() === 'en' ? 'Use a clear, professional image. JPG, PNG or WebP up to 8 MB.' : 'Use uma imagem nítida e profissional. JPG, PNG ou WebP até 8 MB.')?></p>
+    <h2><?=e(current_locale() === 'en' ? 'Profile data' : 'Dados do perfil')?></h2>
+    <p class="text-muted"><?=e(current_locale() === 'en' ? 'Edit your name, short bio and photo.' : 'Edite seu nome, uma bio curta e a foto.')?></p>
+    <label class="form-label fw-bold" for="nome"><?=e(current_locale() === 'en' ? 'Name' : 'Nome')?></label>
+    <input id="nome" class="form-control form-control-lg" name="nome" maxlength="150" value="<?=e($name)?>" required>
+    <label class="form-label fw-bold mt-3" for="bio"><?=e(current_locale() === 'en' ? 'Bio' : 'Bio')?></label>
+    <input id="bio" class="form-control form-control-lg" name="bio" maxlength="80" value="<?=e($bio)?>" placeholder="<?=e(current_locale() === 'en' ? 'Up to 80 characters' : 'Até 80 caracteres')?>">
+    <small id="bio-count" class="profile-bio-count">0/80</small>
     <div class="profile-preview-box">
       <img id="profile-preview" src="<?=e(media_url($photo, $profile['updated_at'] ?? $profile['id'] ?? ''))?>" alt="<?=e(current_locale() === 'en' ? 'Selected photo preview' : 'Prévia da foto selecionada')?>">
       <span><?=e(current_locale() === 'en' ? 'Preview before saving' : 'Prévia antes de salvar')?></span>
     </div>
     <label class="form-label fw-bold" for="foto"><?=e(current_locale() === 'en' ? 'Choose photo' : 'Escolher foto')?></label>
-    <input id="foto" class="form-control form-control-lg" type="file" name="foto" accept="image/jpeg,image/png,image/webp" required>
-    <button class="btn btn-primary btn-lg mt-4" type="submit"><?=e(current_locale() === 'en' ? 'Save photo' : 'Salvar foto')?></button>
+    <input id="foto" class="form-control form-control-lg" type="file" name="foto" accept="image/jpeg,image/png,image/webp">
+    <button class="btn btn-primary btn-lg mt-4" type="submit"><?=e(current_locale() === 'en' ? 'Save profile' : 'Salvar perfil')?></button>
   </form>
 </section>
 <script nonce="<?=e(csp_nonce())?>">
 const profileInput=document.querySelector('#foto');
 const profilePreview=document.querySelector('#profile-preview');
+const bioInput=document.querySelector('#bio');
+const bioCount=document.querySelector('#bio-count');
 let profilePreviewUrl=null;
+function syncBioCount(){if(bioInput&&bioCount)bioCount.textContent=`${bioInput.value.length}/80`}
+if(bioInput){bioInput.addEventListener('input',syncBioCount);syncBioCount()}
 if(profileInput&&profilePreview){
   profileInput.addEventListener('change',()=>{
     const file=profileInput.files&&profileInput.files[0];

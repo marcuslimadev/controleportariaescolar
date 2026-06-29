@@ -29,6 +29,8 @@ final class InMemoryUserRepository implements UserRepository
     }
 
     public function updatePhoto(int $id, string $photoUrl): void {}
+
+    public function updateProfile(int $id, string $name, ?string $bio): void {}
 }
 
 return static function (): void {

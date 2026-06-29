@@ -341,8 +341,10 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .profile-summary span{display:inline-flex;border:1px solid #D7DEE8;border-radius:999px;padding:.25rem .65rem;font-size:.75rem;font-weight:900;text-transform:uppercase;color:var(--gate-dark);background:#fff}
 .profile-summary h2{font-size:1.45rem;font-weight:950;letter-spacing:-.04em;margin:.7rem 0 .25rem}
 .profile-summary p{margin:.2rem 0;color:var(--muted);font-weight:700}
+.profile-summary .profile-bio{color:var(--ink);font-weight:850;line-height:1.35}
 .profile-upload-card{align-self:start}
 .profile-upload-card h2{margin-bottom:.35rem}
+.profile-bio-count{display:block;margin-top:.35rem;color:var(--muted);font-weight:800;text-align:right}
 .profile-preview-box{display:flex;align-items:center;gap:.9rem;margin:1rem 0;padding:.85rem;border:1px solid var(--ds-border,#DED8C8);border-radius:20px;background:linear-gradient(145deg,#fff,#F7FAFD)}
 .profile-preview-box img{width:86px;height:86px;border-radius:999px;object-fit:cover;background:#fff;border:3px solid #fff;box-shadow:0 12px 28px #15171A16}
 .profile-preview-box span{color:var(--muted);font-weight:900}

@@ -49,4 +49,37 @@ final class ProfileService
 
         throw new RuntimeException('Perfil não encontrado.');
     }
+
+    public function updateProfile(?int $userId, ?int $guardianId, array $input): array
+    {
+        $name = trim(preg_replace('/\s+/', ' ', (string)($input['nome'] ?? '')) ?? '');
+        $bio = trim(preg_replace('/\s+/', ' ', (string)($input['bio'] ?? '')) ?? '');
+
+        if ($this->textLength($name) < 2 || $this->textLength($name) > 150) {
+            throw new RuntimeException('Informe um nome com 2 a 150 caracteres.');
+        }
+        if ($this->textLength($bio) > 80) {
+            throw new RuntimeException('A bio deve ter até 80 caracteres.');
+        }
+        $bio = $bio !== '' ? $bio : null;
+
+        if ($guardianId) {
+            $this->guardians->updateProfile($guardianId, $name, $bio);
+            $this->audit->record('alterar_perfil', 'scp_responsaveis', $guardianId);
+            return ['name' => $name, 'bio' => $bio];
+        }
+
+        if ($userId) {
+            $this->users->updateProfile($userId, $name, $bio);
+            $this->audit->record('alterar_perfil', 'scp_usuarios', $userId);
+            return ['name' => $name, 'bio' => $bio];
+        }
+
+        throw new RuntimeException('Perfil não encontrado.');
+    }
+
+    private function textLength(string $value): int
+    {
+        return function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
+    }
 }

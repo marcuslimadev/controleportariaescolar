@@ -91,6 +91,12 @@ final class PdoGuardianRepository implements GuardianRepository
         $query->execute([$photoUrl, $id]);
     }
 
+    public function updateProfile(int $id, string $name, ?string $bio): void
+    {
+        $query = $this->pdo->prepare('UPDATE scp_responsaveis SET nome=?, bio=? WHERE id=?');
+        $query->execute([$name, $bio, $id]);
+    }
+
     public function createFromInvite(array $invite): int
     {
         $query = $this->pdo->prepare('INSERT INTO scp_responsaveis(nome,cpf,email,telefone,foto,senha_hash) VALUES(?,?,?,?,?,?)');

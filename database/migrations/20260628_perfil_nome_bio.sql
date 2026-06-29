@@ -1,0 +1,2 @@
+ALTER TABLE scp_usuarios ADD COLUMN bio VARCHAR(80) NULL AFTER foto;
+ALTER TABLE scp_responsaveis ADD COLUMN bio VARCHAR(80) NULL AFTER foto;

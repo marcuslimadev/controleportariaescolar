@@ -39,4 +39,10 @@ final class PdoUserRepository implements UserRepository
         $query = $this->pdo->prepare('UPDATE scp_usuarios SET foto=? WHERE id=?');
         $query->execute([$photoUrl, $id]);
     }
+
+    public function updateProfile(int $id, string $name, ?string $bio): void
+    {
+        $query = $this->pdo->prepare('UPDATE scp_usuarios SET nome=?, bio=? WHERE id=?');
+        $query->execute([$name, $bio, $id]);
+    }
 }
