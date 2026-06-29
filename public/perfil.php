@@ -68,9 +68,32 @@ layout_header(current_locale() === 'en' ? 'My profile' : 'Meu perfil');
     <input type="hidden" name="csrf" value="<?=e(csrf())?>">
     <h2><?=e(current_locale() === 'en' ? 'Profile photo' : 'Foto de perfil')?></h2>
     <p class="text-muted"><?=e(current_locale() === 'en' ? 'Use a clear, professional image. JPG, PNG or WebP up to 8 MB.' : 'Use uma imagem nítida e profissional. JPG, PNG ou WebP até 8 MB.')?></p>
+    <div class="profile-preview-box">
+      <img id="profile-preview" src="<?=e(media_url($photo, $profile['updated_at'] ?? $profile['id'] ?? ''))?>" alt="<?=e(current_locale() === 'en' ? 'Selected photo preview' : 'Prévia da foto selecionada')?>">
+      <span><?=e(current_locale() === 'en' ? 'Preview before saving' : 'Prévia antes de salvar')?></span>
+    </div>
     <label class="form-label fw-bold" for="foto"><?=e(current_locale() === 'en' ? 'Choose photo' : 'Escolher foto')?></label>
     <input id="foto" class="form-control form-control-lg" type="file" name="foto" accept="image/jpeg,image/png,image/webp" required>
     <button class="btn btn-primary btn-lg mt-4" type="submit"><?=e(current_locale() === 'en' ? 'Save photo' : 'Salvar foto')?></button>
   </form>
 </section>
+<script nonce="<?=e(csp_nonce())?>">
+const profileInput=document.querySelector('#foto');
+const profilePreview=document.querySelector('#profile-preview');
+let profilePreviewUrl=null;
+if(profileInput&&profilePreview){
+  profileInput.addEventListener('change',()=>{
+    const file=profileInput.files&&profileInput.files[0];
+    if(profilePreviewUrl){URL.revokeObjectURL(profilePreviewUrl);profilePreviewUrl=null}
+    if(!file)return;
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)){
+      profileInput.value='';
+      alert(<?=json_encode(current_locale()==='en' ? 'Use JPG, PNG or WebP.' : 'Use JPG, PNG ou WebP.')?>);
+      return;
+    }
+    profilePreviewUrl=URL.createObjectURL(file);
+    profilePreview.src=profilePreviewUrl;
+  });
+}
+</script>
 <?php layout_footer();
