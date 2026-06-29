@@ -245,6 +245,7 @@ function portal_nav_items(): array {
         ];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Teachers' : 'Professores', 'admin/index.php?tab=professores'];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Users' : 'Usuários', 'admin/index.php?tab=usuarios'];
+        if ($role === 'admin') $items[] = [current_locale()==='en' ? 'View as' : 'Ver como', 'admin/ver-como.php'];
         if ($role === 'admin') $items[] = [current_locale()==='en' ? 'Settings' : 'Configurações', 'admin/configuracoes.php'];
         $items[] = [current_locale()==='en' ? 'Gatehouse' : 'Portaria', 'portaria/index.php'];
         $items[] = [current_locale()==='en' ? 'Pickup auth.' : 'Autorizações', 'portaria/autorizacoes.php'];
@@ -297,6 +298,7 @@ function portal_nav_icon(string $path, int $index): string {
     if (str_contains($path, 'eventos')) return '◷';
     if (str_contains($path, 'post-form')) return '+';
     if (str_contains($path, 'relatorios')) return '▤';
+    if (str_contains($path, 'ver-como')) return '👁';
     if (str_contains($path, 'configuracoes')) return '⚙';
     if (str_contains($path, 'logout')) return '↪';
     if (str_contains($path, 'admin/index')) return '☰';

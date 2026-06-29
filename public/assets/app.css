@@ -650,6 +650,13 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .dashboard-card a{color:var(--gate-dark);font-weight:900;text-decoration:none}
 @media(max-width:900px){.dashboard-grid,.dashboard-grid.secondary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.dashboard-grid,.dashboard-grid.secondary{grid-template-columns:1fr}}
+.demo-mode-banner{position:sticky;top:0;z-index:1032;display:flex;align-items:center;justify-content:center;gap:.75rem;padding:.55rem .8rem;background:#FFF8D6;border-bottom:1px solid #E8D27A;color:#5C3B00;font-weight:900}
+.demo-mode-banner span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.demo-role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.demo-role-card{display:grid;gap:.55rem;align-content:start}
+.demo-role-card h2{font-size:1.25rem}
+.demo-role-card form{margin:0}
+@media(max-width:760px){.demo-role-grid{grid-template-columns:1fr}.demo-mode-banner{top:0;justify-content:space-between}}
 
 /* Fase 1: design system e identidade visual */
 :root{
