@@ -26,6 +26,39 @@ final class PdoGuardianPortalRepository implements GuardianPortalRepository
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function child(int $guardianId, int $studentId): ?array
+    {
+        $query = $this->pdo->prepare(
+            "SELECT a.id,a.nome,a.foto,a.qr_token,t.nome turma,
+                (SELECT r.tipo FROM scp_registros_acesso r WHERE r.aluno_id=a.id ORDER BY r.registrado_em DESC,r.id DESC LIMIT 1) ultimo_tipo,
+                (SELECT r.registrado_em FROM scp_registros_acesso r WHERE r.aluno_id=a.id ORDER BY r.registrado_em DESC,r.id DESC LIMIT 1) ultimo_registro
+             FROM scp_aluno_responsavel ar
+             JOIN scp_alunos a ON a.id=ar.aluno_id
+             LEFT JOIN scp_turmas t ON t.id=a.turma_id
+             WHERE ar.responsavel_id=? AND ar.aluno_id=? AND ar.autoriza_consulta=1 AND a.ativo=1 AND a.deleted_at IS NULL
+             LIMIT 1"
+        );
+        $query->execute([$guardianId, $studentId]);
+        $child = $query->fetch(PDO::FETCH_ASSOC);
+        return $child ?: null;
+    }
+
+    public function childMovements(int $guardianId, int $studentId, string $from, string $to): array
+    {
+        $query = $this->pdo->prepare(
+            'SELECT a.nome aluno,t.nome turma,r.tipo,r.registrado_em,r.origem,resp.nome responsavel
+             FROM scp_aluno_responsavel ar
+             JOIN scp_alunos a ON a.id=ar.aluno_id
+             LEFT JOIN scp_turmas t ON t.id=a.turma_id
+             JOIN scp_registros_acesso r ON r.aluno_id=a.id AND DATE(r.registrado_em) BETWEEN ? AND ?
+             LEFT JOIN scp_responsaveis resp ON resp.id=r.responsavel_id
+             WHERE ar.responsavel_id=? AND ar.aluno_id=? AND ar.autoriza_consulta=1 AND a.deleted_at IS NULL
+             ORDER BY r.registrado_em DESC'
+        );
+        $query->execute([$from, $to, $guardianId, $studentId]);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function movements(int $guardianId, string $from, string $to): array
     {
         $query = $this->pdo->prepare(

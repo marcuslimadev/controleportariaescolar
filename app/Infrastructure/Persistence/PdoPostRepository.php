@@ -51,9 +51,13 @@ final class PdoPostRepository implements PostRepository
              LEFT JOIN scp_alunos a ON a.id=p.aluno_id
              WHERE " . implode(' AND ', $where) . "
              ORDER BY p.created_at DESC
-             LIMIT {$limit}";
+             LIMIT :limit";
         $query = $this->pdo->prepare($sql);
-        $query->execute($params);
+        foreach ($params as $index => $value) {
+            $query->bindValue($index + 1, $value);
+        }
+        $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -90,9 +94,13 @@ final class PdoPostRepository implements PostRepository
              JOIN scp_usuarios u ON u.id=p.autor_id
              WHERE p.status='publicado' AND p.deleted_at IS NULL AND {$visibilitySql}
              ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
-             LIMIT {$limit}"
+             LIMIT :limit"
         );
-        $query->execute($params);
+        foreach ($params as $index => $value) {
+            $query->bindValue($index + 1, $value);
+        }
+        $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -100,14 +108,16 @@ final class PdoPostRepository implements PostRepository
     public function publicFeed(int $limit = 6): array
     {
         $limit = max(1, min(20, $limit));
-        $query = $this->pdo->query(
+        $query = $this->pdo->prepare(
             "SELECT p.tipo,p.titulo,p.conteudo,p.imagem_url,p.anexo_url,p.anexo_nome,p.data_evento,p.hora_evento,p.local,p.importante,p.fixado,p.publicado_em,u.nome autor,u.foto autor_foto
              FROM scp_posts p
              JOIN scp_usuarios u ON u.id=p.autor_id
              WHERE p.status='publicado' AND p.publico='publico' AND p.deleted_at IS NULL
              ORDER BY p.fixado DESC, p.publicado_em DESC, p.id DESC
-             LIMIT {$limit}"
+             LIMIT :limit"
         );
+        $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -134,9 +144,13 @@ final class PdoPostRepository implements PostRepository
              JOIN scp_usuarios u ON u.id=p.autor_id
              WHERE " . implode(' AND ', $where) . "
              ORDER BY p.publicado_em DESC, p.id DESC
-             LIMIT {$limit}"
+             LIMIT :limit"
         );
-        $query->execute($params);
+        foreach ($params as $index => $value) {
+            $query->bindValue($index + 1, $value);
+        }
+        $query->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }

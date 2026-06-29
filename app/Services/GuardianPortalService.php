@@ -28,6 +28,24 @@ final class GuardianPortalService
         return $this->portal->absences($guardianId);
     }
 
+    public function childDetail(int $guardianId, int $studentId, string $from, string $to): array
+    {
+        [$from, $to] = $this->normalizePeriod($from, $to);
+        $child = $this->portal->child($guardianId, $studentId);
+        if (!$child) {
+            throw new \RuntimeException('Aluno não encontrado para este responsável.');
+        }
+        $movements = $this->portal->childMovements($guardianId, $studentId, $from, $to);
+
+        return [
+            'from' => $from,
+            'to' => $to,
+            'child' => $child,
+            'movements' => $movements,
+            'summary' => $this->summarize([$child], $movements),
+        ];
+    }
+
     private function normalizePeriod(string $from, string $to): array
     {
         $today = date('Y-m-d');
