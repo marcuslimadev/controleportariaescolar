@@ -615,6 +615,19 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .authorization-person strong{font-size:1.08rem;font-weight:950}
 .authorization-person span{color:var(--muted);font-weight:700}
 .authorization-note{border-left:4px solid var(--gate);padding:.6rem .8rem;background:#fff;border-radius:12px;color:var(--ink)}
+.guardian-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin:0 0 1rem}
+.guardian-summary article{border:1px solid var(--ds-border,#DED8C8);border-radius:22px;background:#fff;box-shadow:0 14px 34px #15171A0D;padding:.9rem}
+.guardian-summary span{display:block;color:var(--muted);font-size:.72rem;font-weight:950;text-transform:uppercase;letter-spacing:.08em}
+.guardian-summary strong{display:block;font-size:2rem;font-weight:950;line-height:1;letter-spacing:-.06em}
+.family-cards-rich article{align-items:center}
+.family-cards-rich small{display:block;margin-top:.18rem;color:var(--muted);font-weight:800}
+.guardian-last-status.inside{color:#0F7A3A}
+.guardian-last-status.outside{color:#9A3412}
+.guardian-movement-list{display:none;gap:.7rem;margin:1rem 0}
+.guardian-movement-list article{display:grid;grid-template-columns:1fr auto;gap:.25rem .75rem;border:1px solid var(--ds-border,#DED8C8);border-radius:20px;background:#fff;padding:.9rem;box-shadow:0 12px 28px #15171A0D}
+.guardian-movement-list strong{font-weight:950}
+.guardian-movement-list span:not(.movement-pill),.guardian-movement-list small{color:var(--muted);font-weight:750}
+@media(max-width:700px){.guardian-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.guardian-movement-list{display:grid}.guardian-table{display:none}}
 .report-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.85rem;margin:0 auto 1rem;max-width:960px}
 .report-metrics article{padding:1rem;border:1px solid var(--ds-border,#DED8C8);border-radius:22px;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--gate) 5%,#fff));box-shadow:0 16px 36px #15171A0D}
 .report-metrics span{display:block;color:var(--muted);font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}

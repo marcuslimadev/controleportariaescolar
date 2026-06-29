@@ -13,12 +13,14 @@ final class PdoGuardianPortalRepository implements GuardianPortalRepository
     public function children(int $guardianId): array
     {
         $query = $this->pdo->prepare(
-            'SELECT a.nome,a.foto,a.qr_token,t.nome turma
+            "SELECT a.id,a.nome,a.foto,a.qr_token,t.nome turma,
+                (SELECT r.tipo FROM scp_registros_acesso r WHERE r.aluno_id=a.id ORDER BY r.registrado_em DESC,r.id DESC LIMIT 1) ultimo_tipo,
+                (SELECT r.registrado_em FROM scp_registros_acesso r WHERE r.aluno_id=a.id ORDER BY r.registrado_em DESC,r.id DESC LIMIT 1) ultimo_registro
              FROM scp_aluno_responsavel ar
              JOIN scp_alunos a ON a.id=ar.aluno_id
              LEFT JOIN scp_turmas t ON t.id=a.turma_id
              WHERE ar.responsavel_id=? AND ar.autoriza_consulta=1 AND a.ativo=1 AND a.deleted_at IS NULL
-             ORDER BY a.nome'
+             ORDER BY a.nome"
         );
         $query->execute([$guardianId]);
         return $query->fetchAll(PDO::FETCH_ASSOC);
