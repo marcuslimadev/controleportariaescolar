@@ -2,6 +2,7 @@
 require __DIR__ . '/../includes/bootstrap.php';
 layout_header(current_locale()==='en' ? 'How it works' : 'Como Funciona');
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
+$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Escola%20Aberta';
 ?>
 <section class="public-home">
   <header class="public-topbar">
@@ -12,6 +13,7 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
     <nav class="public-top-actions" aria-label="Ações públicas">
       <a href="<?=e(url('login.php?login=1#login-card'))?>" class="btn btn-primary"><?=e(t('login'))?></a>
       <a href="<?=e(url('login.php'))?>" class="btn btn-outline-primary"><?=e(current_locale()==='en' ? 'Timeline' : 'Timeline')?></a>
+      <a href="<?=e($whatsappUrl)?>" class="btn public-whatsapp-link" target="_blank" rel="noopener">WhatsApp</a>
       <a href="<?=e(lang_url($nextLang))?>" class="btn btn-outline-secondary lang-button">
         <span class="lang-flag" aria-hidden="true"><?=$nextLang === 'pt' ? '🇧🇷' : '🇺🇸'?></span>
         <span class="lang-code"><?=e(strtoupper($nextLang))?></span>
@@ -64,6 +66,7 @@ $nextLang = current_locale() === 'en' ? 'pt' : 'en';
       <p><?=e(current_locale()==='en'
         ? 'More organization, safer operations, better family experience and reliable records for daily decisions.'
         : 'Mais organização, operação segura, melhor experiência para as famílias e registros confiáveis para decisões do dia a dia.')?></p>
+      <a href="<?=e($whatsappUrl)?>" class="btn public-whatsapp-cta" target="_blank" rel="noopener"><?=e(current_locale()==='en' ? 'Talk on WhatsApp' : 'Falar no WhatsApp')?></a>
     </div>
   </section>
 </section>

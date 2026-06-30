@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_header(t('public_portal'));
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
 $coverUrl = app_cover_url();
+$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Escola%20Aberta';
 ?>
 <section class="public-home <?=$showLogin ? 'show-login' : ''?>">
   <header class="public-topbar">
@@ -45,6 +46,7 @@ $coverUrl = app_cover_url();
     <nav class="public-top-actions" aria-label="Ações iniciais">
       <a href="<?=e(url('login.php?login=1#login-card'))?>" class="btn btn-primary"><?=e(t('login'))?></a>
       <a href="<?=e(url('como-funciona.php'))?>" class="btn btn-outline-primary public-how-link"><?=e(current_locale()==='en' ? 'How it works' : 'Como Funciona')?></a>
+      <a href="<?=e($whatsappUrl)?>" class="btn public-whatsapp-link" target="_blank" rel="noopener">WhatsApp</a>
       <a href="<?=e(url('eventos.php'))?>" class="btn btn-outline-primary"><?=e(t('events'))?></a>
       <a href="<?=e(url('galeria.php'))?>" class="btn btn-outline-primary public-gallery-link"><?=e(current_locale()==='en' ? 'Gallery' : 'Galeria')?></a>
       <a href="<?=e(lang_url($nextLang))?>" class="btn btn-outline-secondary lang-button login-lang-button" aria-label="<?=e($nextLang === 'pt' ? 'Trocar idioma para Português' : 'Change language to English')?>">

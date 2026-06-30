@@ -249,6 +249,9 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .public-brand strong{font-size:1rem;font-weight:950;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .public-brand small{font-size:.73rem;color:var(--muted);font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
 .public-top-actions{display:flex;align-items:center;gap:.45rem;flex:0 0 auto}
+.public-whatsapp-link,.public-whatsapp-cta{display:inline-flex;align-items:center;justify-content:center;border:0!important;background:linear-gradient(135deg,#20c86a,#128c4a)!important;color:#fff!important;font-weight:950;box-shadow:0 14px 28px rgba(18,140,74,.22);text-decoration:none}
+.public-whatsapp-link:hover,.public-whatsapp-cta:hover{color:#fff!important;filter:saturate(1.05) brightness(1.02);transform:translateY(-1px)}
+.public-whatsapp-cta{flex:0 0 auto;border-radius:16px;padding:.7rem 1rem;white-space:nowrap}
 .public-home:not(.show-login) .login-card{display:none}
 .public-home .login-card{margin:0 auto 1rem;box-shadow:6px 6px 0 var(--bh-yellow)}
 .public-memorial{display:grid;gap:1rem;padding:1.1rem;background:linear-gradient(145deg,#FFFFFFF2,#FFF8DFE8);border:1px solid #DED8C8;border-radius:28px;box-shadow:0 24px 58px #15171A12;overflow:hidden}
@@ -259,7 +262,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .public-value-grid strong{display:grid;place-items:center;width:34px;height:34px;border-radius:999px;background:var(--gate);color:#fff;font-weight:950;margin-bottom:.75rem;box-shadow:0 10px 22px color-mix(in srgb,var(--gate) 24%,transparent)}
 .public-value-grid h2{font-size:1.02rem;font-weight:950;letter-spacing:-.035em;margin:0 0 .35rem;color:var(--ink)}
 .public-value-grid p{margin:0;color:var(--muted);line-height:1.42;font-weight:700;font-size:.92rem}
-.public-memorial-footer{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--gate) 10%,#fff),#fff)}
+.public-memorial-footer{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--gate) 10%,#fff),#fff);flex-wrap:wrap}
 .public-memorial-footer span{flex:0 0 auto;color:var(--gate-dark);font-weight:950;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem}
 .public-memorial-footer p{margin:0;color:var(--ink);font-weight:800;line-height:1.4}
 .public-feed-shell{display:grid;gap:1rem}
@@ -280,7 +283,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .public-post-body{padding:.9rem}
 .public-post-body h2{font-size:1.15rem;font-weight:950;letter-spacing:-.025em;margin:.2rem 0 .45rem}
 .public-post-body p{line-height:1.55;color:#25282c;margin-bottom:.65rem}
-@media(max-width:620px){.public-home{padding-top:.25rem}.public-topbar{top:.35rem;border-radius:14px;padding:.5rem}.public-brand small{display:none}.public-brand img{width:42px;height:36px}.public-top-actions .btn-outline-primary{display:none}.public-top-actions .public-how-link{display:inline-flex}.public-top-actions .btn{padding:.45rem .7rem}.public-value-grid{grid-template-columns:1fr}.public-memorial{border-radius:22px;padding:.95rem}.public-memorial-footer{display:grid}.public-post-image{max-height:520px}.public-insta-post{border-radius:14px}}
+@media(max-width:620px){.public-home{padding-top:.25rem}.public-topbar{top:.35rem;border-radius:14px;padding:.5rem}.public-brand small{display:none}.public-brand img{width:42px;height:36px}.public-top-actions .btn-outline-primary{display:none}.public-top-actions .public-how-link{display:inline-flex}.public-top-actions .public-whatsapp-link{display:none}.public-top-actions .btn{padding:.45rem .7rem}.public-value-grid{grid-template-columns:1fr}.public-memorial{border-radius:22px;padding:.95rem}.public-memorial-footer{display:grid}.public-whatsapp-cta{width:100%}.public-post-image{max-height:520px}.public-insta-post{border-radius:14px}}
 @media(max-width:900px){.login-page{background-position:68% center;background-attachment:scroll}.login-page:before{background:linear-gradient(180deg,#15171Aa8 0%,#15171Ae8 45%,#15171A 100%)}.login-shell{display:flex;flex-direction:column;padding:1rem 0 2rem}.public-portal-card,.login-card{max-width:560px;margin-left:auto;margin-right:auto}.login-card{border-radius:10px}.login-card h2{font-size:1.75rem}}
 @media(max-width:420px){.login-page main.container{padding-left:10px;padding-right:10px}.login-card{margin-top:4vh}.login-card .card-body{padding:1.25rem}}
 .app-nav-scroll{background:color-mix(in srgb,var(--surface) 94%,transparent);border-bottom:2px solid var(--bh-black);margin-bottom:1.25rem;overflow:auto;scrollbar-width:none}
