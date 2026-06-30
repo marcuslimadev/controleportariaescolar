@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_header(t('public_portal'));
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
 $coverUrl = app_cover_url();
-$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Escola%20Aberta';
+$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Porta%20Aberta%20Escolar';
 ?>
 <section class="public-home <?=$showLogin ? 'show-login' : ''?>">
   <header class="public-topbar">

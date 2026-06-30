@@ -2,7 +2,7 @@
 require __DIR__ . '/../includes/bootstrap.php';
 layout_header(current_locale()==='en' ? 'How it works' : 'Como Funciona');
 $nextLang = current_locale() === 'en' ? 'pt' : 'en';
-$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Escola%20Aberta';
+$whatsappUrl = 'https://wa.me/5592992287144?text=Ol%C3%A1%20gostaria%20de%20saber%20mais%20sobre%20o%20Porta%20Aberta%20Escolar';
 $logoUrl = app_logo_url();
 $appIconUrl = asset_url('assets/porta-aberta-app-v2-512.png');
 ?>
