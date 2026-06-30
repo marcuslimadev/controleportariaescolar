@@ -112,6 +112,7 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .btn-whatsapp:disabled{opacity:.65}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:.55}}
+@keyframes clickHintBlink{0%,100%{transform:translateY(0);box-shadow:0 0 0 rgba(25,98,179,0);background:#fff}18%,48%{transform:translateY(-1px) scale(1.04);box-shadow:0 0 0 .22rem rgba(25,98,179,.16);background:#EAF2FF}32%,62%{transform:translateY(0);box-shadow:0 0 0 rgba(25,98,179,0);background:#fff}}
 @media(max-width:576px){.container{padding-left:12px;padding-right:12px}.navbar{margin-bottom:1rem!important}.navbar-brand{font-size:1rem}.scanner-panel{min-height:230px;border-radius:8px}.qr-reader{min-height:230px}.btn-scan,.btn-confirm{min-height:68px;font-size:1.17rem}.access-card,.success-card,.quick-register-card{border-radius:8px;padding:1.1rem}.badge-preview-wrap{border-radius:8px;padding:9px}}
 @media(display-mode:standalone){body{overscroll-behavior:none}.navbar{position:sticky;top:0;z-index:10}.gate-app{padding-top:.25rem}}
 .pending-banner{display:grid;grid-template-columns:auto 1fr;gap:.1rem .75rem;align-items:center;background:#FCEFD9;color:#7A4B05;text-decoration:none;border:3px solid var(--bh-black);border-radius:10px;padding:.85rem 1rem;margin-bottom:1rem;box-shadow:5px 5px 0 var(--bh-black)}
@@ -250,6 +251,8 @@ body{background:var(--bh-paper);color:var(--ink);min-height:100vh}
 .public-brand strong{font-size:1rem;font-weight:950;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .public-brand small{font-size:.73rem;color:var(--muted);font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
 .public-top-actions{display:flex;align-items:center;gap:.45rem;flex:0 0 auto}
+.public-how-link{animation:clickHintBlink 1.45s ease-in-out .65s 1 both}
+@media(prefers-reduced-motion:reduce){.public-how-link{animation:none}}
 .public-whatsapp-link,.public-whatsapp-cta{display:inline-flex;align-items:center;justify-content:center;border:0!important;background:linear-gradient(135deg,#20c86a,#128c4a)!important;color:#fff!important;font-weight:950;box-shadow:0 14px 28px rgba(18,140,74,.22);text-decoration:none}
 .public-whatsapp-link:hover,.public-whatsapp-cta:hover{color:#fff!important;filter:saturate(1.05) brightness(1.02);transform:translateY(-1px)}
 .public-whatsapp-cta{flex:0 0 auto;border-radius:16px;padding:.7rem 1rem;white-space:nowrap}
